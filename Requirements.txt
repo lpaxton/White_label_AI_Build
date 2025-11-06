@@ -1,0 +1,136 @@
+Persona/Curate Tool – AI Powered Content Curation Engine
+
+
+Core functional requirements
+
+1. Persona Management
+
+a. Allow users to create, edit, delete and clone custom personas
+
+b. Each persona must include:
+
+i. Name and description
+
+ii. Demographic attributes (e.g., role, industry, location, mission)
+
+iii. Behavioral traits (e.g., “prefers data-driven insights”, “avoids technical jargon”)
+
+iv. Knowledge level (e.g., beginner, intermediate, expert)
+
+v. Content preferences (e.g., “prioritize case studies”, “exclude opinion pieces”)
+
+2. Prompt Template Engine
+
+a. Allow users to create, save, and reuse prompt templates
+
+b. Prompt templates must support:
+
+i. Conditional logic (e.g., “if persona level = expert: include technical deep dives”)
+
+ii. Multi Step reasoning instructions (e.g., “First identify key themes, then filter by relevance to {persona}
+
+iii. Version control for prompts
+
+iv. Support for importing prompt templates (JSON).
+
+3. Content Library Integration
+
+a. Connect to one or more content sources (e.g., internal CMS/SharePoint, API based libraries)
+
+b. Ingest and index content with metadata (title, author, date, tags, categories, full text).
+
+c. Support for real-time or scheduled sync with content sources
+
+d. Allow users to define custom metadata mappings for each source
+
+e. Content duplication and versioning (track updates to articles)
+
+4. AI Powered Scanning & Relevance Scoring
+
+a. Use LLM to:
+
+i. Analyze content against persona + prompt logic
+
+ii. Generate relevance scores (0-100) based on alignment.
+
+iii. Extract key themes, sentiment
+
+b. Allow users to adjust scoring weights (e.g., persona alignment= 60%, prompt match=30%, recency=10%)
+
+c. Support for hybrid scoring (rule-based + AI-based)
+
+d. Provide explainability: show why an article scored highly (e.g., “Matches persona’s preference for ‘case studies and prompt keyword ‘ROI’”
+
+5. Curated Output Generation
+
+a. Generate a ranked list of top ‘X’ articles (X is configurable)
+
+b. Each result includes:
+
+i. Title, author, date, source
+
+ii. Relevance score + breakdown
+
+iii. Snippet/summary by AI based on persona + prompt
+
+iv. Tags/keywords matched
+
+v. Link to original content
+
+c. Allow users to “dismiss” articles to refine future recommendations
+
+d. Generate a ‘curated digest’ summary (1-3 paragraphs) tailored to the persona (To be used to socialize with client)
+
+6. Automation & Scheduling
+
+a. Allow users to schedule recurring scans (daily, weekly, monthly).
+
+b. Trigger scans via API
+
+7. User Interface & Experience
+
+a. Dashboard with:
+
+i. Persona Library
+
+ii. Recent scans & results
+
+iii. Analytics (e.g., “most relevant content sources”)
+
+iv. Drag-and-drop person/prompt builder
+
+8. Security & Compliance
+
+a. Role based access control
+
+b. (need some help here from Luke + Pete)
+
+9. Integration
+
+a. API info (need some help here from Luke + Pete)
+
+10. Analytics
+
+a. Track curation results
+
+b. Generate usage reports e.g., “which content yielded the highest results”
+
+c. Auto suggest prompt refinements based on feedback
+
+
+
+Deliverables
+
+1. Web-based UI for persona/prompt management and execution
+
+2. Backend API for integration
+
+3. Samples are integrated
+
+Success Measures
+
+1. Users can create a working persona + prompt in <10 minutes
+
+2. 85% of generated recommendations are rated “relevant” by end user SME’s
+
+3. 70% reduction in time spent manually curating content
