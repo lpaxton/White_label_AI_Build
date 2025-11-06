@@ -51,6 +51,37 @@ def print_results(results: dict):
     print("\n")
 
 
+def create_llm_provider(args):
+    """
+    Create LLM provider based on command-line arguments.
+    
+    Args:
+        args: Parsed command-line arguments.
+        
+    Returns:
+        Initialized LLM provider instance.
+    """
+    llm_kwargs = {}
+    
+    if args.provider == 'openai':
+        if args.api_key:
+            llm_kwargs['api_key'] = args.api_key
+        if args.model:
+            llm_kwargs['model'] = args.model
+    elif args.provider == 'anthropic':
+        if args.api_key:
+            llm_kwargs['api_key'] = args.api_key
+        if args.model:
+            llm_kwargs['model'] = args.model
+    elif args.provider == 'ollama':
+        if args.model:
+            llm_kwargs['model'] = args.model
+        if args.ollama_host:
+            llm_kwargs['host'] = args.ollama_host
+    
+    return get_llm_provider(args.provider, **llm_kwargs)
+
+
 def interactive_mode(args):
     """
     Run in interactive mode where users can enter multiple personas.
@@ -66,24 +97,7 @@ def interactive_mode(args):
     
     # Initialize LLM provider
     try:
-        llm_kwargs = {}
-        if args.provider == 'openai':
-            if args.api_key:
-                llm_kwargs['api_key'] = args.api_key
-            if args.model:
-                llm_kwargs['model'] = args.model
-        elif args.provider == 'anthropic':
-            if args.api_key:
-                llm_kwargs['api_key'] = args.api_key
-            if args.model:
-                llm_kwargs['model'] = args.model
-        elif args.provider == 'ollama':
-            if args.model:
-                llm_kwargs['model'] = args.model
-            if args.ollama_host:
-                llm_kwargs['host'] = args.ollama_host
-        
-        llm_provider = get_llm_provider(args.provider, **llm_kwargs)
+        llm_provider = create_llm_provider(args)
         selector = PersonaContentSelector(args.xml_file, llm_provider)
     except Exception as e:
         print(f"Error initializing LLM provider: {str(e)}")
@@ -126,24 +140,7 @@ def single_query_mode(args):
     
     # Initialize LLM provider
     try:
-        llm_kwargs = {}
-        if args.provider == 'openai':
-            if args.api_key:
-                llm_kwargs['api_key'] = args.api_key
-            if args.model:
-                llm_kwargs['model'] = args.model
-        elif args.provider == 'anthropic':
-            if args.api_key:
-                llm_kwargs['api_key'] = args.api_key
-            if args.model:
-                llm_kwargs['model'] = args.model
-        elif args.provider == 'ollama':
-            if args.model:
-                llm_kwargs['model'] = args.model
-            if args.ollama_host:
-                llm_kwargs['host'] = args.ollama_host
-        
-        llm_provider = get_llm_provider(args.provider, **llm_kwargs)
+        llm_provider = create_llm_provider(args)
         selector = PersonaContentSelector(args.xml_file, llm_provider)
     except Exception as e:
         print(f"Error initializing LLM provider: {str(e)}")

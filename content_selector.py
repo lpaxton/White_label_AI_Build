@@ -108,7 +108,7 @@ REASONING:
     
     def _parse_llm_response(self, response: str) -> List[str]:
         """
-        Parse LLM response to extract content IDs.
+        Parse LLM response to extract content IDs using multiple strategies.
         
         Args:
             response: Raw response from LLM.
@@ -116,19 +116,35 @@ REASONING:
         Returns:
             List of content IDs.
         """
+        import re
+        
         ids = []
         
-        # Look for the line with content IDs
-        lines = response.split('\n')
-        for line in lines:
-            if 'SELECTED CONTENT IDS' in line.upper() or 'CONTENT IDS' in line.upper():
-                # Extract everything after the colon
-                parts = line.split(':', 1)
-                if len(parts) > 1:
-                    id_text = parts[1]
-                    # Remove brackets and split by comma
-                    id_text = id_text.replace('[', '').replace(']', '').replace('"', '').replace("'", '')
-                    ids = [id.strip() for id in id_text.split(',') if id.strip()]
-                    break
+        # Strategy 1: Look for "SELECTED CONTENT IDS:" or similar pattern (case-insensitive)
+        # Matches variations like "Selected Content IDs:", "CONTENT IDS:", "selected ids:", etc.
+        pattern = r'(?:selected\s+)?content\s+ids?\s*:\s*([^\n]+)'
+        match = re.search(pattern, response, re.IGNORECASE)
+        
+        if match:
+            id_text = match.group(1)
+            # Remove common delimiters and extract numbers/IDs
+            id_text = id_text.replace('[', '').replace(']', '').replace('"', '').replace("'", '')
+            ids = [id.strip() for id in re.split(r'[,\s]+', id_text) if id.strip()]
+        
+        # Strategy 2: If no IDs found, look for patterns like "ID: 1" or "(ID: 1)" in the text
+        if not ids:
+            id_pattern = r'\b(?:ID|id)\s*[:=]\s*(\d+)'
+            matches = re.findall(id_pattern, response)
+            if matches:
+                ids = list(set(matches))  # Remove duplicates
+        
+        # Strategy 3: As last resort, extract all numeric sequences that could be IDs
+        if not ids:
+            # Look for standalone numbers in the first part of the response (before reasoning)
+            first_section = response.split('REASONING', 1)[0] if 'REASONING' in response.upper() else response[:500]
+            potential_ids = re.findall(r'\b(\d+)\b', first_section)
+            # Only use if we find between 1-10 IDs (reasonable range)
+            if 1 <= len(potential_ids) <= 10:
+                ids = list(dict.fromkeys(potential_ids))  # Remove duplicates while preserving order
         
         return ids
