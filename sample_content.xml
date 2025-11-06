@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<content_library>
+    <content id="1">
+        <title>Introduction to Cloud Computing</title>
+        <description>Learn the fundamentals of cloud computing, including IaaS, PaaS, and SaaS models.</description>
+        <category>Technology</category>
+        <difficulty>Beginner</difficulty>
+        <tags>cloud, infrastructure, basics</tags>
+        <duration>30 minutes</duration>
+    </content>
+    <content id="2">
+        <title>Advanced Python Programming</title>
+        <description>Master advanced Python concepts including decorators, generators, and async programming.</description>
+        <category>Programming</category>
+        <difficulty>Advanced</difficulty>
+        <tags>python, programming, advanced</tags>
+        <duration>2 hours</duration>
+    </content>
+    <content id="3">
+        <title>Leadership Essentials</title>
+        <description>Develop key leadership skills including communication, decision-making, and team management.</description>
+        <category>Management</category>
+        <difficulty>Intermediate</difficulty>
+        <tags>leadership, management, soft-skills</tags>
+        <duration>1 hour</duration>
+    </content>
+    <content id="4">
+        <title>Data Science Fundamentals</title>
+        <description>Introduction to data science including statistics, data visualization, and basic machine learning.</description>
+        <category>Data Science</category>
+        <difficulty>Beginner</difficulty>
+        <tags>data-science, statistics, ml</tags>
+        <duration>45 minutes</duration>
+    </content>
+    <content id="5">
+        <title>Cybersecurity Best Practices</title>
+        <description>Essential security practices for protecting systems and data from cyber threats.</description>
+        <category>Security</category>
+        <difficulty>Intermediate</difficulty>
+        <tags>security, cybersecurity, best-practices</tags>
+        <duration>1 hour</duration>
+    </content>
+    <content id="6">
+        <title>Agile Project Management</title>
+        <description>Learn Agile methodologies including Scrum and Kanban for effective project management.</description>
+        <category>Management</category>
+        <difficulty>Intermediate</difficulty>
+        <tags>agile, scrum, project-management</tags>
+        <duration>1.5 hours</duration>
+    </content>
+    <content id="7">
+        <title>Machine Learning with TensorFlow</title>
+        <description>Build and train neural networks using TensorFlow for real-world applications.</description>
+        <category>Data Science</category>
+        <difficulty>Advanced</difficulty>
+        <tags>machine-learning, tensorflow, deep-learning</tags>
+        <duration>3 hours</duration>
+    </content>
+    <content id="8">
+        <title>Customer Service Excellence</title>
+        <description>Master customer service skills and learn how to handle difficult situations effectively.</description>
+        <category>Customer Service</category>
+        <difficulty>Beginner</difficulty>
+        <tags>customer-service, communication, soft-skills</tags>
+        <duration>45 minutes</duration>
+    </content>
+    <content id="9">
+        <title>Financial Analysis for Managers</title>
+        <description>Understand financial statements and use financial data for business decisions.</description>
+        <category>Finance</category>
+        <difficulty>Intermediate</difficulty>
+        <tags>finance, analysis, business</tags>
+        <duration>2 hours</duration>
+    </content>
+    <content id="10">
+        <title>DevOps Practices</title>
+        <description>Learn CI/CD pipelines, containerization, and infrastructure as code.</description>
+        <category>Technology</category>
+        <difficulty>Advanced</difficulty>
+        <tags>devops, ci-cd, automation</tags>
+        <duration>2.5 hours</duration>
+    </content>
+    <content id="11">
+        <title>Marketing Strategy Basics</title>
+        <description>Fundamentals of marketing strategy including market research and campaign planning.</description>
+        <category>Marketing</category>
+        <difficulty>Beginner</difficulty>
+        <tags>marketing, strategy, business</tags>
+        <duration>1 hour</duration>
+    </content>
+    <content id="12">
+        <title>SQL for Data Analysis</title>
+        <description>Master SQL queries for extracting insights from databases.</description>
+        <category>Data Science</category>
+        <difficulty>Beginner</difficulty>
+        <tags>sql, database, data-analysis</tags>
+        <duration>1.5 hours</duration>
+    </content>
+</content_library>
