@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persona-Based Article Finder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .header h1 {
+            font-size: 32px;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 16px;
+            color: #64748b;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .input-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            height: fit-content;
+        }
+        .results-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            min-height: 600px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        .button {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        .button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .persona-examples {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+        .persona-examples h4 {
+            color: #1e293b;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .persona-examples ul {
+            font-size: 13px;
+            color: #64748b;
+            padding-left: 15px;
+        }
+        .persona-examples li {
+            margin-bottom: 4px;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+        .loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-left: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .results-header h3 {
+            color: #1e293b;
+            font-size: 20px;
+        }
+        .results-count {
+            background: #3b82f6;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .article-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .article-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .article-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        .article-description {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        .article-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+        }
+        .relevance-score {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .source-category {
+            color: #6b7280;
+            font-size: 12px;
+            font-style: italic;
+        }
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+        .error-message {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .file-input {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 2px dashed #cbd5e1;
+        }
+        .file-input.dragover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        .ai-settings {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f0f9ff;
+            border-radius: 8px;
+            border: 1px solid #bae6fd;
+        }
+        .ai-settings h4 {
+            color: #1e293b;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 25px;
+            font-weight: 600;
+            color: #1e293b;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+        .back-button:hover {
+            background: white;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="window.location.href='index.html'">← Back to Home</button>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Persona-Based Article Finder</h1>
+            <p>Find the most relevant Fidelity articles for your specific persona using AI analysis</p>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <div class="file-input" id="fileDropZone">
+                    <label for="jsonFile"><strong>📁 Select JSON File:</strong></label>
+                    <input type="file" id="jsonFile" accept=".json" style="margin-top: 8px;">
+                    <p style="font-size: 12px; color: #64748b; margin-top: 5px;">
+                        Drag & drop a JSON file here or click to browse
+                    </p>
+                </div>
+
+                <div class="ai-settings">
+                    <h4>🤖 AI Configuration</h4>
+                    <div class="form-group">
+                        <label for="ollamaUrl">Ollama URL:</label>
+                        <input type="url" id="ollamaUrl" value="http://localhost:11434" placeholder="http://localhost:11434">
+                    </div>
+                    <div class="form-group">
+                        <label for="ollamaModel">Model:</label>
+                        <select id="ollamaModel">
+                            <option value="llama3.2">llama3.2</option>
+                            <option value="llama3.1">llama3.1</option>
+                            <option value="mistral">mistral</option>
+                            <option value="codellama">codellama</option>
+                            <option value="phi3">phi3</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="personaInput">👤 Describe Your Persona:</label>
+                    <textarea id="personaInput" placeholder="Example: 25-year-old recent college graduate, starting first job, wants to learn about budgeting and saving for the future, has student loans, tech-savvy but financially inexperienced..."></textarea>
+                </div>
+
+                <div class="persona-examples">
+                    <h4>💡 Example Personas:</h4>
+                    <ul>
+                        <li><strong>New Graduate:</strong> Recent college grad, entry-level job, student loans, needs budgeting basics</li>
+                        <li><strong>Mid-Career Professional:</strong> 35-year-old, stable income, wants investment advice, planning for home purchase</li>
+                        <li><strong>Pre-Retiree:</strong> 55-year-old, high earner, focused on retirement planning and wealth preservation</li>
+                        <li><strong>Small Business Owner:</strong> Entrepreneur, irregular income, needs business and personal finance strategies</li>
+                    </ul>
+                </div>
+
+                <div class="form-group">
+                    <label for="maxResults">📊 Maximum Results:</label>
+                    <select id="maxResults">
+                        <option value="5">5 articles</option>
+                        <option value="10">10 articles</option>
+                        <option value="15">15 articles</option>
+                        <option value="20">20 articles</option>
+                        <option value="25">25 articles</option>
+                        <option value="30">30 articles</option>
+                        <option value="40">40 articles</option>
+                        <option value="50">50 articles</option>
+                    </select>
+                </div>
+
+                <button id="findArticles" class="button">🔍 Find Best Articles</button>
+            </div>
+
+            <div class="results-section">
+                <div id="welcomeMessage">
+                    <h3>Welcome! 👋</h3>
+                    <p style="color: #64748b; margin-top: 10px;">
+                        To get started:
+                    </p>
+                    <ol style="color: #64748b; margin: 15px 0; padding-left: 20px;">
+                        <li>Upload a JSON file containing Fidelity articles</li>
+                        <li>Describe your target persona in detail</li>
+                        <li>Configure your AI settings (Ollama)</li>
+                        <li>Click "Find Best Articles" to get personalized recommendations</li>
+                    </ol>
+                    <p style="color: #64748b; font-size: 14px; margin-top: 20px;">
+                        <strong>💡 Tip:</strong> The more detailed your persona description, the better the AI can match relevant articles!
+                    </p>
+                </div>
+
+                <div id="loadingMessage" class="loading">
+                    <div class="spinner"></div>
+                    <p>Analyzing articles with AI...</p>
+                    <p style="font-size: 12px; margin-top: 5px;">This may take a moment depending on your model and article count</p>
+                </div>
+
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+                <div id="resultsContainer" style="display: none;">
+                    <div class="results-header">
+                        <h3>📚 Recommended Articles</h3>
+                        <span id="resultsCount" class="results-count">0 articles</span>
+                    </div>
+                    <div id="articlesList"></div>
+                </div>
+
+                <div id="noResults" class="no-results" style="display: none;">
+                    <h3>🤔 No Articles Found</h3>
+                    <p>Try adjusting your persona description or check your AI configuration.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let articlesData = null;
+        let isProcessing = false;
+
+        // File handling
+        const fileInput = document.getElementById('jsonFile');
+        const fileDropZone = document.getElementById('fileDropZone');
+
+        fileDropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileDropZone.classList.add('dragover');
+        });
+
+        fileDropZone.addEventListener('dragleave', () => {
+            fileDropZone.classList.remove('dragover');
+        });
+
+        fileDropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileDropZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type === 'application/json') {
+                handleFileUpload(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileUpload(e.target.files[0]);
+            }
+        });
+
+        function handleFileUpload(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    articlesData = JSON.parse(e.target.result);
+                    console.log(`Loaded ${articlesData.length} articles from ${file.name}`);
+                    
+                    // Update file input display
+                    fileDropZone.innerHTML = `
+                        <p><strong>✅ File Loaded:</strong> ${file.name}</p>
+                        <p style="font-size: 12px; color: #64748b;">
+                            ${articlesData.length} articles ready for analysis
+                        </p>
+                        <p style="font-size: 11px; color: #10b981; margin-top: 5px;">
+                            Click here to change file
+                        </p>
+                    `;
+                    fileDropZone.style.background = '#f0fdf4';
+                    fileDropZone.style.borderColor = '#22c55e';
+                } catch (error) {
+                    showError('Invalid JSON file. Please select a valid articles JSON file.');
+                    console.error('JSON parsing error:', error);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Main analysis function
+        document.getElementById('findArticles').addEventListener('click', async () => {
+            if (isProcessing) return;
+
+            const persona = document.getElementById('personaInput').value.trim();
+            const maxResults = parseInt(document.getElementById('maxResults').value);
+            const ollamaUrl = document.getElementById('ollamaUrl').value.trim();
+            const ollamaModel = document.getElementById('ollamaModel').value;
+
+            if (!articlesData) {
+                showError('Please upload a JSON file first.');
+                return;
+            }
+
+            if (!persona) {
+                showError('Please describe your target persona.');
+                return;
+            }
+
+            if (!ollamaUrl) {
+                showError('Please enter the Ollama URL.');
+                return;
+            }
+
+            isProcessing = true;
+            showLoading();
+            hideError();
+
+            try {
+                // Test Ollama connection first
+                await testOllamaConnection(ollamaUrl);
+
+                // Analyze articles with AI
+                const recommendations = await analyzeArticlesWithAI(persona, articlesData, maxResults, ollamaUrl, ollamaModel);
+                
+                if (recommendations && recommendations.length > 0) {
+                    displayResults(recommendations);
+                } else {
+                    showNoResults();
+                }
+            } catch (error) {
+                console.error('Analysis error:', error);
+                showError(`Analysis failed: ${error.message}`);
+            } finally {
+                isProcessing = false;
+                hideLoading();
+            }
+        });
+
+        async function testOllamaConnection(ollamaUrl) {
+            try {
+                const response = await fetch(`${ollamaUrl}/api/tags`);
+                if (!response.ok) {
+                    throw new Error(`Ollama server not accessible (${response.status})`);
+                }
+            } catch (error) {
+                throw new Error(`Cannot connect to Ollama at ${ollamaUrl}. Make sure Ollama is running.`);
+            }
+        }
+
+        async function analyzeArticlesWithAI(persona, articles, maxResults, ollamaUrl, model) {
+            const prompt = `You are an expert financial advisor AI. Analyze the following articles and recommend the ${maxResults} most relevant ones for this persona:
+
+PERSONA: ${persona}
+
+ARTICLES TO ANALYZE:
+${articles.map((article, index) => 
+    `${index + 1}. Title: "${article.title}"
+       Description: "${article.description || 'No description available'}"
+       URL: ${article.url}`
+).join('\n\n')}
+
+Please respond with ONLY a JSON array of the most relevant articles, ranked by relevance. Include a relevance score (1-100) and brief explanation for each. Format:
+
+[
+  {
+    "title": "Article Title",
+    "url": "Article URL", 
+    "description": "Article description",
+    "relevance_score": 95,
+    "explanation": "Why this article is relevant to the persona"
+  }
+]
+
+Return only valid JSON, no other text.`;
+
+            const response = await fetch(`${ollamaUrl}/api/generate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: model,
+                    prompt: prompt,
+                    stream: false
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`AI analysis failed (${response.status})`);
+            }
+
+            const data = await response.json();
+            
+            try {
+                // Clean the response and parse JSON
+                let jsonText = data.response.trim();
+                
+                // Remove any markdown code blocks if present
+                if (jsonText.startsWith('```')) {
+                    jsonText = jsonText.replace(/```json\n?/g, '').replace(/```/g, '');
+                }
+                
+                const recommendations = JSON.parse(jsonText);
+                
+                // Validate and enhance the recommendations
+                const mapped = recommendations.filter(rec => rec.title && rec.url).map(rec => ({
+                    ...rec,
+                    relevance_score: Math.min(100, Math.max(1, rec.relevance_score || 50)),
+                    explanation: rec.explanation || 'Relevant to your financial goals'
+                }));
+
+                // Apply rank-based decay and cap to maxResults
+                return adjustRanking(mapped, maxResults);
+                
+            } catch (parseError) {
+                console.error('JSON parsing error:', parseError);
+                console.log('Raw AI response:', data.response);
+                throw new Error('AI returned invalid response format');
+            }
+        }
+
+        // Apply rank-based decay to recommendations and cap to maxResults
+        function adjustRanking(recommendations, maxResults) {
+            if (!recommendations || recommendations.length === 0) return [];
+            const max_r = Math.min(maxResults || recommendations.length, recommendations.length);
+            // Sort by relevance desc
+            recommendations.sort((a, b) => (b.relevance_score || 0) - (a.relevance_score || 0));
+            const decayed = [];
+            for (let i = 0; i < Math.min(max_r, recommendations.length); i++) {
+                const rec = Object.assign({}, recommendations[i]);
+                const orig = rec.relevance_score || 50;
+                const multiplier = (max_r > 1) ? (0.3 + 0.7 * (1 - (i / (max_r - 1)))) : 1.0;
+                rec.relevance_score = Math.max(1, Math.min(100, Math.round(orig * multiplier)));
+                decayed.push(rec);
+            }
+            return decayed;
+        }
+        function displayResults(recommendations) {
+            const container = document.getElementById('resultsContainer');
+            const articlesList = document.getElementById('articlesList');
+            const resultsCount = document.getElementById('resultsCount');
+
+            resultsCount.textContent = `${recommendations.length} articles`;
+            
+            articlesList.innerHTML = recommendations.map(article => `
+                <div class="article-card" onclick="window.open('${article.url}', '_blank')">
+                    <div class="article-title">${article.title}</div>
+                    <div class="article-description">${article.description || 'No description available'}</div>
+                    <div style="background: #f8fafc; padding: 10px; border-radius: 6px; margin: 10px 0; font-size: 13px; color: #475569;">
+                        <strong>Why it's relevant:</strong> ${article.explanation}
+                    </div>
+                    <div class="article-meta">
+                        <span class="relevance-score">Relevance: ${article.relevance_score}%</span>
+                        <span class="source-category">Click to open article</span>
+                    </div>
+                </div>
+            `).join('');
+
+            hideAll();
+            container.style.display = 'block';
+        }
+
+        function showLoading() {
+            hideAll();
+            document.getElementById('loadingMessage').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingMessage').style.display = 'none';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        function showNoResults() {
+            hideAll();
+            document.getElementById('noResults').style.display = 'block';
+        }
+
+        function hideAll() {
+            document.getElementById('welcomeMessage').style.display = 'none';
+            document.getElementById('resultsContainer').style.display = 'none';
+            document.getElementById('noResults').style.display = 'none';
+            hideLoading();
+        }
+
+        // Disable button when processing
+        setInterval(() => {
+            const button = document.getElementById('findArticles');
+            button.disabled = isProcessing;
+            if (isProcessing) {
+                button.textContent = '🔄 Analyzing...';
+            } else {
+                button.textContent = '🔍 Find Best Articles';
+            }
+        }, 100);
+    </script>
+</body>
+</html>
