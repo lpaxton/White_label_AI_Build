@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Article Extractor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .header h1 {
+            font-size: 32px;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 16px;
+            color: #64748b;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .input-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            height: fit-content;
+        }
+        .results-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            min-height: 600px;
+            max-height: 800px;
+            overflow-y: auto;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        .button {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.2s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        .button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .button.secondary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+        .loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-left: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error-message {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .success-message {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 25px;
+            font-weight: 600;
+            color: #1e293b;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+        .back-button:hover {
+            background: white;
+            transform: translateY(-2px);
+        }
+        .content-display {
+            line-height: 1.6;
+            color: #1e293b;
+        }
+        .content-display h1, .content-display h2, .content-display h3 {
+            margin: 20px 0 10px 0;
+            color: #1e293b;
+        }
+        .content-display p {
+            margin-bottom: 15px;
+        }
+        .content-display ul, .content-display ol {
+            margin-bottom: 15px;
+            padding-left: 20px;
+        }
+        .content-display li {
+            margin-bottom: 5px;
+        }
+        .content-display blockquote {
+            border-left: 4px solid #3b82f6;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #64748b;
+        }
+        .content-meta {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+        }
+        .content-meta h3 {
+            margin-bottom: 10px;
+            color: #1e293b;
+        }
+        .content-meta .stat {
+            display: inline-block;
+            background: #e2e8f0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 10px;
+            margin-bottom: 5px;
+        }
+        .extraction-options {
+            background: #f0f9ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #bae6fd;
+        }
+        .extraction-options h4 {
+            color: #1e293b;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+        }
+        .checkbox-item label {
+            font-weight: normal;
+            font-size: 14px;
+            margin-bottom: 0;
+        }
+        .welcome-message {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+        .welcome-message h3 {
+            color: #1e293b;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="window.location.href='index.html'">← Back to Home</button>
+    
+    <div class="container">
+        <div class="header">
+            <h1>📄 Article Extractor</h1>
+            <p>Extract and clean article content from any URL for easy reading and review</p>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <div class="form-group">
+                    <label for="urlInput">🌐 Article URL:</label>
+                    <input type="url" id="urlInput" placeholder="https://example.com/article" required>
+                </div>
+
+                <div class="extraction-options">
+                    <h4>🧹 Cleaning Options:</h4>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="removeLinks" checked>
+                            <label for="removeLinks">Remove all &lt;a&gt; tags (links)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="removeCallouts" checked>
+                            <label for="removeCallouts">Remove call-outs, author info, and sidebar elements</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="removeViewpoints" checked>
+                            <label for="removeViewpoints">Remove "Read Viewpoints:" paragraphs</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="removeImages">
+                            <label for="removeImages">Remove images</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="preserveFormatting" checked>
+                            <label for="preserveFormatting">Preserve text formatting</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="extractButton" class="button">📄 Extract Article Content</button>
+                <button id="saveButton" class="button secondary" style="display: none;">💾 Save as Text File</button>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>💡 Example URLs:</label>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 5px;">
+                        <p>• Fidelity Learning Center articles</p>
+                        <p>• News articles</p>
+                        <p>• Blog posts with &lt;article&gt; tags</p>
+                        <p>• Educational content</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-section">
+                <div id="welcomeMessage" class="welcome-message">
+                    <h3>Welcome to Article Extractor! 👋</h3>
+                    <p>This tool helps you extract clean, readable content from web articles.</p>
+                    <div style="margin: 20px 0; text-align: left;">
+                        <h4>How it works:</h4>
+                        <ol style="color: #64748b; margin: 10px 0; padding-left: 20px;">
+                            <li>Enter the URL of an article you want to extract</li>
+                            <li>Choose your cleaning options (remove links, call-outs, etc.)</li>
+                            <li>Click "Extract Article Content"</li>
+                            <li>Review the clean, formatted content</li>
+                            <li>Save as a text file if needed</li>
+                        </ol>
+                    </div>
+                    <p style="color: #64748b; font-size: 14px;">
+                        <strong>🎯 Perfect for:</strong> Content analysis, research, cleaning up articles for better readability
+                    </p>
+                </div>
+
+                <div id="loadingMessage" class="loading">
+                    <div class="spinner"></div>
+                    <p>Extracting article content...</p>
+                    <p style="font-size: 12px; margin-top: 5px;">This may take a moment</p>
+                </div>
+
+                <div id="errorMessage" class="error-message"></div>
+                <div id="successMessage" class="success-message"></div>
+
+                <div id="contentContainer" style="display: none;">
+                    <div id="contentMeta" class="content-meta"></div>
+                    <div id="contentDisplay" class="content-display"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let extractedContent = null;
+        let isProcessing = false;
+
+        // Extract button handler
+        document.getElementById('extractButton').addEventListener('click', async () => {
+            if (isProcessing) return;
+
+            const url = document.getElementById('urlInput').value.trim();
+            
+            if (!url) {
+                showError('Please enter a valid URL.');
+                return;
+            }
+
+            if (!isValidUrl(url)) {
+                showError('Please enter a valid URL starting with http:// or https://');
+                return;
+            }
+
+            isProcessing = true;
+            showLoading();
+            hideError();
+            hideSuccess();
+
+            try {
+                const options = {
+                    removeLinks: document.getElementById('removeLinks').checked,
+                    removeCallouts: document.getElementById('removeCallouts').checked,
+                    removeViewpoints: document.getElementById('removeViewpoints').checked,
+                    removeImages: document.getElementById('removeImages').checked,
+                    preserveFormatting: document.getElementById('preserveFormatting').checked
+                };
+
+                const result = await extractArticleContent(url, options);
+                
+                if (result.success) {
+                    extractedContent = result;
+                    displayContent(result);
+                    showSuccess('✅ Article content extracted successfully!');
+                    document.getElementById('saveButton').style.display = 'block';
+                } else {
+                    showError(`Failed to extract content: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Extraction error:', error);
+                showError(`Extraction failed: ${error.message}`);
+            } finally {
+                isProcessing = false;
+                hideLoading();
+            }
+        });
+
+        // Save button handler
+        document.getElementById('saveButton').addEventListener('click', () => {
+            if (!extractedContent) return;
+
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            const filename = `article-content-${timestamp}.txt`;
+            
+            const content = `Article Content Extracted from: ${extractedContent.url}\nExtracted at: ${new Date().toLocaleString()}\n\n${extractedContent.cleanText}`;
+            
+            downloadTextFile(content, filename);
+            showSuccess(`✅ Content saved as ${filename}`);
+        });
+
+        async function extractArticleContent(url, options) {
+            // Try to use our server proxy first, then fallback to direct CORS proxy
+            const endpoints = [
+                '/api/extract-article', // Our local server
+                'https://api.allorigins.win/get?url=' + encodeURIComponent(url) // CORS proxy fallback
+            ];
+
+            for (const endpoint of endpoints) {
+                try {
+                    let response, data;
+                    
+                    if (endpoint.startsWith('/api/')) {
+                        // Use our local server
+                        response = await fetch(endpoint, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ url, options })
+                        });
+                        
+                        if (response.ok) {
+                            data = await response.json();
+                            return data;
+                        }
+                        continue; // Try next endpoint
+                    } else {
+                        // Use CORS proxy
+                        response = await fetch(endpoint);
+                        if (!response.ok) continue;
+                        
+                        const proxyData = await response.json();
+                        const html = proxyData.contents;
+                        
+                        // Parse and extract article content client-side
+                        return parseArticleContent(html, url, options);
+                    }
+                } catch (error) {
+                    console.error(`Error with endpoint ${endpoint}:`, error);
+                    continue;
+                }
+            }
+            
+            throw new Error('Unable to fetch article content. Please check the URL and try again.');
+        }
+
+        function parseArticleContent(html, url, options) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Try to find article content
+            let articleElement = doc.querySelector('article');
+            
+            if (!articleElement) {
+                // Fallback selectors
+                const fallbacks = [
+                    'main article',
+                    '.article-content',
+                    '.post-content',
+                    '.entry-content',
+                    'main',
+                    '.content'
+                ];
+                
+                for (const selector of fallbacks) {
+                    articleElement = doc.querySelector(selector);
+                    if (articleElement) break;
+                }
+            }
+            
+            if (!articleElement) {
+                throw new Error('No article content found. The page may not have an &lt;article&gt; tag or standard content structure.');
+            }
+            
+            // Clone the element to avoid modifying the original
+            const content = articleElement.cloneNode(true);
+            
+            // Apply cleaning options
+            if (options.removeLinks) {
+                const links = content.querySelectorAll('a');
+                links.forEach(link => {
+                    const text = document.createTextNode(link.textContent);
+                    link.parentNode.replaceChild(text, link);
+                });
+            }
+            
+            if (options.removeCallouts) {
+                const callouts = content.querySelectorAll('div.Call-Out-Part, .call-out-part, .callout, div.article-head-container--author');
+                callouts.forEach(callout => callout.remove());
+            }
+            
+            if (options.removeViewpoints) {
+                // Remove paragraphs that start with "Read Viewpoints:" or "Read <em>Viewpoints:</em>"
+                const paragraphs = content.querySelectorAll('p');
+                paragraphs.forEach(p => {
+                    const text = p.textContent.trim();
+                    if (text.startsWith('Read Viewpoints:') || 
+                        text.startsWith('Read ') && text.includes('Viewpoints:')) {
+                        p.remove();
+                    }
+                });
+            }
+            
+            if (options.removeImages) {
+                const images = content.querySelectorAll('img, figure, picture');
+                images.forEach(img => img.remove());
+            }
+            
+            // Remove script and style tags
+            const scripts = content.querySelectorAll('script, style, noscript');
+            scripts.forEach(script => script.remove());
+            
+            // Get clean text and HTML
+            const cleanText = content.textContent.trim().replace(/\s+/g, ' ').replace(/\n\s*\n/g, '\n\n');
+            const cleanHTML = options.preserveFormatting ? content.innerHTML : cleanText;
+            
+            // Calculate stats
+            const wordCount = cleanText.split(/\s+/).filter(word => word.length > 0).length;
+            const charCount = cleanText.length;
+            const readingTime = Math.ceil(wordCount / 200); // ~200 words per minute
+            
+            return {
+                success: true,
+                url: url,
+                title: doc.title || 'Unknown Title',
+                cleanText: cleanText,
+                cleanHTML: cleanHTML,
+                wordCount: wordCount,
+                charCount: charCount,
+                readingTime: readingTime,
+                extractedAt: new Date().toISOString()
+            };
+        }
+
+        function displayContent(result) {
+            const container = document.getElementById('contentContainer');
+            const metaDiv = document.getElementById('contentMeta');
+            const contentDiv = document.getElementById('contentDisplay');
+            
+            // Update meta information
+            metaDiv.innerHTML = `
+                <h3>📊 Content Statistics</h3>
+                <span class="stat">📝 ${result.wordCount} words</span>
+                <span class="stat">🔤 ${result.charCount} characters</span>
+                <span class="stat">⏱️ ${result.readingTime} min read</span>
+                <span class="stat">🌐 Source: <a href="${result.url}" target="_blank" style="color: #3b82f6;">View Original</a></span>
+            `;
+            
+            // Display content
+            if (document.getElementById('preserveFormatting').checked) {
+                contentDiv.innerHTML = result.cleanHTML;
+            } else {
+                contentDiv.innerHTML = `<pre style="white-space: pre-wrap; font-family: inherit;">${result.cleanText}</pre>`;
+            }
+            
+            // Show container
+            hideAll();
+            container.style.display = 'block';
+        }
+
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return string.startsWith('http://') || string.startsWith('https://');
+            } catch (_) {
+                return false;
+            }
+        }
+
+        function downloadTextFile(content, filename) {
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function showLoading() {
+            hideAll();
+            document.getElementById('loadingMessage').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingMessage').style.display = 'none';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => hideSuccess(), 3000);
+        }
+
+        function hideSuccess() {
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        function hideAll() {
+            document.getElementById('welcomeMessage').style.display = 'none';
+            document.getElementById('contentContainer').style.display = 'none';
+            hideLoading();
+        }
+
+        // Update button state
+        setInterval(() => {
+            const button = document.getElementById('extractButton');
+            button.disabled = isProcessing;
+            if (isProcessing) {
+                button.textContent = '🔄 Extracting...';
+            } else {
+                button.textContent = '📄 Extract Article Content';
+            }
+        }, 100);
+    </script>
+</body>
+</html>
