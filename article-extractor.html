@@ -204,6 +204,31 @@
             margin-right: 10px;
             margin-bottom: 5px;
         }
+        .article-id-display {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border: 2px solid #2563eb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+        .article-id-display .label {
+            font-size: 12px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .article-id-display .value {
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
         .extraction-options {
             background: #f0f9ff;
             border-radius: 8px;
@@ -242,6 +267,13 @@
         .welcome-message h3 {
             color: #1e293b;
             margin-bottom: 15px;
+        }
+        .fidelity-highlight {
+            background-color: #fef08a;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -515,6 +547,64 @@
             const scripts = content.querySelectorAll('script, style, noscript');
             scripts.forEach(script => script.remove());
             
+            // Extract eReview ID from s-assigned-wrapper tag in the disclosures section
+            // This tag is located in <div role="complementary" aria-label="disclosures">
+            let eReviewId = null;
+            
+            console.log('Searching for eReview ID...');
+            
+            // Try multiple selector variations for the disclosures section
+            const disclosuresSelectors = [
+                'div[role="complementary"][aria-label="disclosures"]',
+                'div[aria-label="disclosures"]',
+                '[role="complementary"]'
+            ];
+            
+            for (const selector of disclosuresSelectors) {
+                const disclosuresDiv = doc.querySelector(selector);
+                if (disclosuresDiv) {
+                    console.log('Found disclosures div with selector:', selector);
+                    const sAssignedWrapper = disclosuresDiv.querySelector('s-assigned-wrapper');
+                    if (sAssignedWrapper) {
+                        eReviewId = sAssignedWrapper.textContent.trim();
+                        console.log('Found eReview ID in disclosures:', eReviewId);
+                        break;
+                    }
+                }
+            }
+            
+            // Fallback: check anywhere in the document
+            if (!eReviewId) {
+                console.log('Trying fallback: searching entire document');
+                const sAssignedWrapper = doc.querySelector('s-assigned-wrapper');
+                if (sAssignedWrapper) {
+                    eReviewId = sAssignedWrapper.textContent.trim();
+                    console.log('Found eReview ID in document:', eReviewId);
+                }
+            }
+            
+            // Additional fallback: search in all text content for pattern like "763565.14.0"
+            if (!eReviewId) {
+                console.log('Trying pattern match fallback');
+                const bodyText = doc.body.textContent;
+                const eReviewPattern = /\b\d{6}\.\d{1,2}\.\d{1,2}\b/;
+                const match = bodyText.match(eReviewPattern);
+                if (match) {
+                    eReviewId = match[0];
+                    console.log('Found eReview ID via pattern match:', eReviewId);
+                }
+            }
+            
+            if (!eReviewId) {
+                console.log('eReview ID not found');
+            }
+            
+            // Remove any s-assigned-wrapper from the article content display
+            const wrapperInContent = content.querySelector('s-assigned-wrapper');
+            if (wrapperInContent) {
+                wrapperInContent.remove();
+            }
+            
             // Get clean text and HTML
             const cleanText = content.textContent.trim().replace(/\s+/g, ' ').replace(/\n\s*\n/g, '\n\n');
             const cleanHTML = options.preserveFormatting ? content.innerHTML : cleanText;
@@ -533,6 +623,7 @@
                 wordCount: wordCount,
                 charCount: charCount,
                 readingTime: readingTime,
+                eReviewId: eReviewId,
                 extractedAt: new Date().toISOString()
             };
         }
@@ -542,8 +633,20 @@
             const metaDiv = document.getElementById('contentMeta');
             const contentDiv = document.getElementById('contentDisplay');
             
+            // Build eReview ID display if available
+            let eReviewHTML = '';
+            if (result.eReviewId) {
+                eReviewHTML = `
+                    <div class="article-id-display">
+                        <span class="label">📋 eReview ID:</span>
+                        <span class="value">${result.eReviewId}</span>
+                    </div>
+                `;
+            }
+            
             // Update meta information
             metaDiv.innerHTML = `
+                ${eReviewHTML}
                 <h3>📊 Content Statistics</h3>
                 <span class="stat">📝 ${result.wordCount} words</span>
                 <span class="stat">🔤 ${result.charCount} characters</span>
@@ -558,9 +661,45 @@
                 contentDiv.innerHTML = `<pre style="white-space: pre-wrap; font-family: inherit;">${result.cleanText}</pre>`;
             }
             
+            // Highlight all mentions of "Fidelity"
+            highlightFidelity(contentDiv);
+            
             // Show container
             hideAll();
             container.style.display = 'block';
+        }
+
+        function highlightFidelity(element) {
+            // Function to recursively search and highlight text nodes
+            const highlightInNode = (node) => {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    const text = node.textContent;
+                    // Case-insensitive regex to find all occurrences of "Fidelity"
+                    const regex = /\b(Fidelity)\b/gi;
+                    
+                    if (regex.test(text)) {
+                        // Create a temporary div to hold the highlighted content
+                        const span = document.createElement('span');
+                        span.innerHTML = text.replace(regex, '<span class="fidelity-highlight">$1</span>');
+                        
+                        // Replace the text node with the highlighted content
+                        node.parentNode.replaceChild(span, node);
+                        
+                        // Unwrap the temporary span to keep only its children
+                        while (span.firstChild) {
+                            span.parentNode.insertBefore(span.firstChild, span);
+                        }
+                        span.remove();
+                    }
+                } else if (node.nodeType === Node.ELEMENT_NODE && node.nodeName !== 'SCRIPT' && node.nodeName !== 'STYLE') {
+                    // Recursively process child nodes
+                    // Create a copy of childNodes array because we'll be modifying the DOM
+                    const children = Array.from(node.childNodes);
+                    children.forEach(child => highlightInNode(child));
+                }
+            };
+            
+            highlightInNode(element);
         }
 
         function isValidUrl(string) {
