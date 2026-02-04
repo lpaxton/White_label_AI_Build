@@ -174,8 +174,53 @@ class CORSHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         if not article:
             raise Exception('No article content found. The page may not have an <article> tag or standard content structure.')
         
+        # Extract eReview ID from the full document before cleaning
+        ereview_id = None
+        print('🔍 Searching for eReview ID...')
+        
+        # Try multiple selector variations for the disclosures section
+        disclosures_selectors = [
+            'div[role="complementary"][aria-label="disclosures"]',
+            'div[aria-label="disclosures"]',
+            '[role="complementary"]'
+        ]
+        
+        for selector in disclosures_selectors:
+            disclosures_div = soup.select_one(selector)
+            if disclosures_div:
+                print(f'✓ Found disclosures div with selector: {selector}')
+                s_assigned = disclosures_div.find('s-assigned-wrapper')
+                if s_assigned:
+                    ereview_id = s_assigned.get_text().strip()
+                    print(f'✅ Found eReview ID in disclosures: {ereview_id}')
+                    break
+        
+        # Fallback: check anywhere in document
+        if not ereview_id:
+            print('Trying fallback: searching entire document')
+            s_assigned = soup.find('s-assigned-wrapper')
+            if s_assigned:
+                ereview_id = s_assigned.get_text().strip()
+                print(f'✅ Found eReview ID in document: {ereview_id}')
+        
+        # Additional fallback: pattern matching for format like "763565.14.0"
+        if not ereview_id:
+            print('Trying pattern match fallback')
+            body_text = soup.get_text()
+            match = re.search(r'\b\d{6}\.\d{1,2}\.\d{1,2}\b', body_text)
+            if match:
+                ereview_id = match.group(0)
+                print(f'✅ Found eReview ID via pattern match: {ereview_id}')
+        
+        if not ereview_id:
+            print('❌ eReview ID not found')
+        
         # Clone the article content for cleaning
         content = BeautifulSoup(str(article), 'html.parser')
+        
+        # Remove s-assigned-wrapper from article content display
+        for wrapper in content.find_all('s-assigned-wrapper'):
+            wrapper.decompose()
         
         # Apply cleaning options
         if options.get('removeLinks', True):
@@ -231,6 +276,18 @@ class CORSHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         for element in content.find_all(['script', 'style', 'noscript', 'iframe']):
             element.decompose()
         
+        # Mark sentences containing "Fidelity" if option is enabled
+        if options.get('markFidelitySentences', False):
+            self.mark_sentences_with_fidelity(content)
+        
+        # Remove parenthetical content if option is enabled
+        if options.get('removeParentheses', False):
+            self.remove_parenthetical_content(content)
+        
+        # Remove footnotes if option is enabled
+        if options.get('removeFootnotes', False):
+            self.remove_footnotes(content)
+        
         # Get clean text and HTML
         clean_text = content.get_text()
         # Clean up whitespace
@@ -259,8 +316,102 @@ class CORSHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             'wordCount': word_count,
             'charCount': char_count,
             'readingTime': reading_time,
+            'eReviewId': ereview_id,
             'extractedAt': json.dumps(None)  # Will be set by JavaScript
         }
+    
+    def mark_sentences_with_fidelity(self, content):
+        """Mark sentences containing 'Fidelity' for AI rewriting"""
+        # Find all text nodes and process them
+        for element in content.find_all(string=True):
+            if element.parent.name in ['script', 'style']:
+                continue
+            
+            text = str(element)
+            if 'Fidelity' not in text and 'fidelity' not in text.lower():
+                continue
+            
+            # Split into sentences
+            sentences = re.split(r'([.!?]+)', text)
+            
+            # Reconstruct with markers
+            new_html = []
+            i = 0
+            while i < len(sentences):
+                sentence = sentences[i]
+                # Check if next item is punctuation
+                if i + 1 < len(sentences) and sentences[i + 1] in ['.', '!', '?', '..', '...']:
+                    sentence += sentences[i + 1]
+                    i += 2
+                else:
+                    i += 1
+                
+                # Check if sentence contains Fidelity
+                if re.search(r'\bFidelity\b', sentence, re.IGNORECASE):
+                    # Wrap in span with data-ai-rewrite attribute
+                    new_html.append(f'<span data-ai-rewrite="true" style="background-color: #fef3c7; border-left: 3px solid #f59e0b; padding-left: 5px; display: inline-block;">{sentence}</span>')
+                else:
+                    new_html.append(sentence)
+            
+            # Replace the text node with new HTML
+            if new_html:
+                new_soup = BeautifulSoup(''.join(new_html), 'html.parser')
+                element.replace_with(new_soup)
+    
+    def remove_parenthetical_content(self, content):
+        """Remove content in parentheses including the parentheses"""
+        # Process all text content recursively
+        for element in content.find_all(string=True):
+            if element.parent.name in ['script', 'style']:
+                continue
+            
+            text = str(element)
+            # Remove content in parentheses - handle multiple occurrences
+            cleaned = re.sub(r'\s*\([^)]*\)\s*', ' ', text)
+            # Clean up extra spaces
+            cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+            
+            if cleaned != text:
+                element.replace_with(cleaned)
+    
+    def remove_footnotes(self, content):
+        """Remove footnote markers and footnote sections"""
+        # Remove common footnote markers like [1], [2], etc.
+        for element in content.find_all(string=True):
+            if element.parent.name in ['script', 'style']:
+                continue
+            
+            text = str(element)
+            # Remove footnote markers: [1], [2], etc.
+            cleaned = re.sub(r'\[\d+\]', '', text)
+            # Remove superscript footnote markers: ¹, ², ³, etc.
+            cleaned = re.sub(r'[\u00B9\u00B2\u00B3\u2070-\u209F]', '', cleaned)
+            
+            if cleaned != text:
+                element.replace_with(cleaned)
+        
+        # Remove common footnote sections
+        footnote_selectors = [
+            'div.footnotes',
+            'div.footnote',
+            'section.footnotes',
+            'div[role="doc-endnotes"]',
+            'div[role="doc-footnote"]',
+            'aside.footnotes',
+            'div#footnotes',
+            'div.endnotes',
+            'footer.footnotes'
+        ]
+        
+        for selector in footnote_selectors:
+            for element in content.select(selector):
+                element.decompose()
+        
+        # Remove <sup> tags that often contain footnote references
+        for sup in content.find_all('sup'):
+            # Check if it's a footnote reference (contains numbers or links)
+            if sup.find('a') or re.match(r'^\d+$', sup.get_text().strip()):
+                sup.decompose()
 
 def main():
     port = 8000

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,55 +11,65 @@
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 40px 20px;
         }
+
         .container {
             max-width: 1000px;
             margin: 0 auto;
         }
+
         .header {
             background: white;
             border-radius: 20px;
             padding: 40px;
             text-align: center;
             margin-bottom: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
+
         .header h1 {
             font-size: 36px;
             color: #1e293b;
             margin-bottom: 15px;
         }
+
         .header p {
             font-size: 18px;
             color: #64748b;
         }
+
         .tools-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
+
         .tool-card {
             background: white;
             border-radius: 15px;
             padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             transition: transform 0.3s, box-shadow 0.3s;
         }
+
         .tool-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
         }
+
         .tool-card h2 {
             font-size: 24px;
             color: #1e293b;
             margin-bottom: 10px;
         }
+
         .tool-card .badge {
             display: inline-block;
             padding: 4px 12px;
@@ -67,33 +78,40 @@
             font-weight: 600;
             margin-bottom: 15px;
         }
+
         .badge.recommended {
             background: #10b981;
             color: white;
         }
+
         .badge.advanced {
             background: #3b82f6;
             color: white;
         }
+
         .badge.simple {
             background: #f59e0b;
             color: white;
         }
+
         .tool-card p {
             color: #64748b;
             line-height: 1.6;
             margin-bottom: 20px;
         }
+
         .tool-card ul {
             list-style: none;
             margin-bottom: 20px;
         }
+
         .tool-card ul li {
             color: #475569;
             padding: 5px 0;
             padding-left: 20px;
             position: relative;
         }
+
         .tool-card ul li:before {
             content: "✓";
             position: absolute;
@@ -101,6 +119,7 @@
             color: #10b981;
             font-weight: bold;
         }
+
         .button {
             display: inline-block;
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
@@ -111,25 +130,30 @@
             font-weight: 600;
             transition: transform 0.2s;
         }
+
         .button:hover {
             transform: translateY(-2px);
         }
+
         .docs-section {
             background: white;
             border-radius: 15px;
             padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
+
         .docs-section h2 {
             font-size: 24px;
             color: #1e293b;
             margin-bottom: 20px;
         }
+
         .docs-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
         }
+
         .doc-link {
             display: block;
             padding: 15px;
@@ -141,15 +165,18 @@
             font-weight: 600;
             transition: all 0.3s;
         }
+
         .doc-link:hover {
             background: #e2e8f0;
             border-color: #3b82f6;
         }
+
         .doc-link .icon {
             font-size: 24px;
             margin-bottom: 8px;
             display: block;
         }
+
         .footer {
             text-align: center;
             color: white;
@@ -158,67 +185,22 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
             <h1>aRCHi</h1>
-            <p>Extract and analyze articles from Fidelity's Learning Center</p>
+            <p>Content and Learning System</p>
         </div>
 
         <div class="tools-grid">
-            <div class="tool-card">
-                <span class="badge recommended">RECOMMENDED</span>
-                <h2>🐍 Python Scraper</h2>
-                <p>Production-ready scraper that extracts article cards from all 51 category pages.</p>
-                <ul>
-                    <li>No CORS issues</li>
-                    <li>Exports JSON + CSV</li>
-                    <li>450-600 articles expected</li>
-                    <li>2-second delay between requests</li>
-                </ul>
-                <p><strong>Usage:</strong></p>
-                <pre style="background: #f8fafc; padding: 10px; border-radius: 5px; font-size: 12px;">pip install -r requirements.txt
-python fidelity_scraper.py</pre>
-            </div>
 
-            <div class="tool-card">
-                <span class="badge advanced">ADVANCED</span>
-                <h2>🌐 Web Scraper</h2>
-                <p>Browser-based tool with visual progress monitoring and Ollama integration.</p>
-                <ul>
-                    <li>Real-time progress display</li>
-                    <li>Ollama AI analysis</li>
-                    <li>Multiple CORS proxy fallbacks</li>
-                    <li>JSON export</li>
-                </ul>
-                <a href="fidelity-article-scraper.html" class="button">Open Web Scraper</a>
-            </div>
 
-            <div class="tool-card">
-                <span class="badge simple">SIMPLE</span>
-                <h2>🤖 AI Analyzer</h2>
-                <p>Predict article content using Ollama AI without web scraping. No CORS issues!</p>
-                <ul>
-                    <li>No web requests</li>
-                    <li>Fast analysis</li>
-                    <li>Ollama-powered predictions</li>
-                    <li>CSV + JSON export</li>
-                </ul>
-                <a href="fidelity-article-scraper-simple.html" class="button">Open AI Analyzer</a>
-            </div>
 
-            <div class="tool-card">
-                <span class="badge recommended">NEW</span>
-                <h2>🎯 Persona Finder</h2>
-                <p>Find the most relevant articles for specific user personas using AI analysis.</p>
-                <ul>
-                    <li>Upload your JSON article file</li>
-                    <li>Describe target persona</li>
-                    <li>AI-powered relevance scoring</li>
-                    <li>Personalized recommendations</li>
-                </ul>
-                <a href="persona-article-finder.html" class="button">Open Persona Finder</a>
-            </div>
+
+
+
+
 
             <div class="tool-card">
                 <span class="badge recommended">ENHANCED</span>
@@ -236,7 +218,8 @@ python fidelity_scraper.py</pre>
             <div class="tool-card">
                 <span class="badge advanced">NEW</span>
                 <h2>📄 Article Extractor</h2>
-                <p>Extract and clean article content from any URL. Perfect for reviewing and processing article text.</p>
+                <p>Extract and clean article content from any URL. Perfect for reviewing and processing article text.
+                </p>
                 <ul>
                     <li>Extract &lt;article&gt; content from URLs</li>
                     <li>Remove unwanted elements (links, call-outs)</li>
@@ -245,32 +228,37 @@ python fidelity_scraper.py</pre>
                 </ul>
                 <a href="article-extractor.html" class="button">Open Article Extractor</a>
             </div>
+            <div class="tool-card">
+                <span class="badge advanced">NEW</span>
+                <h2>📝 Article Generator - RAG + Ollama</h2>
+                <p>Generate new articles in your writing style using your existing content as examples. Combines
+                    Retrieval-Augmented Generation (RAG) with Ollama for high-quality, style-matched content.</p>
+                <ul>
+                    <li>Uses your own articles as examples</li>
+                    <li>RAG-powered: finds similar content for context</li>
+                    <li>Ollama LLM for generation</li>
+                    <li>Interactive and script modes</li>
+                    <li>Style analysis and creativity controls</li>
+                </ul>
+
+
+                <a href="article-generator.html" class="button">Open Article Generator</a>
+            </div>
         </div>
 
         <div class="docs-section">
-            <h2>📖 Documentation & Resources</h2>
+            <h2>📖 Documentation &amp; Resources</h2>
             <div class="docs-grid">
-                <a href="QUICK_START.md" class="doc-link" download>
+                <a href="QUICK_START.md" class="doc-link" download="">
                     <span class="icon">🚀</span>
                     Quick Start Guide
                 </a>
-                <a href="README.md" class="doc-link" download>
+                <a href="README.md" class="doc-link" download="">
                     <span class="icon">📚</span>
                     Full Documentation
                 </a>
-                <a href="FILES_SUMMARY.txt" class="doc-link" download>
-                    <span class="icon">📋</span>
-                    Files Summary
-                </a>
-                <a href="fidelity_learning_center_urls.txt" class="doc-link" download>
-                    <span class="icon">🔗</span>
-                    URL List (51 pages)
-                </a>
-                <a href="fidelity_scraper.py" class="doc-link" download>
-                    <span class="icon">💾</span>
-                    Python Script
-                </a>
-                <a href="requirements.txt" class="doc-link" download>
+
+                <a href="requirements.txt" class="doc-link" download="">
                     <span class="icon">📦</span>
                     Requirements.txt
                 </a>
@@ -278,9 +266,10 @@ python fidelity_scraper.py</pre>
         </div>
 
         <div class="footer">
-            <p>All tools respect rate limits and Fidelity's terms of service</p>
-            <p style="margin-top: 10px; font-size: 14px;">Created with Claude • November 2024</p>
+            <p>aRECHi is the createion of Jim Janeteas and Luke Paxton</p>
+            <p style="margin-top: 10px; font-size: 14px;">November 2024</p>
         </div>
     </div>
 </body>
+
 </html>
