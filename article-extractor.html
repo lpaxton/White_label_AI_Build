@@ -368,6 +368,7 @@
                 <button id="extractButton" class="button">📄 Extract Article Content</button>
                 <button id="saveButton" class="button secondary" style="display: none;">💾 Save as Text File</button>
                 <button id="saveHtmlButton" class="button secondary" style="display: none; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">📝 Save as HTML (with formatting)</button>
+                <button id="sendToRewriterButton" class="button secondary" style="display: none; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">🤖 Send to Brand Neutralizer</button>
 
                 <div class="form-group" style="margin-top: 20px;">
                     <label>💡 Example URLs:</label>
@@ -461,6 +462,11 @@
                     showSuccess('✅ Article content extracted successfully!');
                     document.getElementById('saveButton').style.display = 'block';
                     document.getElementById('saveHtmlButton').style.display = 'block';
+                    
+                    // Show "Send to Rewriter" button only if marking is enabled
+                    if (options.markFidelitySentences) {
+                        document.getElementById('sendToRewriterButton').style.display = 'block';
+                    }
                 } else {
                     showError(`Failed to extract content: ${result.error}`);
                 }
@@ -564,6 +570,14 @@
         .content li {
             margin-bottom: 5px;
         }
+        .content em {
+            font-style: italic;
+            color: #1e293b;
+        }
+        .content strong {
+            font-weight: 600;
+            color: #1e293b;
+        }
         .content blockquote {
             border-left: 4px solid #3b82f6;
             padding-left: 15px;
@@ -661,6 +675,24 @@
             showSuccess(`✅ Content saved as ${filename}`);
         });
 
+        // Send to Rewriter button handler
+        document.getElementById('sendToRewriterButton').addEventListener('click', () => {
+            if (!extractedContent) return;
+
+            // Get the displayed HTML content with markers
+            const contentDiv = document.getElementById('contentDisplay');
+            const htmlContent = contentDiv.innerHTML;
+
+            // Store in sessionStorage for the rewriter page
+            sessionStorage.setItem('rewriter_content', htmlContent);
+            sessionStorage.setItem('rewriter_source_url', extractedContent.url);
+            sessionStorage.setItem('rewriter_title', extractedContent.title || 'Article Content');
+            sessionStorage.setItem('rewriter_ereview_id', extractedContent.eReviewId || '');
+
+            // Navigate to the rewriter page
+            window.location.href = 'article-rewriter.html';
+        });
+
         async function extractArticleContent(url, options) {
             // Try to use our server proxy first, then fallback to direct CORS proxy
             const endpoints = [
@@ -708,13 +740,59 @@
         }
 
         function markSentencesWithFidelity(element) {
-            // Recursively process text nodes and mark sentences containing "Fidelity"
+            // Comprehensive list of Fidelity products to detect and mark
+            const fidelityProducts = [
+                // Brand name
+                'Fidelity',
+                // Managed Services
+                'Fidelity Go', 'Fidelity Managed FidFolios', 'Fidelity Basket Portfolios',
+                'Fidelity Basket Portfolios for Teens', 'Fidelity Wealth Services',
+                'Fidelity Strategic Disciplines', 'Fidelity Wealth Management',
+                'Fidelity Private Wealth Management', 'Personalized Portfolios',
+                'Portfolio Advisory Services',
+                // Retirement Accounts
+                'Fidelity IRA', 'Fidelity Roth IRA', 'Fidelity Traditional IRA',
+                'Fidelity Rollover IRA', 'Fidelity SEP IRA', 'Fidelity SIMPLE IRA',
+                'Fidelity Inherited IRA', 'Fidelity 401\\(k\\)', 'Fidelity 403\\(b\\)',
+                // Brokerage Accounts
+                'Fidelity Brokerage Account', 'Fidelity Cash Management Account',
+                'Fidelity Youth Account', 'Fidelity Custodial Account',
+                // Specialized Accounts
+                'Fidelity Health Savings Account', 'Fidelity HSA', 'Fidelity 529',
+                'Fidelity Trust Account',
+                // Funds
+                'Fidelity Funds', 'Fidelity Flex Funds', 'Fidelity Zero Funds',
+                'Fidelity Freedom Funds', 'Fidelity Freedom Retirement Fund',
+                'Fidelity Index Funds', 'Fidelity Sector Funds',
+                'Fidelity International Funds', 'Fidelity ETFs',
+                'Fidelity Money Market Funds',
+                // Crypto & Digital
+                'Fidelity Crypto', 'Fidelity Digital Assets',
+                'Fidelity Digital Asset Services', 'Fidelity Digital Dollar',
+                // Tools & Platforms
+                'Fidelity Account Selector', 'Fidelity Planning Tool',
+                'Fidelity Retirement Calculator', 'Fidelity Investment Calculator',
+                'Fidelity Retirement Planner', 'Fidelity Active Trader Pro',
+                'Fidelity Mobile App', 'Fidelity Planning & Guidance Center',
+                'Fidelity Screeners', 'Fidelity Watchlists',
+                // Other Services
+                'Fidelity Charitable', 'Fidelity Rewards Visa',
+                'Fidelity Stock Plan Services', 'Fidelity Life Insurance',
+                'Fidelity Annuities'
+            ];
+            
+            // Build regex pattern - sort by length (longest first) to match specific products before generic "Fidelity"
+            const sortedProducts = fidelityProducts.sort((a, b) => b.length - a.length);
+            const productPattern = sortedProducts.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+            const productRegex = new RegExp(`\\b(?:${productPattern})\\b[®™℠]?`, 'i');
+            
+            // Recursively process text nodes and mark sentences containing Fidelity products
             const processNode = (node) => {
                 if (node.nodeType === Node.TEXT_NODE) {
                     const text = node.textContent;
                     
-                    // Skip if text is too short or doesn't contain "Fidelity"
-                    if (!text || !/\bFidelity\b/i.test(text)) {
+                    // Skip if text is too short or doesn't contain any Fidelity product
+                    if (!text || !productRegex.test(text)) {
                         return;
                     }
                     
@@ -723,15 +801,15 @@
                     const sentenceRegex = /[^.!?]+[.!?]+|[^.!?]+$/g;
                     const sentences = text.match(sentenceRegex) || [text];
                     
-                    // Check if any sentence contains "Fidelity"
-                    const hasFidelity = sentences.some(s => /\bFidelity\b/i.test(s));
+                    // Check if any sentence contains a Fidelity product
+                    const hasFidelityProduct = sentences.some(s => productRegex.test(s));
                     
-                    if (hasFidelity) {
+                    if (hasFidelityProduct) {
                         // Create a wrapper with marked sentences
                         const wrapper = document.createElement('span');
                         
                         sentences.forEach((sentence, index) => {
-                            if (/\bFidelity\b/i.test(sentence)) {
+                            if (productRegex.test(sentence)) {
                                 // Mark this sentence for AI rewriting
                                 const marker = document.createElement('span');
                                 marker.setAttribute('data-ai-rewrite', 'true');
@@ -770,6 +848,7 @@
 
         function removeParentheticalContent(element) {
             // Recursively process text nodes and remove content in parentheses
+            // NOTE: This ONLY modifies text content - all HTML tags like <em>, <ul>, <li>, etc. are preserved
             const processNode = (node) => {
                 if (node.nodeType === Node.TEXT_NODE) {
                     const text = node.textContent;
@@ -786,7 +865,7 @@
                 } else if (node.nodeType === Node.ELEMENT_NODE && 
                           node.nodeName !== 'SCRIPT' && 
                           node.nodeName !== 'STYLE') {
-                    // Process child nodes
+                    // Process child nodes - preserving all HTML structure
                     const children = Array.from(node.childNodes);
                     children.forEach(child => processNode(child));
                 }
@@ -797,6 +876,7 @@
 
         function removeFootnotes(element) {
             // Remove footnote markers from text nodes
+            // NOTE: This ONLY modifies text content - all HTML tags like <em>, <ul>, <li>, etc. are preserved
             const processNode = (node) => {
                 if (node.nodeType === Node.TEXT_NODE) {
                     const text = node.textContent;
@@ -812,6 +892,7 @@
                 } else if (node.nodeType === Node.ELEMENT_NODE && 
                           node.nodeName !== 'SCRIPT' && 
                           node.nodeName !== 'STYLE') {
+                    // Process child nodes - preserving all HTML structure
                     const children = Array.from(node.childNodes);
                     children.forEach(child => processNode(child));
                 }
@@ -1066,14 +1147,45 @@
         }
 
         function highlightFidelity(element) {
+            // Comprehensive list of Fidelity products to highlight
+            const fidelityProducts = [
+                'Fidelity Go', 'Fidelity Managed FidFolios', 'Fidelity Basket Portfolios',
+                'Fidelity Basket Portfolios for Teens', 'Fidelity Wealth Services',
+                'Fidelity Strategic Disciplines', 'Fidelity Wealth Management',
+                'Fidelity Private Wealth Management', 'Fidelity IRA', 'Fidelity Roth IRA',
+                'Fidelity Traditional IRA', 'Fidelity Rollover IRA', 'Fidelity SEP IRA',
+                'Fidelity SIMPLE IRA', 'Fidelity Inherited IRA', 'Fidelity 401\\(k\\)',
+                'Fidelity 403\\(b\\)', 'Fidelity Brokerage Account', 'Fidelity Cash Management Account',
+                'Fidelity Youth Account', 'Fidelity Custodial Account',
+                'Fidelity Health Savings Account', 'Fidelity HSA', 'Fidelity 529',
+                'Fidelity Trust Account', 'Fidelity Funds', 'Fidelity Flex Funds',
+                'Fidelity Zero Funds', 'Fidelity Freedom Funds', 'Fidelity Freedom Retirement Fund',
+                'Fidelity Index Funds', 'Fidelity Sector Funds', 'Fidelity International Funds',
+                'Fidelity ETFs', 'Fidelity Money Market Funds', 'Fidelity Crypto',
+                'Fidelity Digital Assets', 'Fidelity Digital Asset Services',
+                'Fidelity Digital Dollar', 'Fidelity Account Selector', 'Fidelity Planning Tool',
+                'Fidelity Retirement Calculator', 'Fidelity Investment Calculator',
+                'Fidelity Retirement Planner', 'Fidelity Active Trader Pro',
+                'Fidelity Mobile App', 'Fidelity Planning & Guidance Center',
+                'Fidelity Screeners', 'Fidelity Watchlists', 'Fidelity Charitable',
+                'Fidelity Rewards Visa', 'Fidelity Stock Plan Services',
+                'Fidelity Life Insurance', 'Fidelity Annuities', 'Fidelity'
+            ];
+            
+            // Build regex pattern - sort by length (longest first)
+            const sortedProducts = fidelityProducts.sort((a, b) => b.length - a.length);
+            const productPattern = sortedProducts.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+            const regex = new RegExp(`\\b(${productPattern})\\b[®™℠]?`, 'gi');
+            
             // Function to recursively search and highlight text nodes
             const highlightInNode = (node) => {
                 if (node.nodeType === Node.TEXT_NODE) {
                     const text = node.textContent;
-                    // Case-insensitive regex to find all occurrences of "Fidelity"
-                    const regex = /\b(Fidelity)\b/gi;
                     
                     if (regex.test(text)) {
+                        // Reset regex lastIndex
+                        regex.lastIndex = 0;
+                        
                         // Create a temporary div to hold the highlighted content
                         const span = document.createElement('span');
                         span.innerHTML = text.replace(regex, '<span class="fidelity-highlight">$1</span>');

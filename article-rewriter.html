@@ -248,6 +248,86 @@
         .content-display p {
             margin-bottom: 15px;
         }
+        .content-display ul, .content-display ol {
+            margin-bottom: 15px;
+            padding-left: 20px;
+        }
+        .content-display li {
+            margin-bottom: 5px;
+        }
+        .content-display blockquote {
+            border-left: 4px solid #3b82f6;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #64748b;
+        }
+        .content-display img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .content-display figure {
+            margin: 20px 0;
+        }
+        .content-display figure img {
+            margin: 0 0 10px 0;
+        }
+        .fidelity-highlight {
+            background-color: #fef08a;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .content-meta {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+        }
+        .content-meta h3 {
+            margin-bottom: 10px;
+            color: #1e293b;
+        }
+        .content-meta .stat {
+            display: inline-block;
+            background: #e2e8f0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 10px;
+            margin-bottom: 5px;
+        }
+        .article-id-display {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border: 2px solid #2563eb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+        .article-id-display .label {
+            font-size: 12px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .article-id-display .value {
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
         .stats-box {
             background: #f8fafc;
             border-radius: 8px;
@@ -374,11 +454,43 @@
             border-left: 3px solid #f59e0b;
             padding-left: 5px;
             display: inline-block;
+            position: relative;
+        }
+        [data-ai-rewrite="true"]::before {
+            content: "🤖 AI REWRITE";
+            position: absolute;
+            top: -18px;
+            left: 0;
+            font-size: 10px;
+            font-weight: bold;
+            color: #f59e0b;
+            background: white;
+            padding: 2px 4px;
+            border-radius: 3px;
+            border: 1px solid #f59e0b;
         }
         .rewritten-content {
             background-color: #d1fae5;
-            border-left: 3px solid #10b981;
-            padding-left: 5px;
+            border-left: 4px solid #10b981;
+            padding-left: 8px;
+            padding-right: 4px;
+            display: inline-block;
+            position: relative;
+            margin: 2px 0;
+        }
+        .rewritten-content::before {
+            content: "✨ REWRITTEN";
+            position: absolute;
+            top: -18px;
+            left: 0;
+            font-size: 9px;
+            font-weight: bold;
+            color: #059669;
+            background: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+            border: 1px solid #10b981;
+            white-space: nowrap;
         }
         .brand-highlight {
             background-color: #fef08a;
@@ -573,6 +685,43 @@ Example:
     <script>
         let isProcessing = false;
         let lastResult = null;
+        let eReviewId = null; // Store eReview ID globally
+
+        // Check for content from article extractor on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedContent = sessionStorage.getItem('rewriter_content');
+            const sourceUrl = sessionStorage.getItem('rewriter_source_url');
+            const title = sessionStorage.getItem('rewriter_title');
+            const savedEReviewId = sessionStorage.getItem('rewriter_ereview_id');
+
+            if (savedContent) {
+                // Populate the textarea with the content
+                document.getElementById('htmlInput').value = savedContent;
+                
+                // Store eReview ID
+                if (savedEReviewId) {
+                    eReviewId = savedEReviewId;
+                }
+                
+                // Show a notification
+                showSuccess(`✅ Loaded content from Article Extractor${title ? ': ' + title : ''}${eReviewId ? ' (eReview: ' + eReviewId + ')' : ''}`);
+                
+                // Clear sessionStorage
+                sessionStorage.removeItem('rewriter_content');
+                sessionStorage.removeItem('rewriter_source_url');
+                sessionStorage.removeItem('rewriter_title');
+                sessionStorage.removeItem('rewriter_ereview_id');
+
+                // Scroll to the textarea
+                document.getElementById('htmlInput').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            // Load saved API key
+            const savedApiKey = localStorage.getItem('claude_api_key');
+            if (savedApiKey) {
+                document.getElementById('apiKey').value = savedApiKey;
+            }
+        });
 
         // Tab switching
         document.querySelectorAll('.tab').forEach(tab => {
@@ -763,6 +912,10 @@ Example:
         }
 
         async function rewriteWithClaudeDirectly(htmlContent, apiKey, options) {
+            // FIRST: Remove all parentheses and their content BEFORE any AI processing
+            // This ensures parenthetical content is removed even if it contains "Fidelity"
+            htmlContent = removeAllParentheses(htmlContent);
+            
             // Find all spans with data-ai-rewrite="true"
             const parser = new DOMParser();
             const doc = parser.parseFromString(htmlContent, 'text/html');
@@ -787,9 +940,15 @@ Example:
                         rewritten: rewrittenText.substring(0, 200)
                     });
 
+                    // Wrap rewritten text with a visual marker
+                    // Remove the data-ai-rewrite attribute and add rewritten-content class
+                    const newSpan = document.createElement('span');
+                    newSpan.className = 'rewritten-content';
+                    newSpan.innerHTML = rewrittenText;
+                    
                     // Replace in the HTML
                     const spanOuterHtml = span.outerHTML;
-                    const newSpanHtml = spanOuterHtml.replace(originalText, rewrittenText);
+                    const newSpanHtml = newSpan.outerHTML;
                     processedHtml = processedHtml.replace(spanOuterHtml, newSpanHtml);
                 }
             }
@@ -800,6 +959,19 @@ Example:
                 processedHtml = processedHtml.replace(/<sup>[®™℠]<\/sup>/gi, '');
                 processedHtml = processedHtml.replace(/<sup>SM<\/sup>/gi, '');
             }
+
+            // FINAL CLEANUP: Remove any parentheses that Claude may have added back
+            // This is a safety net in case Claude added explanatory parenthetical content
+            processedHtml = removeAllParentheses(processedHtml);
+            
+            // Fix any double spaces that may have been created
+            processedHtml = processedHtml.replace(/\s{2,}/g, ' ');
+            
+            // Fix spacing issues around common punctuation
+            processedHtml = processedHtml.replace(/\s+\./g, '.');
+            processedHtml = processedHtml.replace(/\s+,/g, ',');
+            processedHtml = processedHtml.replace(/\s+;/g, ';');
+            processedHtml = processedHtml.replace(/\s+:/g, ':');
 
             // Check for warnings
             const warnings = [];
@@ -848,18 +1020,75 @@ Example:
             };
         }
 
+        function removeAllParentheses(htmlContent) {
+            // First pass: Simple string replacement to catch any edge cases
+            // This handles cases where parentheses might be in HTML attributes or other contexts
+            let cleaned = htmlContent.replace(/\s*\([^)]*\)\s*/g, ' ');
+            
+            // Parse the HTML content for DOM-based cleaning
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(cleaned, 'text/html');
+            
+            // Recursively process all text nodes to remove any remaining parentheses
+            // NOTE: This ONLY modifies text content - all HTML tags like <em>, <ul>, <li>, etc. are preserved
+            function processNode(node) {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    const text = node.textContent;
+                    
+                    // Remove content in parentheses including the parentheses
+                    // This catches any that might have been missed
+                    let cleanedText = text.replace(/\s*\([^)]*\)\s*/g, ' ');
+                    // Normalize whitespace - replace multiple spaces with single space
+                    cleanedText = cleanedText.replace(/\s{2,}/g, ' ');
+                    // Trim leading/trailing spaces from the text node
+                    if (cleanedText !== text) {
+                        node.textContent = cleanedText;
+                    }
+                } else if (node.nodeType === Node.ELEMENT_NODE && 
+                          node.nodeName !== 'SCRIPT' && 
+                          node.nodeName !== 'STYLE') {
+                    // Process child nodes - preserving all HTML structure
+                    const children = Array.from(node.childNodes);
+                    children.forEach(child => processNode(child));
+                }
+            }
+            
+            // Process the entire document body
+            processNode(doc.body);
+            
+            // Get the cleaned HTML
+            let result = doc.body.innerHTML;
+            
+            // Final cleanup: One more pass to catch any stragglers
+            result = result.replace(/\s*\([^)]*\)\s*/g, ' ');
+            result = result.replace(/\s{2,}/g, ' '); // Normalize multiple spaces
+            
+            console.log('Parentheses removal complete - all HTML tags preserved');
+            return result;
+        }
+
         async function callClaudeAPI(text, apiKey, brand) {
             const systemPrompt = `You are a professional content editor specializing in brand neutralization. Your task is to rewrite brand-specific content to make it generic and suitable for white-label distribution.
 
 CRITICAL RULES:
 1. ONLY modify the text content - preserve ALL HTML structure, attributes, and tags exactly
-2. Replace brand names (like "${brand}") with generic alternatives (like "many major brokerages" or "your chosen brokerage")
-3. Replace product names with generic descriptions
-4. Remove trademark symbols (®, ™, ℠)
-5. Keep the same tone, style, and informational content
-6. DO NOT add new information or change the meaning
-7. DO NOT fix grammar, spelling, or improve the writing - only neutralize brand references
-8. Maintain the same sentence structure when possible
+2. MUST preserve all HTML tags including: <em>, <strong>, <ul>, <ol>, <li>, <p>, <div>, <span>, <a>, etc.
+3. When you encounter brand names (like "${brand}"), replace them with generic alternatives ONLY when they are the main subject of the sentence
+4. When you encounter specific product names (like "Fidelity Go", "Automated Portfolio", "Fidelity IRA", etc.), REMOVE them completely and adjust the sentence to flow naturally without them
+5. Examples of proper removal:
+   - "robo advisors like Fidelity Go can offer" → "robo advisors can offer"
+   - "use Automated Portfolio to manage" → "use automated portfolio management to manage"
+   - "with Fidelity IRA you can" → "with an IRA you can"
+   - "services like Fidelity Wealth Management provide" → "wealth management services provide"
+6. DO NOT create new generic product names or replacements - simply remove the specific branded product name
+7. Remove trademark symbols (®, ™, ℠)
+8. Keep the same tone, style, and informational content
+9. DO NOT add new information or change the meaning
+10. DO NOT fix grammar, spelling, or improve the writing - only neutralize brand references
+11. Maintain the same sentence structure when possible
+12. DO NOT add parenthetical content or explanations - if the original doesn't have parentheses, your rewrite shouldn't either
+13. DO NOT add clarifying phrases in parentheses like "(Here's how to...)" - just write naturally without parentheses
+14. Preserve all list formatting (<ul>, <li>), emphasis tags (<em>, <strong>), and other HTML elements exactly as they appear
 
 Return ONLY the rewritten text with no explanations or additional commentary.`;
 
@@ -878,7 +1107,18 @@ Return ONLY the rewritten text with no explanations or additional commentary.`;
                     messages: [
                         {
                             role: 'user',
-                            content: `Rewrite the following text to remove all references to "${brand}" and make it brand-neutral:\n\n${text}\n\nReturn ONLY the rewritten text, nothing else.`
+                            content: `Rewrite the following text to remove all references to "${brand}" and make it brand-neutral. 
+
+IMPORTANT: When you see specific product names, REMOVE them completely - do NOT replace them with generic alternatives. For example:
+- "robo advisors like Fidelity Go can" should become "robo advisors can"
+- NOT "robo advisors like Automated Portfolio can"
+
+DO NOT add any parenthetical content or explanations - write naturally without using parentheses.
+
+Text to rewrite:
+${text}
+
+Return ONLY the rewritten text, nothing else.`
                         }
                     ]
                 })
@@ -953,7 +1193,228 @@ Return ONLY the rewritten text with no explanations or additional commentary.`;
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
             const filename = `rewritten-article-${timestamp}.html`;
 
-            const blob = new Blob([lastResult.html], { type: 'text/html' });
+            // Fix relative image URLs by prepending Fidelity base URL
+            let styledContent = lastResult.html;
+            styledContent = styledContent.replace(/src="\/([^"]+)"/g, 'src="https://www.fidelity.com/$1"');
+            styledContent = styledContent.replace(/src='\/([^']+)'/g, "src='https://www.fidelity.com/$1'");
+
+            // Build eReview ID section if available
+            let eReviewSection = '';
+            if (eReviewId) {
+                eReviewSection = `
+        <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border-radius: 8px; padding: 15px 20px; margin-bottom: 20px; border: 2px solid #2563eb; display: flex; align-items: center; gap: 10px; font-weight: 600;">
+            <span style="font-size: 12px; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">📋 eReview ID:</span>
+            <span style="font-size: 18px; font-family: 'Courier New', monospace; background: rgba(255, 255, 255, 0.2); padding: 6px 12px; border-radius: 4px;">${eReviewId}</span>
+        </div>`;
+            }
+
+            // Create a complete HTML document with embedded styles for centered column layout
+            const htmlDocument = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brand Neutralized Article</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f8fafc;
+            line-height: 1.6;
+            color: #1e293b;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 40px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header {
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #1e293b;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        .meta {
+            color: #64748b;
+            font-size: 14px;
+        }
+        .content {
+            color: #1e293b;
+        }
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            margin: 24px 0 12px 0;
+            color: #1e293b;
+            line-height: 1.3;
+        }
+        .content h1 { font-size: 28px; }
+        .content h2 { font-size: 24px; }
+        .content h3 { font-size: 20px; }
+        .content h4 { font-size: 18px; }
+        .content p {
+            margin-bottom: 16px;
+            line-height: 1.7;
+        }
+        .content ul, .content ol {
+            margin-bottom: 16px;
+            padding-left: 28px;
+        }
+        .content li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+        .content em {
+            font-style: italic;
+            color: #1e293b;
+        }
+        .content strong {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .content blockquote {
+            border-left: 4px solid #3b82f6;
+            padding-left: 20px;
+            margin: 20px 0;
+            font-style: italic;
+            color: #64748b;
+        }
+        .content img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 24px auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .content figure {
+            margin: 24px 0;
+        }
+        .content figure img {
+            margin: 0 auto 12px;
+        }
+        .content figcaption {
+            text-align: center;
+            font-size: 14px;
+            color: #64748b;
+            font-style: italic;
+        }
+        .content a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        .content a:hover {
+            text-decoration: underline;
+        }
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .content table th,
+        .content table td {
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            text-align: left;
+        }
+        .content table th {
+            background: #f1f5f9;
+            font-weight: 600;
+        }
+        .content pre {
+            background: #f1f5f9;
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+        .content code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+        .rewritten-content {
+            background-color: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding-left: 8px;
+            padding-right: 4px;
+            display: inline-block;
+            position: relative;
+            margin: 2px 0;
+        }
+        .rewritten-content::before {
+            content: "✨ REWRITTEN";
+            position: absolute;
+            top: -18px;
+            left: 0;
+            font-size: 9px;
+            font-weight: bold;
+            color: #059669;
+            background: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+            border: 1px solid #10b981;
+            white-space: nowrap;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 20px;
+            }
+            .content h1 { font-size: 24px; }
+            .content h2 { font-size: 20px; }
+            .content h3 { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Brand Neutralized Article</h1>
+            <div class="meta">
+                <p><strong>Processed:</strong> ${new Date().toLocaleString()}</p>
+                <p><strong>Replacements Made:</strong> ${lastResult.replacements_count || 0}</p>
+            </div>
+        </div>
+        
+        ${eReviewSection}
+        
+        <div class="content">
+            ${styledContent}
+        </div>
+        
+        <div class="footer">
+            <p>This article has been processed for brand neutralization</p>
+            <p>Generated by aRCHi Brand Neutralizer</p>
+            ${eReviewId ? `<p style="margin-top: 10px;"><strong>eReview ID:</strong> ${eReviewId}</p>` : ''}
+        </div>
+    </div>
+</body>
+</html>`;
+
+            const blob = new Blob([htmlDocument], { type: 'text/html' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
