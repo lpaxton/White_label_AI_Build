@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Article Rewriter - Brand Neutralization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .header h1 {
+            font-size: 32px;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 16px;
+            color: #64748b;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        .panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .panel h2 {
+            font-size: 20px;
+            color: #1e293b;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .input-panel {
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        .output-panel {
+            min-height: 600px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        .form-group textarea {
+            min-height: 200px;
+            resize: vertical;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+        }
+        .button {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.2s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        .button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .button.secondary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        .button.orange {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+        .loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-left: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error-message {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .success-message {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .warning-message {
+            background: #fef3c7;
+            border: 1px solid #fde68a;
+            color: #92400e;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 25px;
+            font-weight: 600;
+            color: #1e293b;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            z-index: 100;
+        }
+        .back-button:hover {
+            background: white;
+            transform: translateY(-2px);
+        }
+        .options-section {
+            background: #f0f9ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #bae6fd;
+        }
+        .options-section h4 {
+            color: #1e293b;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+        }
+        .checkbox-item label {
+            font-weight: normal;
+            font-size: 14px;
+            margin-bottom: 0;
+        }
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .radio-item input[type="radio"] {
+            width: auto;
+        }
+        .radio-item label {
+            font-weight: normal;
+            font-size: 14px;
+            margin-bottom: 0;
+        }
+        .content-display {
+            line-height: 1.6;
+            color: #1e293b;
+        }
+        .content-display h1, .content-display h2, .content-display h3 {
+            margin: 20px 0 10px 0;
+            color: #1e293b;
+        }
+        .content-display p {
+            margin-bottom: 15px;
+        }
+        .stats-box {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+        }
+        .stats-box h3 {
+            margin-bottom: 10px;
+            color: #1e293b;
+            font-size: 16px;
+        }
+        .stat {
+            display: inline-block;
+            background: #e2e8f0;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 10px;
+            margin-bottom: 5px;
+        }
+        .stat.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .stat.warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .stat.info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .replacement-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .replacement-item {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .replacement-item:last-child {
+            border-bottom: none;
+        }
+        .replacement-item .original {
+            color: #dc2626;
+            background: #fee2e2;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .replacement-item .rewritten {
+            color: #059669;
+            background: #d1fae5;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            display: block;
+        }
+        .welcome-message {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+        .welcome-message h3 {
+            color: #1e293b;
+            margin-bottom: 15px;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+        .tab {
+            padding: 10px 20px;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            background: #f1f5f9;
+            border: none;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+        .tab.active {
+            background: #3b82f6;
+            color: white;
+        }
+        .tab:hover:not(.active) {
+            background: #e2e8f0;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .api-key-input {
+            position: relative;
+        }
+        .api-key-input input {
+            padding-right: 100px;
+        }
+        .api-key-input .toggle-visibility {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #e2e8f0;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        [data-ai-rewrite="true"] {
+            background-color: #fef3c7;
+            border-left: 3px solid #f59e0b;
+            padding-left: 5px;
+            display: inline-block;
+        }
+        .rewritten-content {
+            background-color: #d1fae5;
+            border-left: 3px solid #10b981;
+            padding-left: 5px;
+        }
+        .brand-highlight {
+            background-color: #fef08a;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+        .file-upload-area {
+            border: 2px dashed #e2e8f0;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+        .file-upload-area:hover {
+            border-color: #3b82f6;
+            background: #f0f9ff;
+        }
+        .file-upload-area.dragover {
+            border-color: #3b82f6;
+            background: #dbeafe;
+        }
+        .file-upload-area input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>
+
+    <div class="container">
+        <div class="header">
+            <h1>Article Rewriter - Brand Neutralization</h1>
+            <p>Transform brand-specific content into generic, white-label alternatives using Claude AI</p>
+        </div>
+
+        <div class="main-content">
+            <div class="panel input-panel">
+                <h2>Input Content</h2>
+
+                <div class="tabs">
+                    <button class="tab active" data-tab="paste">Paste HTML</button>
+                    <button class="tab" data-tab="upload">Upload File</button>
+                    <button class="tab" data-tab="url">From URL</button>
+                </div>
+
+                <div id="pasteTab" class="tab-content active">
+                    <div class="form-group">
+                        <label for="htmlInput">HTML Content (with data-ai-rewrite markers):</label>
+                        <textarea id="htmlInput" placeholder="Paste your HTML content here. Content marked with data-ai-rewrite='true' will be processed.
+
+Example:
+<p><span data-ai-rewrite='true'>Fidelity offers great investment options.</span></p>"></textarea>
+                    </div>
+                </div>
+
+                <div id="uploadTab" class="tab-content">
+                    <div class="file-upload-area" id="fileUploadArea">
+                        <input type="file" id="fileInput" accept=".html,.htm,.txt">
+                        <p>Drag and drop an HTML file here</p>
+                        <p style="font-size: 12px; color: #64748b; margin-top: 10px;">or click to browse</p>
+                    </div>
+                    <div id="fileInfo" style="display: none; margin-bottom: 20px;">
+                        <p><strong>Selected file:</strong> <span id="fileName"></span></p>
+                    </div>
+                </div>
+
+                <div id="urlTab" class="tab-content">
+                    <div class="form-group">
+                        <label for="urlInput">Article URL:</label>
+                        <input type="url" id="urlInput" placeholder="https://example.com/article">
+                    </div>
+                    <button id="fetchUrlButton" class="button secondary">Fetch Article Content</button>
+                </div>
+
+                <div class="options-section">
+                    <h4>Processing Options:</h4>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="useAI" checked>
+                            <label for="useAI">Use Claude AI for intelligent rewriting</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="removeTrademarks" checked>
+                            <label for="removeTrademarks">Remove trademark symbols</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="removeParentheses" checked>
+                            <label for="removeParentheses">Remove parenthetical content</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="removeFootnotes" checked>
+                            <label for="removeFootnotes">Remove footnotes</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="checkHyperlinks" checked>
+                            <label for="checkHyperlinks">Flag unmarked product hyperlinks</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="checkPossessives" checked>
+                            <label for="checkPossessives">Flag possessive references (our/we/us)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="options-section">
+                    <h4>Brand to Neutralize:</h4>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <select id="brandSelect">
+                            <option value="Fidelity">Fidelity</option>
+                            <option value="custom">Custom (enter below)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="customBrandGroup" style="display: none; margin-top: 10px; margin-bottom: 0;">
+                        <input type="text" id="customBrand" placeholder="Enter brand name">
+                    </div>
+                </div>
+
+                <div class="options-section">
+                    <h4>Claude API Key:</h4>
+                    <div class="form-group api-key-input" style="margin-bottom: 0;">
+                        <input type="password" id="apiKey" placeholder="sk-ant-api...">
+                        <button class="toggle-visibility" onclick="toggleApiKeyVisibility()">Show</button>
+                    </div>
+                    <p style="font-size: 12px; color: #64748b; margin-top: 8px;">Your API key is stored locally and never sent to our servers.</p>
+                </div>
+
+                <button id="rewriteButton" class="button">Rewrite with Claude AI</button>
+
+                <div id="errorMessage" class="error-message"></div>
+            </div>
+
+            <div class="panel output-panel">
+                <h2>Rewritten Content</h2>
+
+                <div id="welcomeMessage" class="welcome-message">
+                    <h3>Welcome to Article Rewriter</h3>
+                    <p>This tool uses Claude AI to intelligently neutralize brand-specific content.</p>
+                    <div style="margin: 20px 0; text-align: left;">
+                        <h4>How it works:</h4>
+                        <ol style="color: #64748b; margin: 10px 0; padding-left: 20px;">
+                            <li>Paste HTML content or upload a file</li>
+                            <li>Mark content for rewriting with <code>data-ai-rewrite="true"</code></li>
+                            <li>Enter your Claude API key</li>
+                            <li>Click "Rewrite with Claude AI"</li>
+                            <li>Review and download the neutralized content</li>
+                        </ol>
+                    </div>
+                    <p style="color: #64748b; font-size: 14px;">
+                        <strong>Perfect for:</strong> White-label content distribution, brand neutralization, content repurposing
+                    </p>
+                </div>
+
+                <div id="loadingMessage" class="loading">
+                    <div class="spinner"></div>
+                    <p>Claude is rewriting your content...</p>
+                    <p style="font-size: 12px; margin-top: 5px;">This may take a moment for longer articles</p>
+                </div>
+
+                <div id="successMessage" class="success-message"></div>
+
+                <div id="resultsContainer" style="display: none;">
+                    <div id="statsBox" class="stats-box">
+                        <h3>Processing Results</h3>
+                        <div id="statsContent"></div>
+                    </div>
+
+                    <div id="warningsBox" class="warning-message" style="display: none;">
+                        <h4>Warnings</h4>
+                        <ul id="warningsList"></ul>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Rewritten HTML:</label>
+                        <textarea id="outputHtml" readonly style="min-height: 300px;"></textarea>
+                    </div>
+
+                    <button id="copyButton" class="button secondary">Copy to Clipboard</button>
+                    <button id="downloadButton" class="button orange">Download HTML File</button>
+
+                    <div id="replacementsSection" style="margin-top: 20px;">
+                        <h4>Replacements Made:</h4>
+                        <div id="replacementsList" class="replacement-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isProcessing = false;
+        let lastResult = null;
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab + 'Tab').classList.add('active');
+            });
+        });
+
+        // Custom brand toggle
+        document.getElementById('brandSelect').addEventListener('change', (e) => {
+            const customGroup = document.getElementById('customBrandGroup');
+            customGroup.style.display = e.target.value === 'custom' ? 'block' : 'none';
+        });
+
+        // File upload handling
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        fileUploadArea.addEventListener('click', () => fileInput.click());
+
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.add('dragover');
+        });
+
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.classList.remove('dragover');
+        });
+
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('htmlInput').value = e.target.result;
+                document.getElementById('fileInfo').style.display = 'block';
+                document.getElementById('fileName').textContent = file.name;
+                // Switch to paste tab to show content
+                document.querySelectorAll('.tab')[0].click();
+            };
+            reader.readAsText(file);
+        }
+
+        // Fetch URL content
+        document.getElementById('fetchUrlButton').addEventListener('click', async () => {
+            const url = document.getElementById('urlInput').value.trim();
+            if (!url) {
+                showError('Please enter a URL');
+                return;
+            }
+
+            showLoading();
+            try {
+                // Use CORS proxy to fetch content
+                const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
+
+                document.getElementById('htmlInput').value = data.contents;
+                document.querySelectorAll('.tab')[0].click();
+                hideLoading();
+                showSuccess('Content fetched successfully!');
+            } catch (error) {
+                hideLoading();
+                showError('Failed to fetch URL: ' + error.message);
+            }
+        });
+
+        // Toggle API key visibility
+        function toggleApiKeyVisibility() {
+            const input = document.getElementById('apiKey');
+            const button = document.querySelector('.toggle-visibility');
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.textContent = 'Hide';
+            } else {
+                input.type = 'password';
+                button.textContent = 'Show';
+            }
+        }
+
+        // Save/load API key from localStorage
+        const savedApiKey = localStorage.getItem('claude_api_key');
+        if (savedApiKey) {
+            document.getElementById('apiKey').value = savedApiKey;
+        }
+
+        document.getElementById('apiKey').addEventListener('change', (e) => {
+            localStorage.setItem('claude_api_key', e.target.value);
+        });
+
+        // Main rewrite function
+        document.getElementById('rewriteButton').addEventListener('click', async () => {
+            if (isProcessing) return;
+
+            const htmlContent = document.getElementById('htmlInput').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const useAI = document.getElementById('useAI').checked;
+
+            if (!htmlContent) {
+                showError('Please enter HTML content to rewrite');
+                return;
+            }
+
+            if (useAI && !apiKey) {
+                showError('Please enter your Claude API key');
+                return;
+            }
+
+            const brandSelect = document.getElementById('brandSelect').value;
+            const brand = brandSelect === 'custom'
+                ? document.getElementById('customBrand').value.trim()
+                : brandSelect;
+
+            if (!brand) {
+                showError('Please specify a brand to neutralize');
+                return;
+            }
+
+            const options = {
+                use_ai: useAI,
+                brand: brand,
+                remove_trademark_symbols: document.getElementById('removeTrademarks').checked,
+                remove_parenthetical_content: document.getElementById('removeParentheses').checked,
+                remove_footnotes: document.getElementById('removeFootnotes').checked,
+                check_hyperlinks: document.getElementById('checkHyperlinks').checked,
+                check_possessive_references: document.getElementById('checkPossessives').checked
+            };
+
+            isProcessing = true;
+            showLoading();
+            hideError();
+
+            try {
+                const result = await rewriteContent(htmlContent, apiKey, options);
+                lastResult = result;
+                displayResults(result);
+                showSuccess('Content rewritten successfully!');
+            } catch (error) {
+                console.error('Rewrite error:', error);
+                showError('Rewrite failed: ' + error.message);
+            } finally {
+                isProcessing = false;
+                hideLoading();
+            }
+        });
+
+        async function rewriteContent(htmlContent, apiKey, options) {
+            // Try local API server first
+            try {
+                const response = await fetch('/api/rewrite', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        html: htmlContent,
+                        api_key: apiKey,
+                        ...options
+                    })
+                });
+
+                if (response.ok) {
+                    return await response.json();
+                }
+            } catch (e) {
+                console.log('Local API not available, using client-side processing');
+            }
+
+            // Fallback to client-side processing with Claude API directly
+            return await rewriteWithClaudeDirectly(htmlContent, apiKey, options);
+        }
+
+        async function rewriteWithClaudeDirectly(htmlContent, apiKey, options) {
+            // Find all spans with data-ai-rewrite="true"
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlContent, 'text/html');
+            const spans = doc.querySelectorAll('[data-ai-rewrite="true"]');
+
+            if (spans.length === 0) {
+                throw new Error('No content marked with data-ai-rewrite="true" found. Please mark the content you want to rewrite.');
+            }
+
+            const replacements = [];
+            let processedHtml = htmlContent;
+
+            for (const span of spans) {
+                const originalText = span.innerHTML;
+
+                // Call Claude API
+                const rewrittenText = await callClaudeAPI(originalText, apiKey, options.brand);
+
+                if (rewrittenText !== originalText) {
+                    replacements.push({
+                        original: originalText.substring(0, 200),
+                        rewritten: rewrittenText.substring(0, 200)
+                    });
+
+                    // Replace in the HTML
+                    const spanOuterHtml = span.outerHTML;
+                    const newSpanHtml = spanOuterHtml.replace(originalText, rewrittenText);
+                    processedHtml = processedHtml.replace(spanOuterHtml, newSpanHtml);
+                }
+            }
+
+            // Apply post-processing
+            if (options.remove_trademark_symbols) {
+                processedHtml = processedHtml.replace(/[®™℠]/g, '');
+                processedHtml = processedHtml.replace(/<sup>[®™℠]<\/sup>/gi, '');
+                processedHtml = processedHtml.replace(/<sup>SM<\/sup>/gi, '');
+            }
+
+            // Check for warnings
+            const warnings = [];
+            const unmarkedLinks = [];
+            const possessiveRefs = [];
+
+            if (options.check_hyperlinks) {
+                const linkPattern = /<a\s+[^>]*>.*?(Fidelity|our tools|our calculator)[^<]*<\/a>/gi;
+                let match;
+                while ((match = linkPattern.exec(htmlContent)) !== null) {
+                    unmarkedLinks.push({ link_text: match[0].substring(0, 100) });
+                }
+                if (unmarkedLinks.length > 0) {
+                    warnings.push(`Found ${unmarkedLinks.length} unmarked hyperlinks that may reference brand products`);
+                }
+            }
+
+            if (options.check_possessive_references) {
+                const possessivePatterns = [
+                    /our\s+[\w\s]{1,30}(?:tool|calculator|planner|guide|glossary)/gi,
+                    /we offer/gi, /we provide/gi, /we suggest/gi, /we recommend/gi,
+                    /contact us/gi, /our company/gi, /our firm/gi, /our website/gi
+                ];
+
+                for (const pattern of possessivePatterns) {
+                    let match;
+                    while ((match = pattern.exec(htmlContent)) !== null) {
+                        possessiveRefs.push({ text: match[0] });
+                    }
+                }
+                if (possessiveRefs.length > 0) {
+                    warnings.push(`Found ${possessiveRefs.length} possessive references (our/we/us) that may imply brand authorship`);
+                }
+            }
+
+            return {
+                html: processedHtml,
+                spans_found: spans.length,
+                spans_processed: replacements.length,
+                replacements_count: replacements.length,
+                replacements: replacements,
+                unmarked_links: unmarkedLinks,
+                possessive_references: possessiveRefs,
+                warnings: warnings,
+                method: 'claude_ai_direct'
+            };
+        }
+
+        async function callClaudeAPI(text, apiKey, brand) {
+            const systemPrompt = `You are a professional content editor specializing in brand neutralization. Your task is to rewrite brand-specific content to make it generic and suitable for white-label distribution.
+
+CRITICAL RULES:
+1. ONLY modify the text content - preserve ALL HTML structure, attributes, and tags exactly
+2. Replace brand names (like "${brand}") with generic alternatives (like "many major brokerages" or "your chosen brokerage")
+3. Replace product names with generic descriptions
+4. Remove trademark symbols (®, ™, ℠)
+5. Keep the same tone, style, and informational content
+6. DO NOT add new information or change the meaning
+7. DO NOT fix grammar, spelling, or improve the writing - only neutralize brand references
+8. Maintain the same sentence structure when possible
+
+Return ONLY the rewritten text with no explanations or additional commentary.`;
+
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': apiKey,
+                    'anthropic-version': '2023-06-01',
+                    'anthropic-dangerous-direct-browser-access': 'true'
+                },
+                body: JSON.stringify({
+                    model: 'claude-sonnet-4-20250514',
+                    max_tokens: 2048,
+                    system: systemPrompt,
+                    messages: [
+                        {
+                            role: 'user',
+                            content: `Rewrite the following text to remove all references to "${brand}" and make it brand-neutral:\n\n${text}\n\nReturn ONLY the rewritten text, nothing else.`
+                        }
+                    ]
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error?.message || 'Claude API request failed');
+            }
+
+            const data = await response.json();
+            return data.content[0].text.trim();
+        }
+
+        function displayResults(result) {
+            document.getElementById('welcomeMessage').style.display = 'none';
+            document.getElementById('resultsContainer').style.display = 'block';
+
+            // Stats
+            const statsHtml = `
+                <span class="stat success">Spans found: ${result.spans_found}</span>
+                <span class="stat success">Spans processed: ${result.spans_processed}</span>
+                <span class="stat info">Method: ${result.method}</span>
+                ${result.processing_time ? `<span class="stat">Time: ${result.processing_time}</span>` : ''}
+            `;
+            document.getElementById('statsContent').innerHTML = statsHtml;
+
+            // Warnings
+            if (result.warnings && result.warnings.length > 0) {
+                document.getElementById('warningsBox').style.display = 'block';
+                document.getElementById('warningsList').innerHTML = result.warnings.map(w => `<li>${w}</li>`).join('');
+            } else {
+                document.getElementById('warningsBox').style.display = 'none';
+            }
+
+            // Output HTML
+            document.getElementById('outputHtml').value = result.html;
+
+            // Replacements list
+            if (result.replacements && result.replacements.length > 0) {
+                document.getElementById('replacementsSection').style.display = 'block';
+                const replacementsHtml = result.replacements.map(r => `
+                    <div class="replacement-item">
+                        <span class="original">${escapeHtml(r.original)}...</span>
+                        <span class="rewritten">${escapeHtml(r.rewritten)}...</span>
+                    </div>
+                `).join('');
+                document.getElementById('replacementsList').innerHTML = replacementsHtml;
+            } else {
+                document.getElementById('replacementsSection').style.display = 'none';
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Copy to clipboard
+        document.getElementById('copyButton').addEventListener('click', () => {
+            const output = document.getElementById('outputHtml');
+            output.select();
+            document.execCommand('copy');
+            showSuccess('Copied to clipboard!');
+        });
+
+        // Download HTML file
+        document.getElementById('downloadButton').addEventListener('click', () => {
+            if (!lastResult) return;
+
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            const filename = `rewritten-article-${timestamp}.html`;
+
+            const blob = new Blob([lastResult.html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showSuccess(`Downloaded ${filename}`);
+        });
+
+        // Utility functions
+        function showLoading() {
+            document.getElementById('welcomeMessage').style.display = 'none';
+            document.getElementById('resultsContainer').style.display = 'none';
+            document.getElementById('loadingMessage').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingMessage').style.display = 'none';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Update button state
+        setInterval(() => {
+            const button = document.getElementById('rewriteButton');
+            button.disabled = isProcessing;
+            if (isProcessing) {
+                button.textContent = 'Rewriting...';
+            } else {
+                button.textContent = 'Rewrite with Claude AI';
+            }
+        }, 100);
+    </script>
+</body>
+</html>

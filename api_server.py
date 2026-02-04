@@ -2,6 +2,7 @@
 """
 Article Generator Flask API Server
 Provides REST API endpoints for the Article Generator web interface.
+Includes Claude-powered Article Rewriter endpoints.
 """
 
 import os
@@ -18,6 +19,14 @@ import traceback
 
 # Import our Article Generator class
 from article_generator import ArticleGenerator
+
+# Import Claude Rewriter (optional - will work without it via client-side)
+try:
+    from claude_rewriter import ClaudeRewriter
+    CLAUDE_REWRITER_AVAILABLE = True
+except ImportError:
+    CLAUDE_REWRITER_AVAILABLE = False
+    print("Warning: claude_rewriter module not available. Rewrite API will require client-side processing.")
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for web interface
@@ -53,7 +62,10 @@ def index():
             'POST /api/generate': 'Generate article',
             'POST /api/analyze-style': 'Analyze writing style',
             'GET /api/status': 'Get current status',
-            'GET /api/health': 'Health check with model validation'
+            'GET /api/health': 'Health check with model validation',
+            'POST /api/rewrite': 'Rewrite article with Claude AI (brand neutralization)',
+            'GET /api/rewrite/config': 'Get rewrite configuration',
+            'GET /api/rewrite/health': 'Rewrite API health check'
         }
     })
 
@@ -382,6 +394,112 @@ def analyze_style():
         traceback.print_exc()
         return jsonify({'error': error_msg}), 500
 
+# ============================================================
+# ARTICLE REWRITER API ENDPOINTS (Claude-powered)
+# ============================================================
+
+@app.route('/api/rewrite', methods=['POST'])
+def rewrite_article():
+    """
+    Rewrite article content to neutralize brand references using Claude AI.
+
+    Request body:
+        - html: HTML content to process
+        - api_key: Claude API key
+        - use_ai: Whether to use Claude AI (default: True)
+        - brand: Brand to neutralize (default: "Fidelity")
+        - remove_trademark_symbols: Remove trademark symbols (default: True)
+        - remove_parenthetical_content: Remove parenthetical content (default: True)
+        - remove_footnotes: Remove footnotes (default: True)
+        - check_hyperlinks: Flag unmarked hyperlinks (default: True)
+        - check_possessive_references: Flag possessive refs (default: True)
+    """
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({'error': 'No JSON data provided'}), 400
+
+        html_content = data.get('html', '').strip()
+        api_key = data.get('api_key', '').strip()
+        use_ai = data.get('use_ai', True)
+        brand = data.get('brand', 'Fidelity')
+
+        if not html_content:
+            return jsonify({'error': 'No HTML content provided'}), 400
+
+        if use_ai and not api_key:
+            return jsonify({'error': 'Claude API key required for AI rewriting'}), 400
+
+        # Build processing options
+        processing_options = {
+            'remove_trademark_symbols': data.get('remove_trademark_symbols', True),
+            'remove_parenthetical_content': data.get('remove_parenthetical_content', True),
+            'remove_footnotes': data.get('remove_footnotes', True),
+            'check_hyperlinks': data.get('check_hyperlinks', True),
+            'check_possessive_references': data.get('check_possessive_references', True)
+        }
+
+        if not CLAUDE_REWRITER_AVAILABLE:
+            return jsonify({
+                'error': 'Server-side rewriting not available. Please use client-side processing.',
+                'use_client_side': True
+            }), 503
+
+        # Initialize rewriter with provided API key
+        config = {
+            'processing_options': processing_options
+        }
+
+        rewriter = ClaudeRewriter(api_key=api_key, config=config)
+
+        # Process the content
+        result = rewriter.process_html(html_content, use_ai=use_ai, brand=brand)
+
+        return jsonify(result)
+
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': f'Rewrite failed: {str(e)}'}), 500
+
+
+@app.route('/api/rewrite/config', methods=['GET'])
+def get_rewrite_config():
+    """Get the default rewrite configuration."""
+    if not CLAUDE_REWRITER_AVAILABLE:
+        return jsonify({
+            'error': 'Claude rewriter module not available',
+            'default_config': {
+                'brand_replacements': {
+                    'Fidelity': {
+                        'company_name': ['many major brokerages', 'reputable financial services firms'],
+                        'products': {
+                            'Fidelity Go': 'automated robo advisors',
+                            'Fidelity Youth': 'custodial accounts for minors'
+                        }
+                    }
+                }
+            }
+        })
+
+    return jsonify({
+        'config': ClaudeRewriter.DEFAULT_CONFIG,
+        'available': True
+    })
+
+
+@app.route('/api/rewrite/health', methods=['GET'])
+def rewrite_health():
+    """Health check for the rewrite API."""
+    return jsonify({
+        'status': 'ok',
+        'claude_rewriter_available': CLAUDE_REWRITER_AVAILABLE,
+        'timestamp': time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime())
+    })
+
+
 @app.errorhandler(413)
 def too_large(e):
     """Handle file too large error"""
@@ -393,15 +511,24 @@ def internal_error(e):
     return jsonify({'error': 'Internal server error occurred.'}), 500
 
 if __name__ == '__main__':
-    print("🚀 Starting Article Generator API Server...")
-    print("📊 Endpoints available:")
+    print("Starting Article Generator API Server...")
+    print("Endpoints available:")
     print("  POST /api/upload - Upload article files")
     print("  POST /api/setup-rag - Setup RAG database")
     print("  POST /api/test-ollama - Test Ollama connection")
     print("  POST /api/generate - Generate article")
     print("  POST /api/analyze-style - Analyze writing style")
     print("  GET /api/status - Get system status")
-    print("\n🌐 Starting server on http://localhost:5000")
-    
+    print("")
+    print("Article Rewriter (Claude-powered):")
+    print("  POST /api/rewrite - Rewrite article with Claude AI")
+    print("  GET /api/rewrite/config - Get rewrite configuration")
+    print("  GET /api/rewrite/health - Rewrite API health check")
+    if CLAUDE_REWRITER_AVAILABLE:
+        print("  Status: Claude Rewriter module loaded")
+    else:
+        print("  Status: Client-side processing only (module not available)")
+    print("\nStarting server on http://localhost:5000")
+
     ensure_upload_dir()
     app.run(host='0.0.0.0', port=5000, debug=True)
