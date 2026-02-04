@@ -1,0 +1,131 @@
+{
+  "config": {
+    "version": "1.0",
+    "description": "Configuration for batch rewriting HTML articles to remove brand-specific content",
+    "output_directory": "/mnt/user-data/outputs/rewritten-articles",
+    "preserve_original": true,
+    "generate_report": true
+  },
+  
+  "brand_replacements": {
+    "Fidelity": {
+      "company_name": [
+        "many major brokerages",
+        "reputable financial services firms",
+        "leading financial institutions"
+      ],
+      "products": {
+        "Fidelity Go®": "automated robo advisors",
+        "Fidelity Youth®": "custodial accounts for minors"
+      },
+      "statements": {
+        "Fidelity suggests": "Financial experts recommend",
+        "Fidelity charges": "Many major brokerages charge",
+        "Fidelity offers": "Many providers offer",
+        "with Fidelity": "with your chosen brokerage",
+        "at Fidelity": "at major brokerages",
+        "if you choose to go with Fidelity": "through your chosen brokerage",
+        "a firm like Fidelity": "a reputable financial services firm"
+      }
+    }
+  },
+  
+  "articles": [
+    {
+      "id": 1,
+      "name": "How to start investing",
+      "input_file": "/mnt/user-data/uploads/article-content-2026-02-02T19-45-46.html",
+      "output_file": "how-to-start-investing-rewritten.html",
+      "status": "pending",
+      "notes": "Main beginner investing guide"
+    },
+    {
+      "id": 2,
+      "name": "Example Article 2",
+      "input_file": "/mnt/user-data/uploads/article-2.html",
+      "output_file": "article-2-rewritten.html",
+      "status": "pending",
+      "notes": "Additional article to process"
+    },
+    {
+      "id": 3,
+      "name": "Example Article 3",
+      "input_file": "/mnt/user-data/uploads/article-3.html",
+      "output_file": "article-3-rewritten.html",
+      "status": "pending",
+      "notes": "Additional article to process"
+    }
+  ],
+  
+  "processing_options": {
+    "target_attribute": "data-ai-rewrite",
+    "target_value": "true",
+    "preserve_html_structure": true,
+    "preserve_inline_styles": true,
+    "preserve_image_paths": true,
+    "preserve_original_text": true,
+    "case_sensitive": false,
+    "whole_word_only": false,
+    "remove_trademark_symbols": true,
+    "trademark_symbols": ["®", "™", "℠"],
+    "remove_trademark_tags": ["<sup>®</sup>", "<sup>™</sup>", "<sup>℠</sup>", "<sup>SM</sup>"],
+    "remove_parenthetical_content": true,
+    "remove_footnotes": true,
+    "check_hyperlinks": true,
+    "check_possessive_references": true,
+    "product_link_keywords": [
+      "Fidelity Go",
+      "Fidelity Youth",
+      "our tools",
+      "our calculator",
+      "our planner",
+      "Fidelity's tools",
+      "Fidelity's calculator",
+      "Fidelity's planner"
+    ],
+    "possessive_patterns": [
+      "our [\\w\\s]{1,30}(?:tool|calculator|planner|guide|glossary|resource|platform|service|product|account|portal|dashboard|app|website|selector)",
+      "we offer",
+      "we provide",
+      "we suggest",
+      "we recommend",
+      "we can help",
+      "check with us",
+      "contact us",
+      "our company",
+      "our firm",
+      "our website",
+      "our platform",
+      "at Fidelity",
+      "the account selector",
+      "in the account selector",
+      "the planning tool",
+      "the retirement calculator"
+    ]
+  },
+  
+  "validation": {
+    "check_all_spans_processed": true,
+    "verify_no_brand_references": true,
+    "validate_html_integrity": true,
+    "generate_diff_report": false,
+    "check_hyperlinks": true,
+    "flag_unmarked_product_links": true,
+    "check_possessive_references": true,
+    "flag_unmarked_possessives": true
+  },
+  
+  "reporting": {
+    "output_file": "rewrite-summary-report.json",
+    "include_details": true,
+    "fields": [
+      "article_id",
+      "article_name",
+      "spans_found",
+      "spans_processed",
+      "replacements_made",
+      "status",
+      "processing_time"
+    ]
+  }
+}
