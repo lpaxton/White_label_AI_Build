@@ -1021,13 +1021,11 @@ Example:
         }
 
         function removeAllParentheses(htmlContent) {
-            // First pass: Simple string replacement to catch any edge cases
-            // This handles cases where parentheses might be in HTML attributes or other contexts
-            let cleaned = htmlContent.replace(/\s*\([^)]*\)\s*/g, ' ');
-            
             // Parse the HTML content for DOM-based cleaning
+            // NOTE: We NEVER apply the parentheses regex to raw HTML strings because it
+            // matches across tag boundaries and destroys CSS rgb() values in style attributes.
             const parser = new DOMParser();
-            const doc = parser.parseFromString(cleaned, 'text/html');
+            const doc = parser.parseFromString(htmlContent, 'text/html');
             
             // Recursively process all text nodes to remove any remaining parentheses
             // NOTE: This ONLY modifies text content - all HTML tags like <em>, <ul>, <li>, etc. are preserved
@@ -1058,11 +1056,10 @@ Example:
             
             // Get the cleaned HTML
             let result = doc.body.innerHTML;
-            
-            // Final cleanup: One more pass to catch any stragglers
-            result = result.replace(/\s*\([^)]*\)\s*/g, ' ');
-            result = result.replace(/\s{2,}/g, ' '); // Normalize multiple spaces
-            
+
+            // Normalize multiple spaces only (no raw regex on HTML - that corrupts style attributes)
+            result = result.replace(/\s{2,}/g, ' ');
+
             console.log('Parentheses removal complete - all HTML tags preserved');
             return result;
         }
