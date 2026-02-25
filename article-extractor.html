@@ -786,100 +786,74 @@
             const productPattern = sortedProducts.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
             const productRegex = new RegExp(`\\b(?:${productPattern})\\b[®™℠]?`, 'i');
             
-            // Recursively process text nodes and mark sentences containing Fidelity products
-            const processNode = (node) => {
-                if (node.nodeType === Node.TEXT_NODE) {
-                    const text = node.textContent;
-                    
-                    // Skip if text is too short or doesn't contain any Fidelity product
-                    if (!text || !productRegex.test(text)) {
-                        return;
-                    }
-                    
-                    // Split text into sentences (basic sentence detection)
-                    // Match sentences ending with . ! ? or end of string
-                    const sentenceRegex = /[^.!?]+[.!?]+|[^.!?]+$/g;
-                    const sentences = text.match(sentenceRegex) || [text];
-                    
-                    // Check if any sentence contains a Fidelity product
-                    const hasFidelityProduct = sentences.some(s => productRegex.test(s));
-                    
-                    if (hasFidelityProduct) {
-                        // Create a wrapper with marked sentences
-                        const wrapper = document.createElement('span');
-                        
-                        // Pre-identify which sentences contain Fidelity mentions
-                        const fidelityIndexes = new Set(
-                            sentences.map((s, i) => productRegex.test(s) ? i : -1).filter(i => i !== -1)
-                        );
+            // Operate at block-element level to capture full sentences that span multiple text nodes
+            // (e.g. "invest in <strong>Fidelity Flex</strong> funds" splits into 3 text nodes —
+            //  reading innerText of the block crosses those boundaries and sees the whole sentence)
+            const sentenceRegex = /[^.!?]+[.!?]+|[^.!?]+$/g;
+            const blockSelector = 'p, li, td, th, h1, h2, h3, h4, h5, h6, blockquote, figcaption';
+            const blockElements = Array.from(element.querySelectorAll(blockSelector));
 
-                        // Build a set of indexes to include in spans (the match + 1 before + 1 after)
-                        const spanIndexes = new Set();
-                        fidelityIndexes.forEach(i => {
-                            if (i > 0) spanIndexes.add(i - 1);                          // sentence before
-                            spanIndexes.add(i);                                          // matched sentence
-                            if (i < sentences.length - 1) spanIndexes.add(i + 1);       // sentence after
-                        });
+            // Also consider the container itself if it is a block element
+            const blockTagNames = new Set(['P', 'LI', 'TD', 'TH', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'FIGCAPTION']);
+            if (blockTagNames.has(element.nodeName)) {
+                blockElements.unshift(element);
+            }
 
-                        // Group consecutive span indexes into contiguous blocks
-                        const blocks = [];
-                        let currentBlock = null;
-                        [...spanIndexes].sort((a, b) => a - b).forEach(i => {
-                            if (!currentBlock || i !== currentBlock.end + 1) {
-                                currentBlock = { start: i, end: i };
-                                blocks.push(currentBlock);
-                            } else {
-                                currentBlock.end = i;
-                            }
-                        });
+            blockElements.forEach(blockEl => {
+                // innerText crosses text-node boundaries and gives the full visible text of the block
+                const fullText = blockEl.innerText || blockEl.textContent || '';
 
-                        // Build the block lookup
-                        const blockMap = new Map();
-                        blocks.forEach(b => {
-                            for (let i = b.start; i <= b.end; i++) blockMap.set(i, b);
-                        });
-
-                        const added = new Set();
-                        sentences.forEach((sentence, index) => {
-                            if (spanIndexes.has(index)) {
-                                const block = blockMap.get(index);
-                                if (!added.has(block)) {
-                                    added.add(block);
-                                    const marker = document.createElement('span');
-                                    marker.setAttribute('data-ai-rewrite', 'true');
-                                    marker.style.backgroundColor = '#fef3c7'; // Light yellow background
-                                    marker.style.borderLeft = '3px solid #f59e0b'; // Orange left border
-                                    marker.style.paddingLeft = '5px';
-                                    marker.style.display = 'inline-block';
-                                    // Combine all sentences in this block into one span
-                                    marker.textContent = sentences.slice(block.start, block.end + 1).join('');
-                                    wrapper.appendChild(marker);
-                                }
-                            } else {
-                                // Regular text node
-                                wrapper.appendChild(document.createTextNode(sentence));
-                            }
-                        });
-                        
-                        // Replace the original text node with the wrapper
-                        node.parentNode.replaceChild(wrapper, node);
-                        
-                        // Unwrap to keep structure clean
-                        while (wrapper.firstChild) {
-                            wrapper.parentNode.insertBefore(wrapper.firstChild, wrapper);
-                        }
-                        wrapper.remove();
-                    }
-                } else if (node.nodeType === Node.ELEMENT_NODE && 
-                          node.nodeName !== 'SCRIPT' && 
-                          node.nodeName !== 'STYLE') {
-                    // Process child nodes
-                    const children = Array.from(node.childNodes);
-                    children.forEach(child => processNode(child));
+                if (!productRegex.test(fullText)) {
+                    return; // No Fidelity mention in this block
                 }
-            };
-            
-            processNode(element);
+
+                // Sentence-split the full text to confirm at least one sentence-level match
+                const sentences = fullText.match(sentenceRegex) || [fullText];
+                if (!sentences.some(s => productRegex.test(s))) {
+                    return;
+                }
+
+                // Wrap the entire block's innerHTML in a span so the full sentence is always captured
+                const marker = document.createElement('span');
+                marker.setAttribute('data-ai-rewrite', 'true');
+                marker.style.backgroundColor = '#fef3c7';
+                marker.style.borderLeft = '3px solid #f59e0b';
+                marker.style.paddingLeft = '5px';
+                marker.style.display = 'block';
+                marker.innerHTML = blockEl.innerHTML;
+                blockEl.innerHTML = '';
+                blockEl.appendChild(marker);
+
+                // Fix any spacing around inline elements that may have been disturbed
+                normalizeInlineSpacing(blockEl);
+            });
+        }
+
+        function normalizeInlineSpacing(container) {
+            const inlineTags = ['STRONG', 'EM', 'B', 'I', 'A', 'SPAN'];
+            container.querySelectorAll(inlineTags.join(',')).forEach(el => {
+                // Skip spans that are themselves AI-rewrite markers
+                if (el.hasAttribute('data-ai-rewrite')) return;
+
+                // Ensure a space exists AFTER the inline element
+                const next = el.nextSibling;
+                if (next && next.nodeType === Node.TEXT_NODE) {
+                    if (next.textContent && !/^[\s.,;:!?)]/.test(next.textContent)) {
+                        next.textContent = ' ' + next.textContent;
+                    }
+                } else if (next && inlineTags.includes(next.nodeName)) {
+                    // Two inline elements back-to-back — insert a space node between them
+                    el.parentNode.insertBefore(document.createTextNode(' '), next);
+                }
+
+                // Ensure a space exists BEFORE the inline element
+                const prev = el.previousSibling;
+                if (prev && prev.nodeType === Node.TEXT_NODE) {
+                    if (prev.textContent && !/[\s(]$/.test(prev.textContent)) {
+                        prev.textContent = prev.textContent + ' ';
+                    }
+                }
+            });
         }
 
         function removeParentheticalContent(element) {

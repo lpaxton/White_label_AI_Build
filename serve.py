@@ -289,23 +289,8 @@ class CORSHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.remove_footnotes(content)
         
         # Get clean text and HTML
-        # Ensure spacing around inline tags (strong, em, a, etc.) so words aren't concatenated
-        inline_tags = ['strong', 'b', 'em', 'i', 'a', 'span']
-        for tagname in inline_tags:
-            for t in content.find_all(tagname):
-                # Skip spans explicitly marked for AI rewrite
-                if t.has_attr('data-ai-rewrite') and t.get('data-ai-rewrite') == 'true':
-                    continue
-
-                prev_sib = t.previous_sibling
-                if isinstance(prev_sib, NavigableString):
-                    if not str(prev_sib).endswith(' ') and not str(t.get_text()).startswith(' '):
-                        t.insert_before(' ')
-
-                next_sib = t.next_sibling
-                if isinstance(next_sib, NavigableString):
-                    if not str(next_sib).startswith(' ') and not str(t.get_text()).endswith(' '):
-                        t.insert_after(' ')
+        # Normalize spacing around inline tags (strong, em, a, etc.) so words aren't concatenated
+        self.normalize_inline_spacing(content)
 
         clean_text = content.get_text()
         # Clean up whitespace
@@ -339,50 +324,64 @@ class CORSHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         }
     
     def mark_sentences_with_fidelity(self, content):
-        """Mark sentences containing 'Fidelity' for AI rewriting"""
-        # Find all text nodes and process them
-        for element in content.find_all(string=True):
-            if element.parent.name in ['script', 'style']:
-                continue
-            
-            text = str(element)
-            if 'Fidelity' not in text and 'fidelity' not in text.lower():
-                continue
-            
-            # Split into sentences
-            sentences = re.split(r'([.!?]+)', text)
-            
-            # Reconstruct with markers
-            new_html = []
-            i = 0
-            while i < len(sentences):
-                sentence = sentences[i]
-                # Check if next item is punctuation
-                if i + 1 < len(sentences) and sentences[i + 1] in ['.', '!', '?', '..', '...']:
-                    sentence += sentences[i + 1]
-                    i += 2
-                else:
-                    i += 1
-                
-                # Check if sentence contains Fidelity
-                if re.search(r'\bFidelity\b', sentence, re.IGNORECASE):
-                    # Wrap in span with data-ai-rewrite attribute
-                    new_html.append(f'<span data-ai-rewrite="true" style="background-color: #fef3c7; border-left: 3px solid #f59e0b; padding-left: 5px; display: inline-block;">{sentence}</span>')
-                else:
-                    new_html.append(sentence)
-            
-            # Replace the text node with new HTML
-            if new_html:
-                # Preserve original leading/trailing whitespace from the text node
-                leading_ws_match = re.match(r'^\s*', text)
-                trailing_ws_match = re.search(r'\s*$', text)
-                leading_ws = leading_ws_match.group(0) if leading_ws_match else ''
-                trailing_ws = trailing_ws_match.group(0) if trailing_ws_match else ''
+        """Mark sentences containing 'Fidelity' for AI rewriting by operating at block level.
 
-                new_html_str = leading_ws + ''.join(new_html) + trailing_ws
-                new_soup = BeautifulSoup(new_html_str, 'html.parser')
-                element.replace_with(new_soup)
+        Operating on block elements rather than individual text nodes ensures that sentences
+        spanning multiple text nodes (e.g. "invest in <strong>Fidelity Flex</strong> funds")
+        are captured whole rather than partially.
+        """
+        block_tags = ['p', 'li', 'td', 'th', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'figcaption']
+        sentence_regex = re.compile(r'[^.!?]+[.!?]+|[^.!?]+$')
+        fidelity_regex = re.compile(r'\bFidelity\b', re.IGNORECASE)
+
+        for block in content.find_all(block_tags):
+            full_text = block.get_text()
+
+            if not fidelity_regex.search(full_text):
+                continue
+
+            # Confirm at least one sentence-level match before wrapping
+            sentences = sentence_regex.findall(full_text)
+            if not any(fidelity_regex.search(s) for s in sentences):
+                continue
+
+            # Wrap the entire block content in a span so the full sentence is always captured
+            span_tag = BeautifulSoup(
+                '<span data-ai-rewrite="true" style="background-color: #fef3c7; '
+                'border-left: 3px solid #f59e0b; padding-left: 5px; display: block;"></span>',
+                'html.parser'
+            ).find('span')
+
+            # Move all children of the block into the span
+            for child in list(block.contents):
+                child.extract()
+                span_tag.append(child)
+
+            block.append(span_tag)
     
+    def normalize_inline_spacing(self, content):
+        """Ensure spaces are preserved around inline tags after DOM manipulation.
+
+        After wrapping or replacing nodes, spaces between an inline element and its
+        surrounding text can be lost (e.g. "Fidelity Flex</strong>funds" missing space).
+        This pass restores them without altering any other content.
+        """
+        inline_tags = ['strong', 'em', 'b', 'i', 'a', 'span']
+        for tag in content.find_all(inline_tags):
+            # Skip spans that are themselves AI-rewrite markers
+            if tag.get('data-ai-rewrite') == 'true':
+                continue
+
+            # Ensure space before tag if previous sibling is text not ending in a space
+            prev = tag.previous_sibling
+            if prev and isinstance(prev, NavigableString) and prev and not prev[-1].isspace():
+                prev.replace_with(NavigableString(str(prev) + ' '))
+
+            # Ensure space after tag if next sibling is text not starting with space or punctuation
+            next_s = tag.next_sibling
+            if next_s and isinstance(next_s, NavigableString) and next_s and next_s[0] not in ' \t\n.,;:!?)':
+                next_s.replace_with(NavigableString(' ' + str(next_s)))
+
     def remove_parenthetical_content(self, content):
         """Remove content in parentheses including the parentheses"""
         # Process all text content recursively
