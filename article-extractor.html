@@ -808,17 +808,53 @@
                         // Create a wrapper with marked sentences
                         const wrapper = document.createElement('span');
                         
+                        // Pre-identify which sentences contain Fidelity mentions
+                        const fidelityIndexes = new Set(
+                            sentences.map((s, i) => productRegex.test(s) ? i : -1).filter(i => i !== -1)
+                        );
+
+                        // Build a set of indexes to include in spans (the match + 1 before + 1 after)
+                        const spanIndexes = new Set();
+                        fidelityIndexes.forEach(i => {
+                            if (i > 0) spanIndexes.add(i - 1);                          // sentence before
+                            spanIndexes.add(i);                                          // matched sentence
+                            if (i < sentences.length - 1) spanIndexes.add(i + 1);       // sentence after
+                        });
+
+                        // Group consecutive span indexes into contiguous blocks
+                        const blocks = [];
+                        let currentBlock = null;
+                        [...spanIndexes].sort((a, b) => a - b).forEach(i => {
+                            if (!currentBlock || i !== currentBlock.end + 1) {
+                                currentBlock = { start: i, end: i };
+                                blocks.push(currentBlock);
+                            } else {
+                                currentBlock.end = i;
+                            }
+                        });
+
+                        // Build the block lookup
+                        const blockMap = new Map();
+                        blocks.forEach(b => {
+                            for (let i = b.start; i <= b.end; i++) blockMap.set(i, b);
+                        });
+
+                        const added = new Set();
                         sentences.forEach((sentence, index) => {
-                            if (productRegex.test(sentence)) {
-                                // Mark this sentence for AI rewriting
-                                const marker = document.createElement('span');
-                                marker.setAttribute('data-ai-rewrite', 'true');
-                                marker.style.backgroundColor = '#fef3c7'; // Light yellow background
-                                marker.style.borderLeft = '3px solid #f59e0b'; // Orange left border
-                                marker.style.paddingLeft = '5px';
-                                marker.style.display = 'inline-block';
-                                marker.textContent = sentence;
-                                wrapper.appendChild(marker);
+                            if (spanIndexes.has(index)) {
+                                const block = blockMap.get(index);
+                                if (!added.has(block)) {
+                                    added.add(block);
+                                    const marker = document.createElement('span');
+                                    marker.setAttribute('data-ai-rewrite', 'true');
+                                    marker.style.backgroundColor = '#fef3c7'; // Light yellow background
+                                    marker.style.borderLeft = '3px solid #f59e0b'; // Orange left border
+                                    marker.style.paddingLeft = '5px';
+                                    marker.style.display = 'inline-block';
+                                    // Combine all sentences in this block into one span
+                                    marker.textContent = sentences.slice(block.start, block.end + 1).join('');
+                                    wrapper.appendChild(marker);
+                                }
                             } else {
                                 // Regular text node
                                 wrapper.appendChild(document.createTextNode(sentence));
