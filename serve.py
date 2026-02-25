@@ -11,7 +11,7 @@ import urllib.parse
 import json
 import sys
 from urllib.error import URLError
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString
 import re
 
 class CORSHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
@@ -289,6 +289,24 @@ class CORSHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.remove_footnotes(content)
         
         # Get clean text and HTML
+        # Ensure spacing around inline tags (strong, em, a, etc.) so words aren't concatenated
+        inline_tags = ['strong', 'b', 'em', 'i', 'a', 'span']
+        for tagname in inline_tags:
+            for t in content.find_all(tagname):
+                # Skip spans explicitly marked for AI rewrite
+                if t.has_attr('data-ai-rewrite') and t.get('data-ai-rewrite') == 'true':
+                    continue
+
+                prev_sib = t.previous_sibling
+                if isinstance(prev_sib, NavigableString):
+                    if not str(prev_sib).endswith(' ') and not str(t.get_text()).startswith(' '):
+                        t.insert_before(' ')
+
+                next_sib = t.next_sibling
+                if isinstance(next_sib, NavigableString):
+                    if not str(next_sib).startswith(' ') and not str(t.get_text()).endswith(' '):
+                        t.insert_after(' ')
+
         clean_text = content.get_text()
         # Clean up whitespace
         clean_text = re.sub(r'\s+', ' ', clean_text).strip()
