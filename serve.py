@@ -355,7 +355,14 @@ class CORSHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             
             # Replace the text node with new HTML
             if new_html:
-                new_soup = BeautifulSoup(''.join(new_html), 'html.parser')
+                # Preserve original leading/trailing whitespace from the text node
+                leading_ws_match = re.match(r'^\s*', text)
+                trailing_ws_match = re.search(r'\s*$', text)
+                leading_ws = leading_ws_match.group(0) if leading_ws_match else ''
+                trailing_ws = trailing_ws_match.group(0) if trailing_ws_match else ''
+
+                new_html_str = leading_ws + ''.join(new_html) + trailing_ws
+                new_soup = BeautifulSoup(new_html_str, 'html.parser')
                 element.replace_with(new_soup)
     
     def remove_parenthetical_content(self, content):
