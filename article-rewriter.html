@@ -672,6 +672,7 @@ Example:
 
                     <button id="copyButton" class="button secondary">Copy to Clipboard</button>
                     <button id="downloadButton" class="button orange">Download HTML File</button>
+                    <button id="sendToDiffButton" class="button" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); margin-top: 10px; display: block; width: 100%;">View Diff (Step 3) &#8594;</button>
 
                     <div id="replacementsSection" style="margin-top: 20px;">
                         <h4>Replacements Made:</h4>
@@ -686,6 +687,7 @@ Example:
         let isProcessing = false;
         let lastResult = null;
         let eReviewId = null; // Store eReview ID globally
+        let originalContent = null; // Store original HTML before rewriting
 
         // Check for content from article extractor on page load
         window.addEventListener('DOMContentLoaded', () => {
@@ -872,6 +874,7 @@ Example:
             hideError();
 
             try {
+                originalContent = htmlContent; // Save original before rewriting
                 const result = await rewriteContent(htmlContent, apiKey, options);
                 lastResult = result;
                 displayResults(result);
@@ -1422,6 +1425,15 @@ Return ONLY the rewritten text, nothing else.`
             URL.revokeObjectURL(url);
 
             showSuccess(`Downloaded ${filename}`);
+        });
+
+        // Send to Diff Tool
+        document.getElementById('sendToDiffButton').addEventListener('click', () => {
+            if (!lastResult || !originalContent) return;
+            sessionStorage.setItem('diff_original', originalContent);
+            sessionStorage.setItem('diff_neutralized', lastResult.html);
+            sessionStorage.setItem('diff_title', eReviewId ? `eReview: ${eReviewId}` : 'Article Comparison');
+            window.location.href = 'article-diff.html';
         });
 
         // Utility functions

@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Diff - Step 3</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 24px 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .header h1 {
+            font-size: 28px;
+            color: #1e293b;
+            margin-bottom: 6px;
+        }
+        .header p {
+            font-size: 15px;
+            color: #64748b;
+        }
+        /* Workflow breadcrumb */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+        .breadcrumb-step {
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            background: #f1f5f9;
+            color: #64748b;
+        }
+        .breadcrumb-step.active {
+            background: #10b981;
+            color: white;
+        }
+        .breadcrumb-step.done {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+        .breadcrumb-arrow {
+            color: white;
+            font-size: 16px;
+            opacity: 0.8;
+        }
+        /* Controls bar */
+        .controls-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 14px 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .controls-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .mode-toggle {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 3px;
+            gap: 3px;
+        }
+        .mode-btn {
+            padding: 7px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            background: transparent;
+            transition: all 0.2s;
+        }
+        .mode-btn.active {
+            background: white;
+            color: #1e293b;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+        }
+        .sync-scroll-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+        }
+        .sync-scroll-toggle input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        .controls-right {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .button {
+            padding: 9px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .button:hover { transform: translateY(-1px); }
+        .button.secondary {
+            background: #e2e8f0;
+            color: #475569;
+        }
+        .button.green {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        .button.back {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.4);
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            font-size: 13px;
+        }
+        .button.back:hover {
+            background: rgba(255,255,255,0.35);
+            transform: none;
+        }
+        /* Diff panels */
+        .diff-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .diff-panel {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 14px 20px;
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .panel-header.original {
+            background: #fffbeb;
+            color: #92400e;
+            border-bottom-color: #fcd34d;
+        }
+        .panel-header.neutralized {
+            background: #ecfdf5;
+            color: #065f46;
+            border-bottom-color: #6ee7b7;
+        }
+        .panel-body {
+            flex: 1;
+            overflow-y: auto;
+            height: calc(100vh - 260px);
+            min-height: 400px;
+            padding: 20px;
+            font-size: 15px;
+            line-height: 1.7;
+            color: #1e293b;
+        }
+        /* Keep existing highlight styles from rewriter */
+        .panel-body [data-ai-rewrite="true"] {
+            background-color: #fef3c7;
+            border-left: 3px solid #f59e0b;
+            padding-left: 6px;
+            display: inline-block;
+            position: relative;
+        }
+        .panel-body [data-ai-rewrite="true"]::before {
+            content: "ORIGINAL";
+            position: absolute;
+            top: -16px;
+            left: 0;
+            font-size: 9px;
+            font-weight: bold;
+            color: #b45309;
+            background: white;
+            padding: 1px 4px;
+            border-radius: 3px;
+            border: 1px solid #f59e0b;
+        }
+        .panel-body .rewritten-content {
+            background-color: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding-left: 8px;
+            padding-right: 4px;
+            display: inline-block;
+            position: relative;
+            margin: 2px 0;
+        }
+        .panel-body .rewritten-content::before {
+            content: "REWRITTEN";
+            position: absolute;
+            top: -16px;
+            left: 0;
+            font-size: 9px;
+            font-weight: bold;
+            color: #059669;
+            background: white;
+            padding: 1px 4px;
+            border-radius: 3px;
+            border: 1px solid #10b981;
+            white-space: nowrap;
+        }
+        /* Word-level diff styles */
+        .diff-removed {
+            background-color: #fee2e2;
+            color: #991b1b;
+            text-decoration: line-through;
+            border-radius: 3px;
+            padding: 1px 2px;
+        }
+        .diff-added {
+            background-color: #dcfce7;
+            color: #166534;
+            border-radius: 3px;
+            padding: 1px 2px;
+        }
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        .empty-state h3 {
+            font-size: 20px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #475569;
+        }
+        .legend-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+        }
+        /* Stats bar */
+        .stats-bar {
+            background: white;
+            border-radius: 10px;
+            padding: 12px 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            font-size: 13px;
+            color: #475569;
+        }
+        .stat-item strong {
+            color: #1e293b;
+        }
+        @media (max-width: 900px) {
+            .diff-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="button back" onclick="window.location.href='article-rewriter.html'">&#8592; Back to Brand Neutralizer</button>
+
+    <div class="container">
+        <div class="header">
+            <h1>Content Diff Tool</h1>
+            <p>Compare original article content with brand-neutralized output side by side</p>
+            <div class="breadcrumb">
+                <span class="breadcrumb-step done">Step 1: Article Extractor</span>
+                <span class="breadcrumb-arrow">&#8594;</span>
+                <span class="breadcrumb-step done">Step 2: Brand Neutralizer</span>
+                <span class="breadcrumb-arrow">&#8594;</span>
+                <span class="breadcrumb-step active">Step 3: Diff Tool</span>
+                <span class="breadcrumb-arrow">&#8594;</span>
+                <span class="breadcrumb-step">Step 5: Word Editor</span>
+            </div>
+        </div>
+
+        <div class="controls-bar">
+            <div class="controls-left">
+                <div class="mode-toggle">
+                    <button class="mode-btn active" id="renderedModeBtn" onclick="setMode('rendered')">Rendered View</button>
+                    <button class="mode-btn" id="diffModeBtn" onclick="setMode('diff')">Word Diff</button>
+                </div>
+                <label class="sync-scroll-toggle">
+                    <input type="checkbox" id="syncScrollToggle" checked>
+                    Sync Scroll
+                </label>
+            </div>
+            <div class="legend" id="legend">
+                <span class="legend-item">
+                    <span class="legend-dot" style="background:#fef3c7; border:2px solid #f59e0b;"></span>
+                    Original marked text
+                </span>
+                <span class="legend-item">
+                    <span class="legend-dot" style="background:#d1fae5; border:2px solid #10b981;"></span>
+                    AI-rewritten text
+                </span>
+            </div>
+            <div class="controls-right">
+                <button class="button green" onclick="goToEditor()">Edit in Word Editor (Step 5) &#8594;</button>
+            </div>
+        </div>
+
+        <div id="statsBar" class="stats-bar" style="display:none;">
+            <div class="stat-item">Left: <strong id="statLeftWords">—</strong> words</div>
+            <div class="stat-item">Right: <strong id="statRightWords">—</strong> words</div>
+            <div class="stat-item">Changed sections: <strong id="statChanges">—</strong></div>
+        </div>
+
+        <div class="diff-wrapper">
+            <div class="diff-panel">
+                <div class="panel-header original">
+                    <span>&#128196;</span>
+                    <span>Original Article (Extractor Output)</span>
+                </div>
+                <div class="panel-body" id="leftPanel">
+                    <div class="empty-state">
+                        <div class="icon">&#128196;</div>
+                        <h3>No content loaded</h3>
+                        <p>Run the workflow from Step 1 &#8594; Step 2 &#8594; Step 3</p>
+                    </div>
+                </div>
+            </div>
+            <div class="diff-panel">
+                <div class="panel-header neutralized">
+                    <span>&#10024;</span>
+                    <span>Brand Neutralized (Neutralizer Output)</span>
+                </div>
+                <div class="panel-body" id="rightPanel">
+                    <div class="empty-state">
+                        <div class="icon">&#10024;</div>
+                        <h3>No content loaded</h3>
+                        <p>Run the workflow from Step 1 &#8594; Step 2 &#8594; Step 3</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let originalHtml = '';
+        let neutralizedHtml = '';
+        let currentMode = 'rendered';
+        let isSyncing = false;
+
+        // Load content from sessionStorage
+        window.addEventListener('DOMContentLoaded', () => {
+            originalHtml = sessionStorage.getItem('diff_original') || '';
+            neutralizedHtml = sessionStorage.getItem('diff_neutralized') || '';
+
+            if (originalHtml || neutralizedHtml) {
+                renderPanels();
+                showStats();
+            }
+
+            setupSyncScroll();
+        });
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('renderedModeBtn').classList.toggle('active', mode === 'rendered');
+            document.getElementById('diffModeBtn').classList.toggle('active', mode === 'diff');
+
+            // Update legend for diff mode
+            const legend = document.getElementById('legend');
+            if (mode === 'diff') {
+                legend.innerHTML = `
+                    <span class="legend-item"><span class="legend-dot" style="background:#fee2e2;"></span>Removed words</span>
+                    <span class="legend-item"><span class="legend-dot" style="background:#dcfce7;"></span>Added words</span>
+                `;
+            } else {
+                legend.innerHTML = `
+                    <span class="legend-item"><span class="legend-dot" style="background:#fef3c7; border:2px solid #f59e0b;"></span>Original marked text</span>
+                    <span class="legend-item"><span class="legend-dot" style="background:#d1fae5; border:2px solid #10b981;"></span>AI-rewritten text</span>
+                `;
+            }
+
+            renderPanels();
+        }
+
+        function renderPanels() {
+            if (currentMode === 'rendered') {
+                renderRenderedView();
+            } else {
+                renderDiffView();
+            }
+        }
+
+        function renderRenderedView() {
+            const leftPanel = document.getElementById('leftPanel');
+            const rightPanel = document.getElementById('rightPanel');
+
+            if (originalHtml) {
+                leftPanel.innerHTML = sanitizeForDisplay(originalHtml);
+            }
+            if (neutralizedHtml) {
+                rightPanel.innerHTML = sanitizeForDisplay(neutralizedHtml);
+            }
+        }
+
+        function sanitizeForDisplay(html) {
+            // Parse the HTML and extract the body content for display
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            // Remove script tags for safety
+            doc.querySelectorAll('script').forEach(el => el.remove());
+            // Remove external links/images that might cause issues
+            doc.querySelectorAll('img').forEach(el => {
+                el.setAttribute('loading', 'lazy');
+                el.style.maxWidth = '100%';
+            });
+
+            return doc.body ? doc.body.innerHTML : html;
+        }
+
+        function extractPlainText(html) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            doc.querySelectorAll('script, style').forEach(el => el.remove());
+            return doc.body ? doc.body.textContent : '';
+        }
+
+        function renderDiffView() {
+            const leftPanel = document.getElementById('leftPanel');
+            const rightPanel = document.getElementById('rightPanel');
+
+            if (!originalHtml && !neutralizedHtml) return;
+
+            const leftText = extractPlainText(originalHtml);
+            const rightText = extractPlainText(neutralizedHtml);
+
+            const diff = computeWordDiff(leftText, rightText);
+
+            let leftHtml = '';
+            let rightHtml = '';
+
+            diff.forEach(part => {
+                const escaped = escapeHtml(part.word + ' ');
+                if (part.type === 'equal') {
+                    leftHtml += escaped;
+                    rightHtml += escaped;
+                } else if (part.type === 'removed') {
+                    leftHtml += `<span class="diff-removed">${escaped}</span>`;
+                } else if (part.type === 'added') {
+                    rightHtml += `<span class="diff-added">${escaped}</span>`;
+                }
+            });
+
+            leftPanel.innerHTML = `<div style="line-height:1.8; white-space:pre-wrap; font-family:inherit;">${leftHtml}</div>`;
+            rightPanel.innerHTML = `<div style="line-height:1.8; white-space:pre-wrap; font-family:inherit;">${rightHtml}</div>`;
+        }
+
+        // Word-level diff using LCS
+        function computeWordDiff(oldText, newText) {
+            const oldWords = tokenize(oldText);
+            const newWords = tokenize(newText);
+
+            const m = oldWords.length;
+            const n = newWords.length;
+
+            // For very large texts, do a sentence-level diff first for performance
+            if (m * n > 800000) {
+                return sentenceLevelDiff(oldText, newText);
+            }
+
+            // LCS dp table
+            const dp = [];
+            for (let i = 0; i <= m; i++) {
+                dp[i] = new Uint16Array(n + 1);
+            }
+
+            for (let i = 1; i <= m; i++) {
+                for (let j = 1; j <= n; j++) {
+                    if (oldWords[i - 1] === newWords[j - 1]) {
+                        dp[i][j] = dp[i - 1][j - 1] + 1;
+                    } else {
+                        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                    }
+                }
+            }
+
+            // Backtrack
+            const result = [];
+            let i = m, j = n;
+            while (i > 0 || j > 0) {
+                if (i > 0 && j > 0 && oldWords[i - 1] === newWords[j - 1]) {
+                    result.unshift({ type: 'equal', word: oldWords[i - 1] });
+                    i--; j--;
+                } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+                    result.unshift({ type: 'added', word: newWords[j - 1] });
+                    j--;
+                } else {
+                    result.unshift({ type: 'removed', word: oldWords[i - 1] });
+                    i--;
+                }
+            }
+
+            return result;
+        }
+
+        function tokenize(text) {
+            return text.trim().split(/\s+/).filter(w => w.length > 0);
+        }
+
+        // Fallback for very large texts: sentence-level diff
+        function sentenceLevelDiff(oldText, newText) {
+            const oldSentences = oldText.match(/[^.!?\n]+[.!?\n]*/g) || [oldText];
+            const newSentences = newText.match(/[^.!?\n]+[.!?\n]*/g) || [newText];
+            const result = [];
+
+            const maxLen = Math.max(oldSentences.length, newSentences.length);
+            for (let i = 0; i < maxLen; i++) {
+                if (i < oldSentences.length && i < newSentences.length) {
+                    if (oldSentences[i].trim() === newSentences[i].trim()) {
+                        result.push({ type: 'equal', word: oldSentences[i] });
+                    } else {
+                        result.push({ type: 'removed', word: oldSentences[i] });
+                        result.push({ type: 'added', word: newSentences[i] });
+                    }
+                } else if (i < oldSentences.length) {
+                    result.push({ type: 'removed', word: oldSentences[i] });
+                } else {
+                    result.push({ type: 'added', word: newSentences[i] });
+                }
+            }
+            return result;
+        }
+
+        function showStats() {
+            const leftText = extractPlainText(originalHtml);
+            const rightText = extractPlainText(neutralizedHtml);
+            const leftWords = tokenize(leftText).length;
+            const rightWords = tokenize(rightText).length;
+
+            // Count changed spans
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(neutralizedHtml, 'text/html');
+            const changedCount = doc.querySelectorAll('.rewritten-content').length;
+
+            document.getElementById('statLeftWords').textContent = leftWords.toLocaleString();
+            document.getElementById('statRightWords').textContent = rightWords.toLocaleString();
+            document.getElementById('statChanges').textContent = changedCount;
+            document.getElementById('statsBar').style.display = 'flex';
+        }
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        // Sync scroll between panels
+        function setupSyncScroll() {
+            const leftPanel = document.getElementById('leftPanel');
+            const rightPanel = document.getElementById('rightPanel');
+            const toggle = document.getElementById('syncScrollToggle');
+
+            leftPanel.addEventListener('scroll', () => {
+                if (!toggle.checked || isSyncing) return;
+                isSyncing = true;
+                const ratio = leftPanel.scrollTop / (leftPanel.scrollHeight - leftPanel.clientHeight);
+                rightPanel.scrollTop = ratio * (rightPanel.scrollHeight - rightPanel.clientHeight);
+                isSyncing = false;
+            });
+
+            rightPanel.addEventListener('scroll', () => {
+                if (!toggle.checked || isSyncing) return;
+                isSyncing = true;
+                const ratio = rightPanel.scrollTop / (rightPanel.scrollHeight - rightPanel.clientHeight);
+                leftPanel.scrollTop = ratio * (leftPanel.scrollHeight - leftPanel.clientHeight);
+                isSyncing = false;
+            });
+        }
+
+        function goToEditor() {
+            if (!neutralizedHtml) {
+                alert('No neutralized content available. Please complete Step 2 first.');
+                return;
+            }
+            sessionStorage.setItem('editor_content', neutralizedHtml);
+            window.location.href = 'article-editor.html';
+        }
+    </script>
+</body>
+</html>
