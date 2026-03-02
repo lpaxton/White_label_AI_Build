@@ -155,7 +155,7 @@ def upload_articles():
         if not files or all(f.filename == '' for f in files):
             return jsonify({'error': 'No files selected'}), 400
         
-        print(f"📥 Processing upload request with {len(files)} files")
+        print(f"Processing upload request with {len(files)} files")
         
         # Create temporary directory for uploaded articles
         if temp_articles_dir and os.path.exists(temp_articles_dir):
@@ -321,7 +321,7 @@ def generate_article():
         
         # Update generator model if different
         if model != generator.model_name:
-            print(f"🔄 Switching model from {generator.model_name} to {model}")
+            print(f"Switching model from {generator.model_name} to {model}")
             generator.model_name = model
             
         # Validate model before generation

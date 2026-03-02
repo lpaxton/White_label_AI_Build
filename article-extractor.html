@@ -4,38 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Article Extractor</title>
+    <link rel="stylesheet" href="shared.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
         .container {
             max-width: 1200px;
             margin: 0 auto;
-        }
-        .header {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            text-align: center;
-            margin-bottom: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        .header h1 {
-            font-size: 32px;
-            color: #1e293b;
-            margin-bottom: 10px;
-        }
-        .header p {
-            font-size: 16px;
-            color: #64748b;
+            padding: 20px;
         }
         .main-content {
             display: grid;
@@ -44,187 +18,98 @@
             margin-bottom: 30px;
         }
         .input-section {
-            background: white;
-            border-radius: 15px;
+            background: #000;
+            border: 1px solid #fff;
             padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            height: fit-content;
+            
         }
         .results-section {
-            background: white;
-            border-radius: 15px;
+            background: #fff;
+            border: 1px solid #fff;
             padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             min-height: 600px;
             max-height: 800px;
             overflow-y: auto;
+            color: #000;
         }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 8px;
-        }
-        .form-group input, .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: inherit;
-        }
-        .form-group input:focus, .form-group textarea:focus {
-            outline: none;
-            border-color: #3b82f6;
-        }
+        /* Full-width stacked buttons in the input panel */
         .button {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 14px;
-            transition: transform 0.2s;
             width: 100%;
             margin-bottom: 10px;
+            padding: 12px 24px;
+            font-size: 14px;
         }
-        .button:hover {
-            transform: translateY(-2px);
-        }
-        .button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .button.secondary {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        }
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 40px;
-            color: #64748b;
-        }
-        .loading .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #e2e8f0;
-            border-left: 4px solid #3b82f6;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .error-message {
-            background: #fee2e2;
-            border: 1px solid #fecaca;
-            color: #dc2626;
+        .extraction-options {
+            background: #000;
             padding: 15px;
-            border-radius: 8px;
             margin-bottom: 20px;
-            display: none;
+            border: 1px solid #fff;
         }
-        .success-message {
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            color: #166534;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
+        .extraction-options h4 {
+            color: #fff;
+            margin-bottom: 10px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            opacity: 0.5;
         }
-        .back-button {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            border: none;
-            padding: 10px 15px;
-            border-radius: 25px;
-            font-weight: 600;
-            color: #1e293b;
+        .options-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            transition: all 0.3s;
+            user-select: none;
+            margin-bottom: 0;
         }
-        .back-button:hover {
-            background: white;
-            transform: translateY(-2px);
+        .options-toggle:hover h4 { opacity: 0.9; }
+        .options-toggle .toggle-icon {
+            font-size: 16px;
+            opacity: 0.5;
+            line-height: 1;
+            transition: transform 0.2s;
         }
-        .content-display {
-            line-height: 1.6;
-            color: #1e293b;
+        .options-toggle.open .toggle-icon { transform: rotate(45deg); }
+        .options-body {
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.25s ease, margin-top 0.25s ease;
+            margin-top: 0;
         }
-        .content-display h1, .content-display h2, .content-display h3 {
-            margin: 20px 0 10px 0;
-            color: #1e293b;
+        .options-body.open {
+            max-height: 400px;
+            margin-top: 10px;
         }
-        .content-display p {
-            margin-bottom: 15px;
-        }
-        .content-display ul, .content-display ol {
-            margin-bottom: 15px;
-            padding-left: 20px;
-        }
-        .content-display li {
-            margin-bottom: 5px;
-        }
-        .content-display blockquote {
-            border-left: 4px solid #3b82f6;
-            padding-left: 15px;
-            margin: 15px 0;
-            font-style: italic;
-            color: #64748b;
-        }
-        .content-display img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 20px 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .content-display figure {
-            margin: 20px 0;
-        }
-        .content-display figure img {
-            margin: 0 0 10px 0;
-        }
+        /* content-meta uses light bg (results panel is white) */
         .content-meta {
-            background: #f8fafc;
-            border-radius: 8px;
+            background: #f5f5f5;
             padding: 15px;
             margin-bottom: 20px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #ccc;
         }
         .content-meta h3 {
             margin-bottom: 10px;
-            color: #1e293b;
+            color: #000;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-size: 11px;
+            opacity: 0.5;
         }
         .content-meta .stat {
             display: inline-block;
-            background: #e2e8f0;
+            background: transparent;
+            border: 1px solid rgba(0,0,0,0.3);
+            color: #000;
             padding: 4px 8px;
-            border-radius: 4px;
             font-size: 12px;
             margin-right: 10px;
             margin-bottom: 5px;
         }
         .article-id-display {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            color: white;
-            border-radius: 8px;
+            background: #f5f5f5;
+            color: #000;
             padding: 12px 15px;
             margin-bottom: 15px;
-            border: 2px solid #2563eb;
+            border: 1px solid #ccc;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -232,103 +117,53 @@
         }
         .article-id-display .label {
             font-size: 12px;
-            opacity: 0.9;
+            opacity: 0.6;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.15em;
         }
         .article-id-display .value {
             font-size: 16px;
             font-family: 'Courier New', monospace;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(0,0,0,0.07);
             padding: 4px 8px;
-            border-radius: 4px;
-        }
-        .extraction-options {
-            background: #f0f9ff;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-            border: 1px solid #bae6fd;
-        }
-        .extraction-options h4 {
-            color: #1e293b;
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
-        .checkbox-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .checkbox-item input[type="checkbox"] {
-            width: auto;
-        }
-        .checkbox-item label {
-            font-weight: normal;
-            font-size: 14px;
-            margin-bottom: 0;
-        }
-        .welcome-message {
-            text-align: center;
-            padding: 40px;
-            color: #64748b;
-        }
-        .welcome-message h3 {
-            color: #1e293b;
-            margin-bottom: 15px;
-        }
-        .fidelity-highlight {
-            background-color: #fef08a;
-            padding: 2px 4px;
-            border-radius: 3px;
-            font-weight: 600;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-        [data-ai-rewrite="true"] {
-            background-color: #fef3c7;
-            border-left: 3px solid #f59e0b;
-            padding-left: 5px;
-            display: inline-block;
-            position: relative;
-        }
-        [data-ai-rewrite="true"]::before {
-            content: "🤖 AI REWRITE";
-            position: absolute;
-            top: -18px;
-            left: 0;
-            font-size: 10px;
-            font-weight: bold;
-            color: #f59e0b;
-            background: white;
-            padding: 2px 4px;
-            border-radius: 3px;
-            border: 1px solid #f59e0b;
         }
     </style>
 </head>
 <body>
-    <button class="back-button" onclick="window.location.href='index.html'">← Back to Home</button>
-    
+    <div class="site-header">
+        <h1>aRCHi</h1>
+        <p>Content &amp; Learning System</p>
+    </div>
+    <button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>
+
     <div class="container">
         <div class="header">
-            <h1>📄 Article Extractor</h1>
+            <h1>Article Extractor</h1>
             <p>Extract and clean article content from any URL for easy reading and review</p>
+            <div class="breadcrumb">
+                <span class="breadcrumb-step active">Step 1: Article Extractor</span>
+                <span class="breadcrumb-arrow">→</span>
+                <span class="breadcrumb-step">Step 2: Brand Neutralizer</span>
+                <span class="breadcrumb-arrow">→</span>
+                <span class="breadcrumb-step">Step 3: Diff Tool</span>
+                <span class="breadcrumb-arrow">→</span>
+                <span class="breadcrumb-step">Step 5: Word Editor</span>
+            </div>
         </div>
 
         <div class="main-content">
             <div class="input-section">
                 <div class="form-group">
-                    <label for="urlInput">🌐 Article URL:</label>
+                    <label for="urlInput">Article URL:</label>
                     <input type="url" id="urlInput" placeholder="https://example.com/article" required>
                 </div>
 
                 <div class="extraction-options">
-                    <h4>🧹 Cleaning Options:</h4>
+                    <div class="options-toggle" id="optionsToggle">
+                        <h4 style="margin-bottom:0;">Cleaning Options</h4>
+                        <span class="toggle-icon">+</span>
+                    </div>
+                    <div class="options-body" id="optionsBody">
                     <div class="checkbox-group">
                         <div class="checkbox-item">
                             <input type="checkbox" id="removeLinks" checked>
@@ -351,43 +186,48 @@
                             <label for="preserveFormatting">Preserve text formatting</label>
                         </div>
                         <div class="checkbox-item">
-                            <input type="checkbox" id="markFidelitySentences">
+                            <input type="checkbox" id="markFidelitySentences" checked>
                             <label for="markFidelitySentences">Mark sentences with "Fidelity" for rewriting (AI marker)</label>
                         </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="removeParentheses">
+                        <div class="checkbox-item" style="display: none;">
+                            <input type="checkbox" id="removeParentheses" unchecked>
                             <label for="removeParentheses">Remove content in parentheses (including the parentheses)</label>
                         </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="removeFootnotes">
+                        <div class="checkbox-item" style="display: none;">
+                            <input type="checkbox" id="removeFootnotes" checked>
                             <label for="removeFootnotes">Remove footnotes and footnote markers</label>
                         </div>
                     </div>
+                    </div><!-- /options-body -->
                 </div>
 
-                <button id="extractButton" class="button">📄 Extract Article Content</button>
-                <button id="saveButton" class="button secondary" style="display: none;">💾 Save as Text File</button>
-                <button id="saveHtmlButton" class="button secondary" style="display: none; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">📝 Save as HTML (with formatting)</button>
-                <button id="sendToRewriterButton" class="button secondary" style="display: none; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">🤖 Send to Brand Neutralizer</button>
+                <button id="extractButton" class="button">Extract Article Content</button>
 
-                <div class="form-group" style="margin-top: 20px;">
-                    <label>💡 Example URLs:</label>
-                    <div style="font-size: 12px; color: #64748b; margin-top: 5px;">
-                        <p>• Fidelity Learning Center articles</p>
-                        <p>• News articles</p>
-                        <p>• Blog posts with &lt;article&gt; tags</p>
-                        <p>• Educational content</p>
-                    </div>
+                <div id="globe-animation" style="margin: 28px 0px; display: flex; justify-content: center;">
+                    <svg width="200" height="200" viewBox="0 0 100 100" fill="none" stroke="white" xmlns="http://www.w3.org/2000/svg" style="stroke-width: 0.285714px;">
+                        <ellipse cx="50" cy="50" rx="48" ry="48"></ellipse>
+                        <ellipse cx="50" cy="50" rx="48" ry="48"></ellipse>
+                        <ellipse cx="50" cy="50" rx="48" ry="48"></ellipse>
+                        <ellipse cx="50" cy="50" rx="48" ry="48"></ellipse>
+                        <ellipse cx="50" cy="50" rx="48" ry="48"></ellipse>
+                        <ellipse cx="50" cy="50" rx="48" ry="48"></ellipse>
+                    </svg>
                 </div>
+                <button id="sendToRewriterButton" class="button secondary" style="display: none;">Send to Brand Neutralizer</button>
+                <button id="saveButton" class="button secondary" style="display: none;">Save as Text File</button>
+                <button id="saveHtmlButton" class="button secondary" style="display: none;">Save as HTML (with formatting)</button>
+                
+
+               
             </div>
 
             <div class="results-section">
                 <div id="welcomeMessage" class="welcome-message">
-                    <h3>Welcome to Article Extractor! 👋</h3>
+                    <h3>Welcome to Article Extractor!</h3>
                     <p>This tool helps you extract clean, readable content from web articles.</p>
                     <div style="margin: 20px 0; text-align: left;">
                         <h4>How it works:</h4>
-                        <ol style="color: #64748b; margin: 10px 0; padding-left: 20px;">
+                        <ol style=" opacity: 0.6; margin: 10px 0; padding-left: 20px;">
                             <li>Enter the URL of an article you want to extract</li>
                             <li>Choose your cleaning options (remove links, call-outs, etc.)</li>
                             <li>Click "Extract Article Content"</li>
@@ -395,8 +235,8 @@
                             <li>Save as a text file if needed</li>
                         </ol>
                     </div>
-                    <p style="color: #64748b; font-size: 14px;">
-                        <strong>🎯 Perfect for:</strong> Content analysis, research, cleaning up articles for better readability
+                    <p style="opacity: 0.6; font-size: 14px;">
+                        <strong>Perfect for:</strong> Content analysis, research, cleaning up articles for better readability
                     </p>
                 </div>
 
@@ -426,7 +266,7 @@
             if (isProcessing) return;
 
             const url = document.getElementById('urlInput').value.trim();
-            
+
             if (!url) {
                 showError('Please enter a valid URL.');
                 return;
@@ -450,23 +290,19 @@
                     removeImages: document.getElementById('removeImages').checked,
                     preserveFormatting: document.getElementById('preserveFormatting').checked,
                     markFidelitySentences: document.getElementById('markFidelitySentences').checked,
-                    removeParentheses: document.getElementById('removeParentheses').checked,
+                    removeParentheses: false,
                     removeFootnotes: document.getElementById('removeFootnotes').checked
                 };
 
                 const result = await extractArticleContent(url, options);
-                
+
                 if (result.success) {
                     extractedContent = result;
                     displayContent(result);
-                    showSuccess('✅ Article content extracted successfully!');
+                    showSuccess('Article content extracted successfully!');
                     document.getElementById('saveButton').style.display = 'block';
                     document.getElementById('saveHtmlButton').style.display = 'block';
-                    
-                    // Show "Send to Rewriter" button only if marking is enabled
-                    if (options.markFidelitySentences) {
-                        document.getElementById('sendToRewriterButton').style.display = 'block';
-                    }
+                    document.getElementById('sendToRewriterButton').style.display = 'block';
                 } else {
                     showError(`Failed to extract content: ${result.error}`);
                 }
@@ -485,11 +321,11 @@
 
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
             const filename = `article-content-${timestamp}.txt`;
-            
+
             const content = `Article Content Extracted from: ${extractedContent.url}\nExtracted at: ${new Date().toLocaleString()}\n\n${extractedContent.cleanText}`;
-            
+
             downloadTextFile(content, filename);
-            showSuccess(`✅ Content saved as ${filename}`);
+            showSuccess(`Content saved as ${filename}`);
         });
 
         // Save HTML button handler
@@ -498,26 +334,26 @@
 
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
             const filename = `article-content-${timestamp}.html`;
-            
+
             // Get the current displayed content with all formatting and highlights
             const contentDiv = document.getElementById('contentDisplay');
             let styledContent = contentDiv.innerHTML;
-            
+
             // Fix relative image URLs by prepending Fidelity base URL
             styledContent = styledContent.replace(/src="\/([^"]+)"/g, 'src="https://www.fidelity.com/$1"');
             styledContent = styledContent.replace(/src='\/([^']+)'/g, "src='https://www.fidelity.com/$1'");
-            
+
             // Build eReview section if available
             let eReviewSection = '';
             if (extractedContent.eReviewId) {
                 eReviewSection = `
-                    <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border-radius: 8px; padding: 12px 15px; margin-bottom: 15px; border: 2px solid #2563eb; display: flex; align-items: center; gap: 10px; font-weight: 600;">
-                        <span style="font-size: 12px; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">📋 eReview ID:</span>
-                        <span style="font-size: 16px; font-family: 'Courier New', monospace; background: rgba(255, 255, 255, 0.2); padding: 4px 8px; border-radius: 4px;">${extractedContent.eReviewId}</span>
+                    <div style="background: #000; color: #fff; border: 1px solid #fff; padding: 12px 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; font-weight: 600;">
+                        <span style="font-size: 12px; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.15em;">eReview ID:</span>
+                        <span style="font-size: 16px; font-family: 'Courier New', monospace; background: rgba(255,255,255,0.1); padding: 4px 8px;">${extractedContent.eReviewId}</span>
                     </div>
                 `;
             }
-            
+
             // Create a complete HTML document with embedded styles
             const htmlContent = `<!DOCTYPE html>
 <html lang="en">
@@ -527,38 +363,40 @@
     <title>${extractedContent.title || 'Article Content'}</title>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
             padding: 20px;
             line-height: 1.6;
-            color: #1e293b;
-            background: #f8fafc;
+            color: #fff;
+            background: #000;
         }
         .header {
-            background: white;
-            border-radius: 8px;
+            background: #000;
+            border: 1px solid #fff;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .header h1 {
             margin: 0 0 10px 0;
-            color: #1e293b;
+            color: #fff;
         }
         .meta {
-            color: #64748b;
+            color: #fff;
+            opacity: 0.6;
             font-size: 14px;
         }
+        .meta a {
+            color: #fff;
+        }
         .content {
-            background: white;
-            border-radius: 8px;
+            background: #000;
+            border: 1px solid #fff;
             padding: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .content h1, .content h2, .content h3 {
             margin: 20px 0 10px 0;
-            color: #1e293b;
+            color: #fff;
         }
         .content p {
             margin-bottom: 15px;
@@ -572,26 +410,25 @@
         }
         .content em {
             font-style: italic;
-            color: #1e293b;
+            color: #fff;
         }
         .content strong {
             font-weight: 600;
-            color: #1e293b;
+            color: #fff;
         }
         .content blockquote {
-            border-left: 4px solid #3b82f6;
+            border-left: 1px solid #fff;
             padding-left: 15px;
             margin: 15px 0;
             font-style: italic;
-            color: #64748b;
+            color: #fff;
+            opacity: 0.6;
         }
         .content img {
             max-width: 100%;
             height: auto;
             display: block;
             margin: 20px 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .content figure {
             margin: 20px 0;
@@ -600,48 +437,50 @@
             margin: 0 0 10px 0;
         }
         .fidelity-highlight {
-            background-color: #fef08a;
+            background-color: rgba(0,0,0,0.06);
             padding: 2px 4px;
-            border-radius: 3px;
             font-weight: 600;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0,0,0,0.25);
         }
         [data-ai-rewrite="true"] {
-            background-color: #fef3c7;
-            border-left: 3px solid #f59e0b;
+            
             padding-left: 5px;
             display: inline-block;
             position: relative;
         }
         [data-ai-rewrite="true"]::before {
-            content: "🤖 AI REWRITE";
+            content: "AI REWRITE";
             position: absolute;
             top: -18px;
             left: 0;
             font-size: 10px;
             font-weight: bold;
-            color: #f59e0b;
-            background: white;
+            color: #fff;
+            
             padding: 2px 4px;
-            border-radius: 3px;
-            border: 1px solid #f59e0b;
+            
+            letter-spacing: 0.1em;
         }
         .stats {
-            background: #f8fafc;
-            border-radius: 8px;
+            background: #000;
+            border: 1px solid #fff;
             padding: 15px;
             margin-bottom: 20px;
-            border: 1px solid #e2e8f0;
         }
         .stats h3 {
             margin-bottom: 10px;
-            color: #1e293b;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-size: 11px;
+            opacity: 0.5;
         }
         .stat {
             display: inline-block;
-            background: #e2e8f0;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.4);
+            color: #fff;
             padding: 4px 8px;
-            border-radius: 4px;
             font-size: 12px;
             margin-right: 10px;
             margin-bottom: 5px;
@@ -656,23 +495,23 @@
             <p><strong>Extracted with aRCHi:</strong> ${new Date(extractedContent.extractedAt).toLocaleString()}</p>
         </div>
     </div>
-    
+
     <div class="content">
         ${eReviewSection}
         <div class="stats">
-            <h3>📊 Content Statistics</h3>
-            <span class="stat">📝 ${extractedContent.wordCount} words</span>
-            <span class="stat">🔤 ${extractedContent.charCount} characters</span>
-            <span class="stat">⏱️ ${extractedContent.readingTime} min read</span>
+            <h3>Content Statistics</h3>
+            <span class="stat">${extractedContent.wordCount} words</span>
+            <span class="stat">${extractedContent.charCount} characters</span>
+            <span class="stat">${extractedContent.readingTime} min read</span>
         </div>
-        
+
         ${styledContent}
     </div>
 </body>
 </html>`;
-            
+
             downloadHtmlFile(htmlContent, filename);
-            showSuccess(`✅ Content saved as ${filename}`);
+            showSuccess(`Content saved as ${filename}`);
         });
 
         // Send to Rewriter button handler
@@ -703,7 +542,7 @@
             for (const endpoint of endpoints) {
                 try {
                     let response, data;
-                    
+
                     if (endpoint.startsWith('/api/')) {
                         // Use our local server
                         response = await fetch(endpoint, {
@@ -713,7 +552,7 @@
                             },
                             body: JSON.stringify({ url, options })
                         });
-                        
+
                         if (response.ok) {
                             data = await response.json();
                             return data;
@@ -723,10 +562,10 @@
                         // Use CORS proxy
                         response = await fetch(endpoint);
                         if (!response.ok) continue;
-                        
+
                         const proxyData = await response.json();
                         const html = proxyData.contents;
-                        
+
                         // Parse and extract article content client-side
                         return parseArticleContent(html, url, options);
                     }
@@ -735,7 +574,7 @@
                     continue;
                 }
             }
-            
+
             throw new Error('Unable to fetch article content. Please check the URL and try again.');
         }
 
@@ -780,12 +619,12 @@
                 'Fidelity Stock Plan Services', 'Fidelity Life Insurance',
                 'Fidelity Annuities'
             ];
-            
+
             // Build regex pattern - sort by length (longest first) to match specific products before generic "Fidelity"
             const sortedProducts = fidelityProducts.sort((a, b) => b.length - a.length);
             const productPattern = sortedProducts.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
             const productRegex = new RegExp(`\\b(?:${productPattern})\\b[®™℠]?`, 'i');
-            
+
             // Operate at block-element level to capture full sentences that span multiple text nodes
             // (e.g. "invest in <strong>Fidelity Flex</strong> funds" splits into 3 text nodes —
             //  reading innerText of the block crosses those boundaries and sees the whole sentence)
@@ -816,8 +655,8 @@
                 // Wrap the entire block's innerHTML in a span so the full sentence is always captured
                 const marker = document.createElement('span');
                 marker.setAttribute('data-ai-rewrite', 'true');
-                marker.style.backgroundColor = '#fef3c7';
-                marker.style.borderLeft = '3px solid #f59e0b';
+                marker.style.backgroundColor = 'rgba(255,255,255,0.08)';
+                marker.style.borderLeft = '3px solid #fff';
                 marker.style.paddingLeft = '5px';
                 marker.style.display = 'block';
                 marker.innerHTML = blockEl.innerHTML;
@@ -862,25 +701,25 @@
             const processNode = (node) => {
                 if (node.nodeType === Node.TEXT_NODE) {
                     const text = node.textContent;
-                    
+
                     // Remove content in parentheses including the parentheses
                     // Handle multiple occurrences and clean up spacing
                     let cleanedText = text.replace(/\s*\([^)]*\)\s*/g, ' ');
                     cleanedText = cleanedText.replace(/\s+/g, ' ').trim();
-                    
+
                     // Only update if text changed
                     if (cleanedText !== text) {
                         node.textContent = cleanedText;
                     }
-                } else if (node.nodeType === Node.ELEMENT_NODE && 
-                          node.nodeName !== 'SCRIPT' && 
+                } else if (node.nodeType === Node.ELEMENT_NODE &&
+                          node.nodeName !== 'SCRIPT' &&
                           node.nodeName !== 'STYLE') {
                     // Process child nodes - preserving all HTML structure
                     const children = Array.from(node.childNodes);
                     children.forEach(child => processNode(child));
                 }
             };
-            
+
             processNode(element);
         }
 
@@ -890,26 +729,26 @@
             const processNode = (node) => {
                 if (node.nodeType === Node.TEXT_NODE) {
                     const text = node.textContent;
-                    
+
                     // Remove footnote markers: [1], [2], etc.
                     let cleanedText = text.replace(/\[\d+\]/g, '');
                     // Remove superscript footnote markers
                     cleanedText = cleanedText.replace(/[\u00B9\u00B2\u00B3\u2070-\u209F]/g, '');
-                    
+
                     if (cleanedText !== text) {
                         node.textContent = cleanedText;
                     }
-                } else if (node.nodeType === Node.ELEMENT_NODE && 
-                          node.nodeName !== 'SCRIPT' && 
+                } else if (node.nodeType === Node.ELEMENT_NODE &&
+                          node.nodeName !== 'SCRIPT' &&
                           node.nodeName !== 'STYLE') {
                     // Process child nodes - preserving all HTML structure
                     const children = Array.from(node.childNodes);
                     children.forEach(child => processNode(child));
                 }
             };
-            
+
             processNode(element);
-            
+
             // Remove common footnote sections
             const footnoteSelectors = [
                 'div.footnotes',
@@ -922,12 +761,12 @@
                 'div.endnotes',
                 'footer.footnotes'
             ];
-            
+
             footnoteSelectors.forEach(selector => {
                 const footnotes = element.querySelectorAll(selector);
                 footnotes.forEach(fn => fn.remove());
             });
-            
+
             // Remove <sup> tags that often contain footnote references
             const sups = element.querySelectorAll('sup');
             sups.forEach(sup => {
@@ -942,10 +781,10 @@
         function parseArticleContent(html, url, options) {
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
-            
+
             // Try to find article content
             let articleElement = doc.querySelector('article');
-            
+
             if (!articleElement) {
                 // Fallback selectors
                 const fallbacks = [
@@ -956,20 +795,20 @@
                     'main',
                     '.content'
                 ];
-                
+
                 for (const selector of fallbacks) {
                     articleElement = doc.querySelector(selector);
                     if (articleElement) break;
                 }
             }
-            
+
             if (!articleElement) {
                 throw new Error('No article content found. The page may not have an &lt;article&gt; tag or standard content structure.');
             }
-            
+
             // Clone the element to avoid modifying the original
             const content = articleElement.cloneNode(true);
-            
+
             // Apply cleaning options
             if (options.removeLinks) {
                 const links = content.querySelectorAll('a');
@@ -978,46 +817,46 @@
                     link.parentNode.replaceChild(text, link);
                 });
             }
-            
+
             if (options.removeCallouts) {
                 const callouts = content.querySelectorAll('div.Call-Out-Part, .call-out-part, .callout, div.article-head-container--author');
                 callouts.forEach(callout => callout.remove());
             }
-            
+
             if (options.removeViewpoints) {
                 // Remove paragraphs that start with "Read Viewpoints:" or "Read <em>Viewpoints:</em>"
                 const paragraphs = content.querySelectorAll('p');
                 paragraphs.forEach(p => {
                     const text = p.textContent.trim();
-                    if (text.startsWith('Read Viewpoints:') || 
+                    if (text.startsWith('Read Viewpoints:') ||
                         text.startsWith('Read ') && text.includes('Viewpoints:')) {
                         p.remove();
                     }
                 });
             }
-            
+
             if (options.removeImages) {
                 const images = content.querySelectorAll('img, figure, picture');
                 images.forEach(img => img.remove());
             }
-            
+
             // Remove script and style tags
             const scripts = content.querySelectorAll('script, style, noscript');
             scripts.forEach(script => script.remove());
-            
+
             // Extract eReview ID from s-assigned-wrapper tag in the disclosures section
             // This tag is located in <div role="complementary" aria-label="disclosures">
             let eReviewId = null;
-            
+
             console.log('Searching for eReview ID...');
-            
+
             // Try multiple selector variations for the disclosures section
             const disclosuresSelectors = [
                 'div[role="complementary"][aria-label="disclosures"]',
                 'div[aria-label="disclosures"]',
                 '[role="complementary"]'
             ];
-            
+
             for (const selector of disclosuresSelectors) {
                 const disclosuresDiv = doc.querySelector(selector);
                 if (disclosuresDiv) {
@@ -1030,7 +869,7 @@
                     }
                 }
             }
-            
+
             // Fallback: check anywhere in the document
             if (!eReviewId) {
                 console.log('Trying fallback: searching entire document');
@@ -1040,7 +879,7 @@
                     console.log('Found eReview ID in document:', eReviewId);
                 }
             }
-            
+
             // Additional fallback: search in all text content for pattern like "763565.14.0"
             if (!eReviewId) {
                 console.log('Trying pattern match fallback');
@@ -1052,41 +891,41 @@
                     console.log('Found eReview ID via pattern match:', eReviewId);
                 }
             }
-            
+
             if (!eReviewId) {
                 console.log('eReview ID not found');
             }
-            
+
             // Remove any s-assigned-wrapper from the article content display
             const wrapperInContent = content.querySelector('s-assigned-wrapper');
             if (wrapperInContent) {
                 wrapperInContent.remove();
             }
-            
+
             // Mark sentences containing "Fidelity" if option is enabled
             if (options.markFidelitySentences) {
                 markSentencesWithFidelity(content);
             }
-            
+
             // Remove parenthetical content if option is enabled
             if (options.removeParentheses) {
                 removeParentheticalContent(content);
             }
-            
+
             // Remove footnotes if option is enabled
             if (options.removeFootnotes) {
                 removeFootnotes(content);
             }
-            
+
             // Get clean text and HTML
             const cleanText = content.textContent.trim().replace(/\s+/g, ' ').replace(/\n\s*\n/g, '\n\n');
             const cleanHTML = options.preserveFormatting ? content.innerHTML : cleanText;
-            
+
             // Calculate stats
             const wordCount = cleanText.split(/\s+/).filter(word => word.length > 0).length;
             const charCount = cleanText.length;
             const readingTime = Math.ceil(wordCount / 200); // ~200 words per minute
-            
+
             return {
                 success: true,
                 url: url,
@@ -1105,32 +944,32 @@
             const container = document.getElementById('contentContainer');
             const metaDiv = document.getElementById('contentMeta');
             const contentDiv = document.getElementById('contentDisplay');
-            
+
             // Build eReview ID display if available
             let eReviewHTML = '';
             if (result.eReviewId) {
                 eReviewHTML = `
                     <div class="article-id-display">
-                        <span class="label">📋 eReview ID:</span>
+                        <span class="label">eReview ID:</span>
                         <span class="value">${result.eReviewId}</span>
                     </div>
                 `;
             }
-            
+
             // Update meta information
             metaDiv.innerHTML = `
                 ${eReviewHTML}
-                <h3>📊 Content Statistics</h3>
-                <span class="stat">📝 ${result.wordCount} words</span>
-                <span class="stat">🔤 ${result.charCount} characters</span>
-                <span class="stat">⏱️ ${result.readingTime} min read</span>
-                <span class="stat">🌐 Source: <a href="${result.url}" target="_blank" style="color: #3b82f6;">View Original</a></span>
+                <h3>Content Statistics</h3>
+                <span class="stat">${result.wordCount} words</span>
+                <span class="stat">${result.charCount} characters</span>
+                <span class="stat">${result.readingTime} min read</span>
+                <span class="stat">Source: <a href="${result.url}" target="_blank" style="color: #fff;">View Original</a></span>
             `;
-            
+
             // Display content
             if (document.getElementById('preserveFormatting').checked) {
                 contentDiv.innerHTML = result.cleanHTML;
-                
+
                 // Fix image URLs in the displayed content
                 const images = contentDiv.querySelectorAll('img');
                 images.forEach(img => {
@@ -1147,10 +986,10 @@
             } else {
                 contentDiv.innerHTML = `<pre style="white-space: pre-wrap; font-family: inherit;">${result.cleanText}</pre>`;
             }
-            
+
             // Highlight all mentions of "Fidelity"
             highlightFidelity(contentDiv);
-            
+
             // Show container
             hideAll();
             container.style.display = 'block';
@@ -1181,28 +1020,28 @@
                 'Fidelity Rewards Visa', 'Fidelity Stock Plan Services',
                 'Fidelity Life Insurance', 'Fidelity Annuities', 'Fidelity'
             ];
-            
+
             // Build regex pattern - sort by length (longest first)
             const sortedProducts = fidelityProducts.sort((a, b) => b.length - a.length);
             const productPattern = sortedProducts.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
             const regex = new RegExp(`\\b(${productPattern})\\b[®™℠]?`, 'gi');
-            
+
             // Function to recursively search and highlight text nodes
             const highlightInNode = (node) => {
                 if (node.nodeType === Node.TEXT_NODE) {
                     const text = node.textContent;
-                    
+
                     if (regex.test(text)) {
                         // Reset regex lastIndex
                         regex.lastIndex = 0;
-                        
+
                         // Create a temporary div to hold the highlighted content
                         const span = document.createElement('span');
                         span.innerHTML = text.replace(regex, '<span class="fidelity-highlight">$1</span>');
-                        
+
                         // Replace the text node with the highlighted content
                         node.parentNode.replaceChild(span, node);
-                        
+
                         // Unwrap the temporary span to keep only its children
                         while (span.firstChild) {
                             span.parentNode.insertBefore(span.firstChild, span);
@@ -1216,7 +1055,7 @@
                     children.forEach(child => highlightInNode(child));
                 }
             };
-            
+
             highlightInNode(element);
         }
 
@@ -1256,10 +1095,12 @@
         function showLoading() {
             hideAll();
             document.getElementById('loadingMessage').style.display = 'block';
+            globeStartLoop();
         }
 
         function hideLoading() {
             document.getElementById('loadingMessage').style.display = 'none';
+            globeStopLoop();
         }
 
         function showError(message) {
@@ -1289,14 +1130,69 @@
             hideLoading();
         }
 
+        // ── Cleaning options toggle ──
+        document.getElementById('optionsToggle').addEventListener('click', () => {
+            const toggle = document.getElementById('optionsToggle');
+            const body   = document.getElementById('optionsBody');
+            const isOpen = body.classList.toggle('open');
+            toggle.classList.toggle('open', isOpen);
+        });
+
+        // ── Globe animation engine ──
+        const GLOBE_TARGET_RX = [48, 39.4, 30.8, 22.2, 13.6, 5];
+        const GLOBE_DURATION  = 2500; // ms per pulse
+        let _globeAnimId      = null;
+        let _globeLooping     = false;
+        let _globeStopNext    = false;
+
+        function _globeRunCycle(cycleStart, ts) {
+            const ellipses = document.querySelectorAll('#globe-animation svg ellipse');
+            const t    = Math.min((ts - cycleStart) / GLOBE_DURATION, 1);
+            const ease = Math.sin(t * Math.PI); // smooth 0 → 1 → 0
+            GLOBE_TARGET_RX.forEach((target, i) => {
+                ellipses[i].setAttribute('rx', (48 - (48 - target) * ease).toFixed(3));
+            });
+            if (t < 1) {
+                _globeAnimId = requestAnimationFrame(t2 => _globeRunCycle(cycleStart, t2));
+            } else {
+                ellipses.forEach(el => el.setAttribute('rx', '48'));
+                _globeAnimId = null;
+                if (_globeLooping && !_globeStopNext) {
+                    _globeAnimId = requestAnimationFrame(t2 => _globeRunCycle(t2, t2));
+                }
+            }
+        }
+
+        function globePulseOnce() {
+            _globeLooping  = false;
+            _globeStopNext = false;
+            if (_globeAnimId) cancelAnimationFrame(_globeAnimId);
+            _globeAnimId = requestAnimationFrame(ts => _globeRunCycle(ts, ts));
+        }
+
+        function globeStartLoop() {
+            _globeLooping  = true;
+            _globeStopNext = false;
+            if (_globeAnimId) cancelAnimationFrame(_globeAnimId);
+            _globeAnimId = requestAnimationFrame(ts => _globeRunCycle(ts, ts));
+        }
+
+        function globeStopLoop() {
+            _globeStopNext = true;
+            _globeLooping  = false;
+        }
+
+        // One pulse on page load
+        globePulseOnce();
+
         // Update button state
         setInterval(() => {
             const button = document.getElementById('extractButton');
             button.disabled = isProcessing;
             if (isProcessing) {
-                button.textContent = '🔄 Extracting...';
+                button.textContent = 'Extracting...';
             } else {
-                button.textContent = '📄 Extract Article Content';
+                button.textContent = 'Extract Article Content';
             }
         }, 100);
     </script>

@@ -4,76 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Content Diff - Step 3</title>
+    <link rel="stylesheet" href="shared.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
         .container {
             max-width: 1600px;
             margin: 0 auto;
+            padding: 20px;
         }
-        .header {
-            background: white;
-            border-radius: 20px;
-            padding: 24px 30px;
-            text-align: center;
-            margin-bottom: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        .header h1 {
-            font-size: 28px;
-            color: #1e293b;
-            margin-bottom: 6px;
-        }
-        .header p {
-            font-size: 15px;
-            color: #64748b;
-        }
-        /* Workflow breadcrumb */
-        .breadcrumb {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-top: 14px;
-        }
-        .breadcrumb-step {
-            padding: 5px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            background: #f1f5f9;
-            color: #64748b;
-        }
-        .breadcrumb-step.active {
-            background: #10b981;
-            color: white;
-        }
-        .breadcrumb-step.done {
-            background: #dbeafe;
-            color: #2563eb;
-        }
-        .breadcrumb-arrow {
-            color: white;
-            font-size: 16px;
-            opacity: 0.8;
-        }
+        /* header size override (smaller than shared default) */
+        .header { padding: 24px 30px; margin-bottom: 20px; }
+        .header h1 { font-size: 28px; margin-bottom: 6px; }
+        .header p  { font-size: 15px; }
         /* Controls bar */
         .controls-bar {
-            background: white;
-            border-radius: 12px;
+            background: #000;
+            border: 1px solid #fff;
             padding: 14px 20px;
             margin-bottom: 16px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -87,79 +34,51 @@
         }
         .mode-toggle {
             display: flex;
-            background: #f1f5f9;
-            border-radius: 8px;
-            padding: 3px;
-            gap: 3px;
+            border: 1px solid #fff;
         }
         .mode-btn {
             padding: 7px 16px;
-            border-radius: 6px;
             border: none;
+            border-right: 1px solid #fff;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
-            color: #64748b;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #fff;
             background: transparent;
             transition: all 0.2s;
         }
-        .mode-btn.active {
-            background: white;
-            color: #1e293b;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.12);
-        }
+        .mode-btn:last-child { border-right: none; }
+        .mode-btn.active { background: #fff; color: #000; }
         .sync-scroll-toggle {
             display: flex;
             align-items: center;
             gap: 6px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
-            color: #475569;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #fff;
+            opacity: 0.7;
             cursor: pointer;
         }
         .sync-scroll-toggle input[type="checkbox"] {
             width: 16px;
             height: 16px;
             cursor: pointer;
+            accent-color: #fff;
         }
-        .controls-right {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .button {
-            padding: 9px 20px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .button:hover { transform: translateY(-1px); }
-        .button.secondary {
-            background: #e2e8f0;
-            color: #475569;
-        }
-        .button.green {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-        }
+        .controls-right { display: flex; gap: 10px; align-items: center; }
+        /* button size override for this page */
+        .button { padding: 9px 20px; font-size: 12px; }
         .button.back {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 2px solid rgba(255,255,255,0.4);
             position: fixed;
-            top: 20px;
-            left: 20px;
+            top: 60px;
+            right: 60px;
+            left: auto;
             z-index: 100;
-            font-size: 13px;
-        }
-        .button.back:hover {
-            background: rgba(255,255,255,0.35);
-            transform: none;
+            font-size: 11px;
         }
         /* Diff panels */
         .diff-wrapper {
@@ -169,31 +88,24 @@
             margin-bottom: 20px;
         }
         .diff-panel {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            background: #000;
+            border: 1px solid #fff;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
         .panel-header {
             padding: 14px 20px;
-            font-size: 15px;
+            font-size: 12px;
             font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
             display: flex;
             align-items: center;
             gap: 8px;
-            border-bottom: 2px solid #e2e8f0;
-        }
-        .panel-header.original {
-            background: #fffbeb;
-            color: #92400e;
-            border-bottom-color: #fcd34d;
-        }
-        .panel-header.neutralized {
-            background: #ecfdf5;
-            color: #065f46;
-            border-bottom-color: #6ee7b7;
+            border-bottom: 1px solid #fff;
+            background: #111;
+            color: #fff;
         }
         .panel-body {
             flex: 1;
@@ -203,127 +115,89 @@
             padding: 20px;
             font-size: 15px;
             line-height: 1.7;
-            color: #1e293b;
+            background: #fff;
+            color: #000;
         }
-        /* Keep existing highlight styles from rewriter */
-        .panel-body [data-ai-rewrite="true"] {
-            background-color: #fef3c7;
-            border-left: 3px solid #f59e0b;
-            padding-left: 6px;
-            display: inline-block;
-            position: relative;
-        }
+        /* Override shared [data-ai-rewrite] label: diff left panel = "ORIGINAL" */
         .panel-body [data-ai-rewrite="true"]::before {
             content: "ORIGINAL";
-            position: absolute;
             top: -16px;
-            left: 0;
-            font-size: 9px;
-            font-weight: bold;
-            color: #b45309;
-            background: white;
             padding: 1px 4px;
-            border-radius: 3px;
-            border: 1px solid #f59e0b;
         }
+        /* rewritten-content in panel-body gets slight background tint */
         .panel-body .rewritten-content {
-            background-color: #d1fae5;
-            border-left: 4px solid #10b981;
-            padding-left: 8px;
-            padding-right: 4px;
-            display: inline-block;
-            position: relative;
-            margin: 2px 0;
+            background: rgba(0,0,0,0.04);
         }
         .panel-body .rewritten-content::before {
-            content: "REWRITTEN";
-            position: absolute;
             top: -16px;
-            left: 0;
-            font-size: 9px;
-            font-weight: bold;
-            color: #059669;
-            background: white;
             padding: 1px 4px;
-            border-radius: 3px;
-            border: 1px solid #10b981;
-            white-space: nowrap;
         }
-        /* Word-level diff styles */
+        /* Word-level diff */
         .diff-removed {
-            background-color: #fee2e2;
-            color: #991b1b;
+            background-color: rgba(0,0,0,0.08);
+            color: #000;
             text-decoration: line-through;
-            border-radius: 3px;
+            opacity: 0.5;
             padding: 1px 2px;
         }
         .diff-added {
-            background-color: #dcfce7;
-            color: #166534;
-            border-radius: 3px;
+            background-color: rgba(0,0,0,0.08);
+            color: #000;
             padding: 1px 2px;
         }
         /* Empty state */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: #94a3b8;
+            color: #000;
+            opacity: 0.4;
         }
-        .empty-state .icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-        .empty-state h3 {
-            font-size: 20px;
-            color: #64748b;
-            margin-bottom: 8px;
-        }
+        .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+        .empty-state h3    { font-size: 20px; margin-bottom: 8px; }
         /* Legend */
-        .legend {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
         .legend-item {
             display: flex;
             align-items: center;
             gap: 6px;
-            font-size: 12px;
-            color: #475569;
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #fff;
+            opacity: 0.7;
         }
-        .legend-dot {
-            width: 14px;
-            height: 14px;
-            border-radius: 3px;
-        }
+        .legend-dot { width: 14px; height: 14px; border: 1px solid #fff; }
         /* Stats bar */
         .stats-bar {
-            background: white;
-            border-radius: 10px;
+            background: #000;
+            border: 1px solid #fff;
             padding: 12px 20px;
             margin-bottom: 16px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             display: flex;
             gap: 20px;
             flex-wrap: wrap;
         }
         .stat-item {
-            font-size: 13px;
-            color: #475569;
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #fff;
+            opacity: 0.6;
         }
-        .stat-item strong {
-            color: #1e293b;
-        }
+        .stat-item strong { color: #fff; opacity: 1; }
         @media (max-width: 900px) {
-            .diff-wrapper {
-                grid-template-columns: 1fr;
-            }
+            .diff-wrapper { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <button class="button back" onclick="window.location.href='article-rewriter.html'">&#8592; Back to Brand Neutralizer</button>
+    <div class="site-header">
+        <h1>aRCHi</h1>
+        <p>Content &amp; Learning System</p>
+        <button class="back-button" onclick="window.location.href='article-rewriter.html'">hoME</button>
+        <button class="back-button" onclick="window.location.href='article-rewriter.html'">Back to Brand Neutralizer</button>
+    </div>
+    
 
     <div class="container">
         <div class="header">
@@ -353,11 +227,11 @@
             </div>
             <div class="legend" id="legend">
                 <span class="legend-item">
-                    <span class="legend-dot" style="background:#fef3c7; border:2px solid #f59e0b;"></span>
+                    <span class="legend-dot" style="border-bottom:2px solid rgba(0,0,0,0.4);"></span>
                     Original marked text
                 </span>
                 <span class="legend-item">
-                    <span class="legend-dot" style="background:#d1fae5; border:2px solid #10b981;"></span>
+                    <span class="legend-dot" style="background:rgba(0,0,0,0.04);border-bottom:2px solid rgba(0,0,0,0.4);"></span>
                     AI-rewritten text
                 </span>
             </div>
@@ -430,13 +304,13 @@
             const legend = document.getElementById('legend');
             if (mode === 'diff') {
                 legend.innerHTML = `
-                    <span class="legend-item"><span class="legend-dot" style="background:#fee2e2;"></span>Removed words</span>
-                    <span class="legend-item"><span class="legend-dot" style="background:#dcfce7;"></span>Added words</span>
+                    <span class="legend-item"><span class="legend-dot" style="background:rgba(0,0,0,0.08);opacity:0.5;"></span>Removed words</span>
+                    <span class="legend-item"><span class="legend-dot" style="background:rgba(0,0,0,0.08);"></span>Added words</span>
                 `;
             } else {
                 legend.innerHTML = `
-                    <span class="legend-item"><span class="legend-dot" style="background:#fef3c7; border:2px solid #f59e0b;"></span>Original marked text</span>
-                    <span class="legend-item"><span class="legend-dot" style="background:#d1fae5; border:2px solid #10b981;"></span>AI-rewritten text</span>
+                    <span class="legend-item"><span class="legend-dot" style="border-bottom:2px solid rgba(0,0,0,0.4);"></span>Original marked text</span>
+                    <span class="legend-item"><span class="legend-dot" style="background:rgba(0,0,0,0.04);border-bottom:2px solid rgba(0,0,0,0.4);"></span>AI-rewritten text</span>
                 `;
             }
 

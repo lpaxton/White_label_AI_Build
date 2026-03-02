@@ -69,11 +69,11 @@ class CORSHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
             self.wfile.write(response_data)
-            print(f"✅ Proxied {self.command} {self.path} to Ollama successfully")
+            print(f"Proxied {self.command} {self.path} to Ollama successfully")
             
         except URLError as e:
             # Ollama not available
-            print(f"❌ Cannot connect to Ollama: {e}")
+            print(f"Cannot connect to Ollama: {e}")
             self.send_response(503)
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
@@ -84,7 +84,7 @@ class CORSHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             
         except Exception as e:
             # Other error
-            print(f"❌ Proxy error: {e}")
+            print(f"Proxy error: {e}")
             self.send_response(500)
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
@@ -110,7 +110,7 @@ class CORSHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             if not url:
                 raise ValueError("URL is required")
             
-            print(f"🔍 Extracting article from: {url}")
+            print(f"Extracting article from: {url}")
             
             # Fetch the webpage
             headers = {
@@ -132,10 +132,12 @@ class CORSHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             response_data = json.dumps(result).encode('utf-8')
             self.wfile.write(response_data)
             
-            print(f"✅ Successfully extracted article content ({result['wordCount']} words)")
+            print(f"Successfully extracted article content ({result['wordCount']} words)")
             
         except Exception as e:
-            print(f"❌ Article extraction error: {e}")
+            import traceback
+            print(f"Article extraction error: {e}")
+            traceback.print_exc()
             self.send_response(500)
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
@@ -176,7 +178,7 @@ class CORSHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         
         # Extract eReview ID from the full document before cleaning
         ereview_id = None
-        print('🔍 Searching for eReview ID...')
+        print('Searching for eReview ID...')
         
         # Try multiple selector variations for the disclosures section
         disclosures_selectors = [
@@ -188,11 +190,11 @@ class CORSHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         for selector in disclosures_selectors:
             disclosures_div = soup.select_one(selector)
             if disclosures_div:
-                print(f'✓ Found disclosures div with selector: {selector}')
+                print(f' Found disclosures div with selector: {selector}')
                 s_assigned = disclosures_div.find('s-assigned-wrapper')
                 if s_assigned:
                     ereview_id = s_assigned.get_text().strip()
-                    print(f'✅ Found eReview ID in disclosures: {ereview_id}')
+                    print(f'Found eReview ID in disclosures: {ereview_id}')
                     break
         
         # Fallback: check anywhere in document
@@ -201,7 +203,7 @@ class CORSHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             s_assigned = soup.find('s-assigned-wrapper')
             if s_assigned:
                 ereview_id = s_assigned.get_text().strip()
-                print(f'✅ Found eReview ID in document: {ereview_id}')
+                print(f'Found eReview ID in document: {ereview_id}')
         
         # Additional fallback: pattern matching for format like "763565.14.0"
         if not ereview_id:
@@ -210,10 +212,10 @@ class CORSHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             match = re.search(r'\b\d{6}\.\d{1,2}\.\d{1,2}\b', body_text)
             if match:
                 ereview_id = match.group(0)
-                print(f'✅ Found eReview ID via pattern match: {ereview_id}')
+                print(f'Found eReview ID via pattern match: {ereview_id}')
         
         if not ereview_id:
-            print('❌ eReview ID not found')
+            print('eReview ID not found')
         
         # Clone the article content for cleaning
         content = BeautifulSoup(str(article), 'html.parser')
@@ -446,18 +448,17 @@ def main():
             print("Invalid port number. Using default port 8000.")
     
     with socketserver.TCPServer(("", port), CORSHTTPRequestHandler) as httpd:
-        print(f"🚀 Server starting on http://localhost:{port}")
-        print(f"📁 Serving files from current directory")
-        print(f"🔗 Open http://localhost:{port}/enhanced-persona-finder.html")
-        print(f"� Open http://localhost:{port}/article-extractor.html")
-        print(f"�🔧 CORS proxy available for Ollama requests")
-        print(f"🗂️ Article extraction API available at /api/extract-article")
-        print(f"💡 Press Ctrl+C to stop")
+        print(f"Server starting on http://localhost:{port}")
+        print(f"Serving files from current directory")
+        print(f"Open http://localhost:{port}/article-extractor.html")
+        print(f"CORS proxy available for Ollama requests")
+        print(f"Article extraction API available at /api/extract-article")
+        print(f"Press Ctrl+C to stop")
         
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
-            print("\n👋 Server stopped")
+            print("\nServer stopped")
 
 if __name__ == "__main__":
     main()

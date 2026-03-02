@@ -1,0 +1,384 @@
+/* ═══════════════════════════════════════════════
+   shared.css — aRCHi design system
+   Common styles across all tool pages.
+   Import with: <link rel="stylesheet" href="shared.css">
+   ═══════════════════════════════════════════════ */
+
+/* ── Reset ── */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ── Base ── */
+body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background: #000;
+    color: #fff;
+    min-height: 100vh;
+    padding: 0;
+}
+
+/* ── Site-wide brand header (full-bleed, same style as homepage) ── */
+.site-header {
+    border-bottom: 1px solid #fff;
+    padding: 48px 60px;
+    display: flex;
+    align-items: baseline;
+    gap: 32px;
+}
+.site-header h1 {
+    font-size: 48px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    color: #fff;
+}
+.site-header p {
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #fff;
+    opacity: 0.6;
+}
+
+/* ── Header (tool pages — inside container) ── */
+.header {
+    background: #000;
+    border: 1px solid #fff;
+    padding: 30px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+.header h1 {
+    font-size: 32px;
+    color: #fff;
+    margin-bottom: 10px;
+}
+.header p {
+    font-size: 16px;
+    color: #fff;
+    opacity: 0.6;
+}
+
+/* ── Breadcrumb ── */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+}
+.breadcrumb-step {
+    padding: 4px 12px;
+    border: 1px solid #fff;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: transparent;
+    color: #fff;
+    opacity: 0.5;
+}
+.breadcrumb-step.active {
+    background: #fff;
+    color: #000;
+    opacity: 1;
+}
+.breadcrumb-step.done {
+    opacity: 0.7;
+}
+.breadcrumb-arrow {
+    color: #fff;
+    font-size: 16px;
+    opacity: 0.4;
+}
+
+/* ── Back button (fixed, anchored to right of site header) ── */
+.back-button,
+.button-back {
+    position: absolute;
+    top: 60px;
+    right: 60px;
+    left: auto;
+    background: #000;
+    color: #fff;
+    border: 1px solid #fff;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    z-index: 100;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    transition: background 0.15s, color 0.15s;
+}
+.back-button:hover,
+.button-back:hover {
+    background: #fff;
+    color: #000;
+}
+
+/* ── Button ── */
+.button {
+    display: inline-block;
+    border: 1px solid #fff;
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: background 0.2s, color 0.2s;
+    text-decoration: none;
+    background: #000;
+    color: #fff;
+    padding: 10px 20px;
+    font-size: 12px;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+.button:hover         { background: #fff; color: #000; }
+.button:disabled      { opacity: 0.6; cursor: not-allowed; }
+.button.primary       { background: #000; color: #fff; }
+.button.primary:hover { background: #fff; color: #000; }
+.button.secondary       { background: #000; color: #fff; border: 1px solid #fff; }
+.button.secondary:hover { background: #fff; color: #000; }
+.button.green       { background: #000; color: #fff; border: 1px solid #fff; }
+.button.green:hover { background: #fff; color: #000; }
+.button.orange       { background: #000; color: #fff; border: 1px solid #fff; }
+.button.orange:hover { background: #fff; color: #000; }
+
+/* ── Form group ── */
+.form-group {
+    margin-bottom: 20px;
+}
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 8px;
+}
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #fff;
+    font-size: 14px;
+    font-family: inherit;
+    background: #000;
+    color: #fff;
+}
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: 1px solid #fff;
+    border-color: #fff;
+}
+
+/* ── Checkboxes ── */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.checkbox-item input[type="checkbox"] {
+    width: auto;
+    accent-color: #fff;
+}
+.checkbox-item label {
+    font-weight: normal;
+    font-size: 14px;
+    margin-bottom: 0;
+    color: #fff;
+}
+
+/* ── Loading spinner ── */
+.loading {
+    display: none;
+    text-align: center;
+    padding: 40px;
+    color: #fff;
+    opacity: 0.6;
+}
+.loading .spinner {
+    width: 40px;
+    height: 40px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-left: 2px solid #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+@keyframes spin {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ── Status messages ── */
+.error-message {
+    background: #111;
+    border: 1px solid #fff;
+    color: #fff;
+    padding: 15px;
+    margin-bottom: 20px;
+    display: none;
+}
+.success-message {
+    background: #111;
+    border: 1px solid #fff;
+    color: #fff;
+    padding: 15px;
+    margin-bottom: 20px;
+    display: none;
+}
+.warning-message {
+    background: #111;
+    border: 1px solid #fff;
+    color: #fff;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+/* ── Content display (white-bg article area) ── */
+.content-display {
+    line-height: 1.6;
+    color: #000;
+}
+.content-display h1,
+.content-display h2,
+.content-display h3 {
+    margin: 20px 0 10px 0;
+    color: #000;
+}
+.content-display p         { margin-bottom: 15px; }
+.content-display ul,
+.content-display ol        { margin-bottom: 15px; padding-left: 20px; }
+.content-display li        { margin-bottom: 5px; }
+.content-display blockquote {
+    border-left: 1px solid rgba(0,0,0,0.3);
+    padding-left: 15px;
+    margin: 15px 0;
+    font-style: italic;
+    color: #000;
+    opacity: 0.6;
+}
+.content-display img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 20px 0;
+}
+.content-display figure     { margin: 20px 0; }
+.content-display figure img { margin: 0 0 10px 0; }
+
+/* ── Welcome message (empty-state inside white-bg areas) ── */
+.welcome-message {
+    text-align: center;
+    font-family: monospace;
+    padding: 40px;
+    color: #000;
+    opacity: 0.6;
+}
+.welcome-message h3 {
+    color: #000;
+    opacity: 1;
+    margin-bottom: 15px;
+}
+
+/* ── Fidelity highlight ── */
+.fidelity-highlight{
+    background-color: rgb(255 129 0 / 41%);
+    padding: 2px 4px;
+    font-weight: 600;
+    border: 1px solid rgb(255 129 0);
+}
+
+/* ── AI rewrite markers (dark-on-light, for white-bg panels) ── */
+[data-ai-rewrite="true"] {
+    background-color: rgb(122 233 149 / 41%);
+    border: 1px solid rgb(13 87 35);
+    padding-left: 5px;
+    display: inline;
+    position: relative;
+}
+[data-ai-rewrite="true"]::before {
+    content: "AI REWRITE";
+    position: absolute;
+    top: -18px;
+    left: 0;
+    font-size: 10px;
+    font-weight: bold;
+    color: #000;
+    background: #fff;
+    padding: 2px 4px;
+    border: 1px solid #000;
+    letter-spacing: 0.1em;
+}
+.rewritten-content {
+    background: #2dc54066;
+    border-bottom: 2px solid rgb(89 159 108 / 87%);
+    padding-left: 8px;
+    padding-right: 4px;
+    display: inline;
+    position: relative;
+    margin: 2px 0;
+}
+.rewritten-content::before {
+    content: "REWRITTEN";
+    position: absolute;
+    top: -18px;
+    left: 0;
+    font-size: 9px;
+    font-weight: bold;
+    color: #000;
+    background: #fff;
+    padding: 2px 5px;
+    border: 1px solid #000;
+    white-space: nowrap;
+    letter-spacing: 0.1em;
+}
+
+/* ── Stat badges (white-on-black context) ── */
+.stat {
+    display: inline-block;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.4);
+    color: #fff;
+    padding: 4px 10px;
+    font-size: 12px;
+    margin-right: 10px;
+    margin-bottom: 5px;
+}
+.stat.success,
+.stat.warning,
+.stat.info {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.4);
+}
+
+/* ── Toast notification ── */
+.toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 14px 20px;
+    border: 1px solid #fff;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #fff;
+    background: #000;
+    z-index: 1000;
+    transform: translateY(0);
+    transition: opacity 0.3s, transform 0.3s;
+}
+.toast.success { background: #000; border-color: #fff; }
+.toast.error   { background: #000; border-color: #fff; opacity: 0.7; }
+.toast.hidden  { opacity: 0; transform: translateY(10px); pointer-events: none; }

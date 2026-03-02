@@ -41,7 +41,7 @@ class ClaudeRewriter:
             "remove_trademark_symbols": True,
             "trademark_symbols": ["\u00ae", "\u2122", "\u2120"],
             "remove_trademark_tags": ["<sup>\u00ae</sup>", "<sup>\u2122</sup>", "<sup>\u2120</sup>", "<sup>SM</sup>"],
-            "remove_parenthetical_content": True,
+            "remove_parenthetical_content": False,
             "remove_footnotes": True,
             "check_hyperlinks": True,
             "check_possessive_references": True,
