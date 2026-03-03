@@ -43,12 +43,11 @@
 
         .input-panel {
             
-            overflow-y: auto;
         }
 
         .output-panel {
             min-height: 600px;
-            max-height: 85vh;
+            
             overflow-y: auto;
             background: #fff;
             color: #000;
@@ -385,7 +384,7 @@
 
 <body>
     <div class="site-header">
-        <h1><span style="color: #fa2D00;">a</span>RCH<span style="color: #fa2D00;">i</span> <span style="font-weight: 100;">[</span><span style="text-transform: uppercase;">Systems</span><span style="">]</span></h1>
+        <h1><span style="color: #fa2D00;">a</span>RCH<span style="color: #fa2D00;">i</span> <span style="font-weight: 100;">[</span><span style="text-transform: uppercase;">Systems</span><span style="font-weight: 100;">]</span></h1>
         <p>Content &amp; Learning Tools</p>
     </div>
     <button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>
@@ -401,7 +400,7 @@
                 <span class="breadcrumb-arrow">→</span>
                 <span class="breadcrumb-step">Step 3: Diff Tool</span>
                 <span class="breadcrumb-arrow">→</span>
-                <span class="breadcrumb-step">Step 5: Word Editor</span>
+                <span class="breadcrumb-step">Step 4: Word Editor</span>
             </div>
         </div>
 
@@ -410,7 +409,8 @@
                 <h2>Input Content</h2>
                 <p style="padding-bottom: 20px;">Content Extracted from previous step:</p>
                 <div id="successMessage" class="success-message"></div>
-                <button class="button secondary" onclick="window.location.href='article-extractor.html'" style="margin-bottom: 16px;">Back to Article Extractor</button>
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
+                <button id="backToExtractorButton" class="button secondary" onclick="window.location.href='article-extractor.html'" style="display: none; margin-bottom: 16px;">Back to Article Extractor</button>
                 <div class="tabs" style="display: none;">
                     <button class="tab active" data-tab="paste">Paste HTML</button>
                     <button class="tab" data-tab="upload">Upload File</button>
@@ -512,14 +512,13 @@
                 <div id="rewrite-animation" style="margin-top: 28px; display: flex; justify-content: center;">
                     <svg width="300" height="300" viewBox="0 0 100 100" fill="none" stroke="white" xmlns="http://www.w3.org/2000/svg" style="stroke-width: 0.330033px;"></svg>
                 </div>
-
-                <div id="leftPanelActions" style="display: none; margin-top: 20px;">
+                
+                <div id="leftPanelActions" style="display: none; position: sticky; top: 83%;">
+                    <button id="sendToDiffButton" class="button CTA" style="width: 100%;">Article Diff View</button>
                     <button id="copyButton" class="button secondary" style="width: 100%; margin-bottom: 10px;">Copy to Clipboard</button>
                     <button id="downloadButton" class="button orange" style="width: 100%; margin-bottom: 10px;">Download HTML File</button>
-                    <button id="sendToDiffButton" class="button CTA" style="width: 100%;">Article Diff View</button>
+                    
                 </div>
-
-                <div id="errorMessage" class="error-message"></div>
             </div>
 
             <div class="panel output-panel">
@@ -537,7 +536,7 @@
                             <li> After the rewritten content is displayed Click "Article Diff View" to compare the original extracted article to the AI updated article. Or save as a text or HTML file if needed. </li>
                         </ol>
                     </div>
-                    <p style=" opacity: 0.6; font-size: 14px;">
+                    <p style=" opacity: 0.6; font-size: 14px; display: none;">
                         <strong>Perfect for:</strong> White-label content distribution, brand neutralization, content
                         repurposing
                     </p>
@@ -561,7 +560,7 @@
                     </div>
 
                     <div id="outputHtml" class="content-display"
-                        style="min-height: 300px; max-height: 600px; overflow-y: auto; padding: 20px; border: 1px solid rgba(0,0,0,0.15); margin-bottom: 20px; background: #fff; color: #000;">
+                        style="min-height: 300px; overflow-y: auto; padding: 20px; border: 1px solid rgba(0,0,0,0.15); margin-bottom: 20px; background: #fff; color: #000;">
                     </div>
 
                 </div>
@@ -602,6 +601,9 @@
 
                 // Scroll to the textarea
                 document.getElementById('htmlInput').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                // No content loaded from Article Extractor — show the back button
+                document.getElementById('backToExtractorButton').style.display = 'block';
             }
 
             // Load saved API key
@@ -727,11 +729,12 @@
 
             if (!htmlContent) {
                 showError('Please go to Article Extractor');
+                document.getElementById('backToExtractorButton').style.display = 'block';
                 return;
             }
 
             if (useAI && !apiKey) {
-                showError('Please enter your Claude API key');
+                showError('Please enter your AI API key');
                 return;
             }
 
@@ -898,7 +901,7 @@
                 unmarked_links: unmarkedLinks,
                 possessive_references: possessiveRefs,
                 warnings: warnings,
-                method: 'claude_ai_direct'
+                method: 'ai_direct'
             };
         }
 

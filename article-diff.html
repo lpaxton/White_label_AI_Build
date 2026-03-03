@@ -28,7 +28,7 @@
             gap: 12px;
         }
         .controls-left {
-            display: flex;
+            display: block;
             align-items: center;
             gap: 10px;
         }
@@ -192,7 +192,7 @@
 </head>
 <body>
     <div class="site-header">
-        <h1><span style="color: #fa2D00;">a</span>RCH<span style="color: #fa2D00;">i</span> <span style="font-weight: 100;">[</span><span style="text-transform: uppercase;">Systems</span><span style="">]</span></h1>
+        <h1><span style="color: #fa2D00;">a</span>RCH<span style="color: #fa2D00;">i</span> <span style="font-weight: 100;">[</span><span style="text-transform: uppercase;">Systems</span><span style="font-weight: 100;">]</span></h1>
         <p>Content &amp; Learning Tools</p>
     </div>
     <button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>
@@ -208,7 +208,7 @@
                 <span class="breadcrumb-arrow">&#8594;</span>
                 <span class="breadcrumb-step active">Step 3: Diff Tool</span>
                 <span class="breadcrumb-arrow">&#8594;</span>
-                <span class="breadcrumb-step">Step 5: Word Editor</span>
+                <span class="breadcrumb-step">Step 4: Word Editor</span>
             </div>
         </div>
 
@@ -218,36 +218,35 @@
                     <button class="mode-btn active" id="renderedModeBtn" onclick="setMode('rendered')">Rendered View</button>
                     <button class="mode-btn" id="diffModeBtn" onclick="setMode('diff')">Word Diff</button>
                 </div>
-                <label class="sync-scroll-toggle">
+                <label class="sync-scroll-toggle" style="display: none;">
                     <input type="checkbox" id="syncScrollToggle" checked>
                     Sync Scroll
                 </label>
+                <div style="padding-top: 10px;"><div class="stat-item">Left: <strong id="statLeftWords">864</strong> words</div>
+            <div class="stat-item">Right: <strong id="statRightWords">865</strong> words</div>
+            <div class="stat-item">Changed sections: <strong id="statChanges">1</strong></div></div>
             </div>
-            <div class="legend" id="legend">
+            <div class="legend" id="legend" style="display: none;">
                 <span class="legend-item">
                     <span class="legend-dot" style="border-bottom:2px solid rgba(0,0,0,0.4);"></span>
                     Original marked text
                 </span>
-                <span class="legend-item">
+                <span class="legend-item" >
                     <span class="legend-dot" style="background:rgba(0,0,0,0.04);border-bottom:2px solid rgba(0,0,0,0.4);"></span>
                     AI-rewritten text
                 </span>
             </div>
             <div class="controls-right">
-                <button class="button green" onclick="goToEditor()">Edit in Word Editor (Step 5) &#8594;</button>
+                <button class="button CTA" onclick="goToEditor()">Next Edit in Word Editor</button>
             </div>
         </div>
 
-        <div id="statsBar" class="stats-bar" style="display:none;">
-            <div class="stat-item">Left: <strong id="statLeftWords">—</strong> words</div>
-            <div class="stat-item">Right: <strong id="statRightWords">—</strong> words</div>
-            <div class="stat-item">Changed sections: <strong id="statChanges">—</strong></div>
-        </div>
+        
 
         <div class="diff-wrapper">
             <div class="diff-panel">
                 <div class="panel-header original">
-                    <span>&#128196;</span>
+                    
                     <span>Original Article (Extractor Output)</span>
                 </div>
                 <div class="panel-body" id="leftPanel">
@@ -260,8 +259,8 @@
             </div>
             <div class="diff-panel">
                 <div class="panel-header neutralized">
-                    <span>&#10024;</span>
-                    <span>Brand Neutralized (Neutralizer Output)</span>
+                    
+                    <span>Brand Neutralized (AI Output)</span>
                 </div>
                 <div class="panel-body" id="rightPanel">
                     <div class="empty-state">
@@ -270,6 +269,16 @@
                         <p>Run the workflow from Step 1 &#8594; Step 2 &#8594; Step 3</p>
                     </div>
                 </div>
+            </div>
+        </div>
+        <div class="controls-bar">
+            
+            <div class="legend" id="legend" style="display: none;">
+                    <span class="legend-item" style="display:none;"><span class="legend-dot" style="border-bottom:2px solid rgba(0,0,0,0.4);"></span>Original marked text</span>
+                    <span class="legend-item" style="display:none;"><span class="legend-dot" style="background:rgba(0,0,0,0.04);border-bottom:2px solid rgba(0,0,0,0.4);"></span>AI-rewritten text</span>
+                </div>
+            <div class="controls-right" style="margin: auto;">
+                <button class="button CTA" onclick="goToEditor()">Next Edit in Word Editor</button>
             </div>
         </div>
     </div>
@@ -302,13 +311,13 @@
             const legend = document.getElementById('legend');
             if (mode === 'diff') {
                 legend.innerHTML = `
-                    <span class="legend-item"><span class="legend-dot" style="background:rgba(0,0,0,0.08);opacity:0.5;"></span>Removed words</span>
-                    <span class="legend-item"><span class="legend-dot" style="background:rgba(0,0,0,0.08);"></span>Added words</span>
+                    <span class="legend-item" style="display:none;"><span class="legend-dot" style="background:rgba(0,0,0,0.08);opacity:0.5; "></span>Removed words</span>
+                    <span class="legend-item" style="display:none;"><span class="legend-dot" style="background:rgba(0,0,0,0.08);"></span>Added words</span>
                 `;
             } else {
                 legend.innerHTML = `
-                    <span class="legend-item"><span class="legend-dot" style="border-bottom:2px solid rgba(0,0,0,0.4);"></span>Original marked text</span>
-                    <span class="legend-item"><span class="legend-dot" style="background:rgba(0,0,0,0.04);border-bottom:2px solid rgba(0,0,0,0.4);"></span>AI-rewritten text</span>
+                    <span class="legend-item" style="display:none;"><span class="legend-dot" style="border-bottom:2px solid rgba(0,0,0,0.4);"></span>Original marked text</span>
+                    <span class="legend-item" style="display:none;"><span class="legend-dot" style="background:rgba(0,0,0,0.04);border-bottom:2px solid rgba(0,0,0,0.4);"></span>AI-rewritten text</span>
                 `;
             }
 

@@ -232,10 +232,9 @@ body {
 
 /* ── Status messages ── */
 .error-message {
-    background: #111;
-    border: 1px solid #fff;
-    color: #fff;
-    padding: 15px;
+    
+    color: #a99808;
+    
     margin-bottom: 20px;
     display: none;
 }
