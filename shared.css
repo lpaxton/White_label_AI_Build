@@ -97,6 +97,16 @@ body {
 }
 
 /* ── Back button (fixed, anchored to right of site header) ── */
+
+.button.CTA {
+    border: 1px solid #fa2D00;
+    background-color: #fa790f00;
+}
+
+.button.CTA:hover {
+    color: #fa2D00;
+}
+
 .back-button,
 .button-back {
     position: absolute;
@@ -192,7 +202,8 @@ body {
 }
 .checkbox-item label {
     font-weight: normal;
-    font-size: 14px;
+    font-size: 11px;
+    opacity: 0.5;
     margin-bottom: 0;
     color: #fff;
 }
@@ -229,8 +240,8 @@ body {
     display: none;
 }
 .success-message {
-    background: #111;
-    border: 1px solid #fff;
+    background: #b0981630;
+    border: 1px solid #a99808;
     color: #fff;
     padding: 15px;
     margin-bottom: 20px;
@@ -245,6 +256,13 @@ body {
 }
 
 /* ── Content display (white-bg article area) ── */
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
 .content-display {
     line-height: 1.6;
     color: #000;
@@ -298,12 +316,12 @@ body {
     border: 1px solid rgb(255 129 0);
 }
 
-/* ── AI rewrite markers (dark-on-light, for white-bg panels) ── */
+/* ── AI rewrite markers ── */
 [data-ai-rewrite="true"] {
     background-color: rgb(122 233 149 / 41%);
     border: 1px solid rgb(13 87 35);
     padding-left: 5px;
-    display: inline;
+    display: block;
     position: relative;
 }
 [data-ai-rewrite="true"]::before {
@@ -324,7 +342,7 @@ body {
     border-bottom: 2px solid rgb(89 159 108 / 87%);
     padding-left: 8px;
     padding-right: 4px;
-    display: inline;
+    display: block;
     position: relative;
     margin: 2px 0;
 }

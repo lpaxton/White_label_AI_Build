@@ -28,8 +28,8 @@
             border: 1px solid #fff;
             padding: 25px;
             min-height: 600px;
-            max-height: 800px;
-            overflow-y: auto;
+            
+            
             color: #000;
         }
         /* Full-width stacked buttons in the input panel */
@@ -131,8 +131,8 @@
 </head>
 <body>
     <div class="site-header">
-        <h1>aRCHi</h1>
-        <p>Content &amp; Learning System</p>
+        <h1><span style="color: #fa2D00;">a</span>RCH<span style="color: #fa2D00;">i</span> <span style="font-weight: 100;">[</span><span style="text-transform: uppercase;">Systems</span><span style="">]</span></h1>
+        <p>Content &amp; Learning Tools</p>
     </div>
     <button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>
 
@@ -201,10 +201,10 @@
                     </div><!-- /options-body -->
                 </div>
 
-                <button id="extractButton" class="button">Extract Article Content</button>
+                <button id="extractButton" class="button CTA">Extract Article Content</button>
 
                 <div id="globe-animation" style="margin: 28px 0px; display: flex; justify-content: center;">
-                    <svg width="200" height="200" viewBox="0 0 100 100" fill="none" stroke="white" xmlns="http://www.w3.org/2000/svg" style="stroke-width: 0.285714px;">
+                    <svg width="300" height="300" viewBox="0 0 100 100" fill="none" stroke="white" xmlns="http://www.w3.org/2000/svg" style="stroke-width: 0.285714px;">
                         <ellipse cx="50" cy="50" rx="48" ry="48"></ellipse>
                         <ellipse cx="50" cy="50" rx="48" ry="48"></ellipse>
                         <ellipse cx="50" cy="50" rx="48" ry="48"></ellipse>
@@ -213,10 +213,12 @@
                         <ellipse cx="50" cy="50" rx="48" ry="48"></ellipse>
                     </svg>
                 </div>
-                <button id="sendToRewriterButton" class="button secondary" style="display: none;">Send to Brand Neutralizer</button>
+
+                <div style="display: block; position: sticky; top: 82%;">
+                <button id="sendToRewriterButton" class="button CTA" style="display: none;">Send to Brand Neutralizer</button>
                 <button id="saveButton" class="button secondary" style="display: none;">Save as Text File</button>
                 <button id="saveHtmlButton" class="button secondary" style="display: none;">Save as HTML (with formatting)</button>
-                
+                </div>
 
                
             </div>
@@ -232,7 +234,7 @@
                             <li>Choose your cleaning options (remove links, call-outs, etc.)</li>
                             <li>Click "Extract Article Content"</li>
                             <li>Review the clean, formatted content</li>
-                            <li>Save as a text file if needed</li>
+                            <li>Click the "Send to Brand Neutralizer" button or save as a text or HTML file if needed.</li>
                         </ol>
                     </div>
                     <p style="opacity: 0.6; font-size: 14px;">
@@ -442,25 +444,6 @@
             font-weight: 600;
             border: 1px solid rgba(0,0,0,0.25);
         }
-        [data-ai-rewrite="true"] {
-            
-            padding-left: 5px;
-            display: inline-block;
-            position: relative;
-        }
-        [data-ai-rewrite="true"]::before {
-            content: "AI REWRITE";
-            position: absolute;
-            top: -18px;
-            left: 0;
-            font-size: 10px;
-            font-weight: bold;
-            color: #fff;
-            
-            padding: 2px 4px;
-            
-            letter-spacing: 0.1em;
-        }
         .stats {
             background: #000;
             border: 1px solid #fff;
@@ -655,10 +638,6 @@
                 // Wrap the entire block's innerHTML in a span so the full sentence is always captured
                 const marker = document.createElement('span');
                 marker.setAttribute('data-ai-rewrite', 'true');
-                marker.style.backgroundColor = 'rgba(255,255,255,0.08)';
-                marker.style.borderLeft = '3px solid #fff';
-                marker.style.paddingLeft = '5px';
-                marker.style.display = 'block';
                 marker.innerHTML = blockEl.innerHTML;
                 blockEl.innerHTML = '';
                 blockEl.appendChild(marker);

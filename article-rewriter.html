@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,24 +8,30 @@
     <link rel="stylesheet" href="shared.css">
     <style>
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
+
         .main-content {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 2fr;
             gap: 20px;
             margin-bottom: 30px;
         }
+
         @media (max-width: 1024px) {
-            .main-content { grid-template-columns: 1fr; }
+            .main-content {
+                grid-template-columns: 1fr;
+            }
         }
+
         .panel {
             background: #000;
             border: 1px solid #fff;
             padding: 25px;
         }
+
         .panel h2 {
             font-size: 20px;
             color: #fff;
@@ -33,10 +40,12 @@
             align-items: center;
             gap: 10px;
         }
+
         .input-panel {
-            max-height: 85vh;
+            
             overflow-y: auto;
         }
+
         .output-panel {
             min-height: 600px;
             max-height: 85vh;
@@ -44,6 +53,7 @@
             background: #fff;
             color: #000;
         }
+
         /* select extends the shared form-group input rule */
         .form-group select {
             width: 100%;
@@ -54,16 +64,19 @@
             background: #000;
             color: #fff;
         }
+
         .form-group select:focus {
             outline: 1px solid #fff;
             border-color: #fff;
         }
+
         .form-group textarea {
             min-height: 200px;
             resize: vertical;
             font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
             font-size: 13px;
         }
+
         /* Full-width stacked buttons in the input panel */
         .button {
             width: 100%;
@@ -71,12 +84,14 @@
             padding: 12px 24px;
             font-size: 14px;
         }
+
         .options-section {
             background: #000;
             border: 1px solid #fff;
             padding: 15px;
             margin-bottom: 20px;
         }
+
         .options-section h4 {
             color: #fff;
             opacity: 0.5;
@@ -85,26 +100,86 @@
             text-transform: uppercase;
             letter-spacing: 0.15em;
         }
+
+        .options-section-title {
+            color: #fff;
+
+            margin: 20px 0px;
+            font-size: 11px;
+            padding-top: 10px;
+            border-top: 1px solid #8b8282;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        .options-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            margin-bottom: 0;
+        }
+
+        .options-toggle:hover h4 {
+            opacity: 0.9;
+        }
+
+        .options-toggle .toggle-icon {
+            font-size: 16px;
+            opacity: 0.5;
+            line-height: 1;
+            transition: transform 0.2s;
+        }
+
+        .options-toggle.open .toggle-icon {
+            transform: rotate(45deg);
+        }
+
+        .options-body {
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.3s ease, margin-top 0.25s ease;
+            margin-top: 0;
+        }
+
+        .options-body.open {
+            max-height: 600px;
+            margin-top: 10px;
+        }
+
+        .options-body .options-section {
+            margin-bottom: 16px;
+        }
+
+        .options-body .options-section:last-child {
+            margin-bottom: 0;
+        }
+
         .radio-group {
             display: flex;
             gap: 20px;
             margin-top: 10px;
         }
+
         .radio-item {
             display: flex;
             align-items: center;
             gap: 8px;
         }
+
         .radio-item input[type="radio"] {
             width: auto;
             accent-color: #fff;
         }
+
         .radio-item label {
             font-weight: normal;
             font-size: 14px;
             margin-bottom: 0;
             color: #fff;
         }
+
         /* content-meta stays white-on-black (it's in the input panel) */
         .content-meta {
             background: #000;
@@ -112,20 +187,23 @@
             padding: 15px;
             margin-bottom: 20px;
         }
+
         .content-meta h3 {
             margin-bottom: 10px;
             color: #fff;
         }
+
         .content-meta .stat {
             display: inline-block;
             background: transparent;
-            border: 1px solid rgba(255,255,255,0.4);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             color: #fff;
             padding: 4px 8px;
             font-size: 12px;
             margin-right: 10px;
             margin-bottom: 5px;
         }
+
         .article-id-display {
             background: #000;
             color: #fff;
@@ -137,66 +215,79 @@
             gap: 10px;
             font-weight: 600;
         }
+
         .article-id-display .label {
             font-size: 12px;
             opacity: 0.6;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
         .article-id-display .value {
             font-size: 16px;
             font-family: 'Courier New', monospace;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             padding: 4px 8px;
         }
+
         .stats-box {
             background: #000;
             border: 1px solid #fff;
             padding: 15px;
             margin-bottom: 20px;
         }
+
         .stats-box h3 {
             margin-bottom: 10px;
             color: #fff;
             font-size: 16px;
         }
+
         .replacement-list {
             max-height: 300px;
             overflow-y: auto;
             border: 1px solid #fff;
             margin-top: 15px;
         }
+
         .replacement-item {
             padding: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
-        .replacement-item:last-child { border-bottom: none; }
+
+        .replacement-item:last-child {
+            border-bottom: none;
+        }
+
         .replacement-item .original {
             color: #fff;
             opacity: 0.6;
             background: transparent;
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             padding: 4px 8px;
             font-size: 13px;
             display: block;
             margin-bottom: 5px;
         }
+
         .replacement-item .rewritten {
             color: #fff;
             background: transparent;
-            border: 1px solid rgba(255,255,255,0.6);
+            border: 1px solid rgba(255, 255, 255, 0.6);
             padding: 4px 8px;
             font-size: 13px;
             display: block;
         }
+
         /* fidelity-highlight override: border-bottom only (no bg fill) */
         .fidelity-highlight {
-            border-bottom: 2px solid rgba(0,0,0,0.4);
+            border-bottom: 2px solid rgba(0, 0, 0, 0.4);
             background: transparent;
             border-top: none;
             border-left: none;
             border-right: none;
         }
+
         .tabs {
             display: flex;
             gap: 10px;
@@ -204,6 +295,7 @@
             border-bottom: 1px solid #fff;
             padding-bottom: 10px;
         }
+
         .tab {
             padding: 10px 20px;
             cursor: pointer;
@@ -214,12 +306,32 @@
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             transition: background 0.15s, color 0.15s;
         }
-        .tab.active { background: #fff; color: #000; }
-        .tab:hover:not(.active) { background: rgba(255,255,255,0.1); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .api-key-input { position: relative; }
-        .api-key-input input { padding-right: 100px; }
+
+        .tab.active {
+            background: #fff;
+            color: #000;
+        }
+
+        .tab:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .api-key-input {
+            position: relative;
+        }
+
+        .api-key-input input {
+            padding-right: 100px;
+        }
+
         .api-key-input .toggle-visibility {
             position: absolute;
             right: 10px;
@@ -234,13 +346,19 @@
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             transition: background 0.15s, color 0.15s;
         }
-        .api-key-input .toggle-visibility:hover { background: #fff; color: #000; }
+
+        .api-key-input .toggle-visibility:hover {
+            background: #fff;
+            color: #000;
+        }
+
         .brand-highlight {
-            border-bottom: 2px solid rgba(255,255,255,0.6);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.6);
             background: transparent;
             padding: 2px 4px;
             font-weight: 600;
         }
+
         .file-upload-area {
             border: 1px dashed #fff;
             padding: 30px;
@@ -250,22 +368,32 @@
             margin-bottom: 20px;
             color: #fff;
         }
-        .file-upload-area:hover        { background: rgba(255,255,255,0.05); }
-        .file-upload-area.dragover     { background: rgba(255,255,255,0.1); }
-        .file-upload-area input        { display: none; }
+
+        .file-upload-area:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .file-upload-area.dragover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .file-upload-area input {
+            display: none;
+        }
     </style>
 </head>
+
 <body>
     <div class="site-header">
-        <h1>aRCHi</h1>
-        <p>Content &amp; Learning System</p>
+        <h1><span style="color: #fa2D00;">a</span>RCH<span style="color: #fa2D00;">i</span> <span style="font-weight: 100;">[</span><span style="text-transform: uppercase;">Systems</span><span style="">]</span></h1>
+        <p>Content &amp; Learning Tools</p>
     </div>
     <button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>
 
     <div class="container">
         <div class="header">
             <h1>Article Rewriter - Brand Neutralization</h1>
-            <p>Transform brand-specific content into generic, white-label alternatives using Claude AI</p>
+            <p>Transform brand-specific content into generic, white-label alternatives using AI</p>
             <div class="breadcrumb">
                 <span class="breadcrumb-step done">Step 1: Article Extractor</span>
                 <span class="breadcrumb-arrow">→</span>
@@ -280,20 +408,19 @@
         <div class="main-content">
             <div class="panel input-panel">
                 <h2>Input Content</h2>
-
-                <div class="tabs">
+                <p style="padding-bottom: 20px;">Content Extracted from previous step:</p>
+                <div id="successMessage" class="success-message"></div>
+                <button class="button secondary" onclick="window.location.href='article-extractor.html'" style="margin-bottom: 16px;">Back to Article Extractor</button>
+                <div class="tabs" style="display: none;">
                     <button class="tab active" data-tab="paste">Paste HTML</button>
                     <button class="tab" data-tab="upload">Upload File</button>
                     <button class="tab" data-tab="url">From URL</button>
                 </div>
 
-                <div id="pasteTab" class="tab-content active">
+                <div id="pasteTab" class="tab-content active" style="display: none;">
                     <div class="form-group">
                         <label for="htmlInput">HTML Content (with data-ai-rewrite markers):</label>
-                        <textarea id="htmlInput" placeholder="Paste your HTML content here. Content marked with data-ai-rewrite='true' will be processed.
-
-Example:
-<p><span data-ai-rewrite='true'>Fidelity offers great investment options.</span></p>"></textarea>
+                        <textarea id="htmlInput" placeholder="Paste your HTML content here. Content marked with data-ai-rewrite='true' will be processed.Example:<p><span data-ai-rewrite='true'>Fidelity offers great investment options.</span></p>"></textarea>
                     </div>
                 </div>
 
@@ -317,58 +444,80 @@ Example:
                 </div>
 
                 <div class="options-section">
-                    <h4>Processing Options:</h4>
-                    <div class="checkbox-group">
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="useAI" checked>
-                            <label for="useAI">Use Claude AI for intelligent rewriting</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="removeTrademarks" checked>
-                            <label for="removeTrademarks">Remove trademark symbols</label>
-                        </div>
-                        <div class="checkbox-item" style="display: none;">
-                            <input type="checkbox" id="removeParentheses" unchecked >
-                            <label for="removeParentheses">Remove parenthetical content</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="removeFootnotes" checked>
-                            <label for="removeFootnotes">Remove footnotes</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="checkHyperlinks" checked>
-                            <label for="checkHyperlinks">Flag unmarked product hyperlinks</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="checkPossessives" checked>
-                            <label for="checkPossessives">Flag possessive references (our/we/us)</label>
-                        </div>
+                    <div class="options-toggle" id="optionsToggle">
+                        <h4 style="margin-bottom:0;">Rewrite Options</h4>
+                        <span class="toggle-icon">+</span>
                     </div>
+                    <div class="options-body" id="optionsBody">
+
+                        <div class="options-section-title">
+                            <h4>Processing Options</h4>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="useAI" checked>
+                                    <label for="useAI">Use AI for intelligent rewriting</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="removeTrademarks" checked>
+                                    <label for="removeTrademarks">Remove trademark symbols</label>
+                                </div>
+                                <div class="checkbox-item" style="display: none;">
+                                    <input type="checkbox" id="removeParentheses" unchecked>
+                                    <label for="removeParentheses">Remove parenthetical content</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="removeFootnotes" checked>
+                                    <label for="removeFootnotes">Remove footnotes</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="checkHyperlinks" checked>
+                                    <label for="checkHyperlinks">Flag unmarked product hyperlinks</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="checkPossessives" checked>
+                                    <label for="checkPossessives">Flag possessive references (our/we/us)</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="options-section-title">
+                            <h4>Brand to Neutralize</h4>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <select id="brandSelect">
+                                    <option value="Fidelity">Fidelity</option>
+                                    <option value="custom">Custom (enter below)</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="customBrandGroup"
+                                style="display: none; margin-top: 10px; margin-bottom: 0;">
+                                <input type="text" id="customBrand" placeholder="Enter brand name">
+                            </div>
+                        </div>
+
+                        <div class="options-section-title">
+                            <h4>AI API Key</h4>
+                            <div class="form-group api-key-input" style="margin-bottom: 0;">
+                                <input type="password" id="apiKey" placeholder="sk-ant-api...">
+                                <button class="toggle-visibility" onclick="toggleApiKeyVisibility()">Show</button>
+                            </div>
+                            <p style="font-size: 12px; color: #fff; opacity: 0.6; margin-top: 8px;">Your API key is
+                                stored locally and never sent to our servers.</p>
+                        </div>
+
+                    </div><!-- /options-body -->
                 </div>
 
-                <div class="options-section">
-                    <h4>Brand to Neutralize:</h4>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <select id="brandSelect">
-                            <option value="Fidelity">Fidelity</option>
-                            <option value="custom">Custom (enter below)</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="customBrandGroup" style="display: none; margin-top: 10px; margin-bottom: 0;">
-                        <input type="text" id="customBrand" placeholder="Enter brand name">
-                    </div>
+                <button id="rewriteButton" class="button  CTA">Rewrite with AI</button>
+
+                <div id="rewrite-animation" style="margin-top: 28px; display: flex; justify-content: center;">
+                    <svg width="300" height="300" viewBox="0 0 100 100" fill="none" stroke="white" xmlns="http://www.w3.org/2000/svg" style="stroke-width: 0.330033px;"></svg>
                 </div>
 
-                <div class="options-section">
-                    <h4>Claude API Key:</h4>
-                    <div class="form-group api-key-input" style="margin-bottom: 0;">
-                        <input type="password" id="apiKey" placeholder="sk-ant-api...">
-                        <button class="toggle-visibility" onclick="toggleApiKeyVisibility()">Show</button>
-                    </div>
-                    <p style="font-size: 12px; color: #fff; opacity: 0.6; margin-top: 8px;">Your API key is stored locally and never sent to our servers.</p>
+                <div id="leftPanelActions" style="display: none; margin-top: 20px;">
+                    <button id="copyButton" class="button secondary" style="width: 100%; margin-bottom: 10px;">Copy to Clipboard</button>
+                    <button id="downloadButton" class="button orange" style="width: 100%; margin-bottom: 10px;">Download HTML File</button>
+                    <button id="sendToDiffButton" class="button CTA" style="width: 100%;">Article Diff View</button>
                 </div>
-
-                <button id="rewriteButton" class="button">Rewrite with Claude AI</button>
 
                 <div id="errorMessage" class="error-message"></div>
             </div>
@@ -378,19 +527,19 @@ Example:
 
                 <div id="welcomeMessage" class="welcome-message">
                     <h3>Welcome to Article Rewriter</h3>
-                    <p>This tool uses Claude AI to intelligently neutralize brand-specific content.</p>
+                    <p>This tool uses AI to intelligently neutralize brand-specific content.</p>
                     <div style="margin: 20px 0; text-align: left;">
                         <h4>How it works:</h4>
-                        <ol style="color: #fff; opacity: 0.6; margin: 10px 0; padding-left: 20px;">
-                            <li>Paste HTML content or upload a file</li>
-                            <li>Mark content for rewriting with <code>data-ai-rewrite="true"</code></li>
-                            <li>Enter your Claude API key</li>
-                            <li>Click "Rewrite with Claude AI"</li>
-                            <li>Review and download the neutralized content</li>
+                        <ol style=" opacity: 0.6; margin: 10px 0; padding-left: 20px;">
+                            <li> The extracted content is displayed in the yellow box. If the content was not loaded or the page was refreshed you will be presented with a "Back to article extractor" button. (Restart step one)</li>
+                            <li>Review Rewrite Options for Processing. Add AI API Key if box is empty.</li>
+                            <li>Click "Rewrite with AI"</li>
+                            <li> After the rewritten content is displayed Click "Article Diff View" to compare the original extracted article to the AI updated article. Or save as a text or HTML file if needed. </li>
                         </ol>
                     </div>
-                    <p style="color: #fff; opacity: 0.6; font-size: 14px;">
-                        <strong>Perfect for:</strong> White-label content distribution, brand neutralization, content repurposing
+                    <p style=" opacity: 0.6; font-size: 14px;">
+                        <strong>Perfect for:</strong> White-label content distribution, brand neutralization, content
+                        repurposing
                     </p>
                 </div>
 
@@ -399,8 +548,6 @@ Example:
                     <p>Claude is rewriting your content...</p>
                     <p style="font-size: 12px; margin-top: 5px;">This may take a moment for longer articles</p>
                 </div>
-
-                <div id="successMessage" class="success-message"></div>
 
                 <div id="resultsContainer" style="display: none;">
                     <div id="statsBox" class="stats-box">
@@ -413,11 +560,10 @@ Example:
                         <ul id="warningsList"></ul>
                     </div>
 
-                    <div id="outputHtml" class="content-display" style="min-height: 300px; max-height: 600px; overflow-y: auto; padding: 20px; border: 1px solid rgba(0,0,0,0.15); margin-bottom: 20px; background: #fff; color: #000;"></div>
+                    <div id="outputHtml" class="content-display"
+                        style="min-height: 300px; max-height: 600px; overflow-y: auto; padding: 20px; border: 1px solid rgba(0,0,0,0.15); margin-bottom: 20px; background: #fff; color: #000;">
+                    </div>
 
-                    <button id="copyButton" class="button secondary">Copy to Clipboard</button>
-                    <button id="downloadButton" class="button orange">Download HTML File</button>
-                    <button id="sendToDiffButton" class="button" style="margin-top: 10px; display: block; width: 100%;">View Diff (Step 3) &#8594;</button>
                 </div>
             </div>
         </div>
@@ -439,15 +585,15 @@ Example:
             if (savedContent) {
                 // Populate the textarea with the content
                 document.getElementById('htmlInput').value = savedContent;
-                
+
                 // Store eReview ID
                 if (savedEReviewId) {
                     eReviewId = savedEReviewId;
                 }
-                
+
                 // Show a notification
                 showSuccess(`Loaded content from Article Extractor${title ? ': ' + title : ''}${eReviewId ? ' (eReview: ' + eReviewId + ')' : ''}`);
-                
+
                 // Clear sessionStorage
                 sessionStorage.removeItem('rewriter_content');
                 sessionStorage.removeItem('rewriter_source_url');
@@ -580,7 +726,7 @@ Example:
             const useAI = document.getElementById('useAI').checked;
 
             if (!htmlContent) {
-                showError('Please enter HTML content to rewrite');
+                showError('Please go to Article Extractor');
                 return;
             }
 
@@ -612,6 +758,7 @@ Example:
             isProcessing = true;
             showLoading();
             hideError();
+            hideSuccess();
 
             try {
                 originalContent = htmlContent; // Save original before rewriting
@@ -684,7 +831,7 @@ Example:
                     const newSpan = document.createElement('span');
                     newSpan.className = 'rewritten-content';
                     newSpan.innerHTML = rewrittenText;
-                    
+
                     // Replace in the HTML
                     const spanOuterHtml = span.outerHTML;
                     const newSpanHtml = newSpan.outerHTML;
@@ -701,7 +848,7 @@ Example:
 
             // Fix any double spaces that may have been created
             processedHtml = processedHtml.replace(/\s{2,}/g, ' ');
-            
+
             // Fix spacing issues around common punctuation
             processedHtml = processedHtml.replace(/\s+\./g, '.');
             processedHtml = processedHtml.replace(/\s+,/g, ',');
@@ -761,13 +908,13 @@ Example:
             // matches across tag boundaries and destroys CSS rgb() values in style attributes.
             const parser = new DOMParser();
             const doc = parser.parseFromString(htmlContent, 'text/html');
-            
+
             // Recursively process all text nodes to remove any remaining parentheses
             // NOTE: This ONLY modifies text content - all HTML tags like <em>, <ul>, <li>, etc. are preserved
             function processNode(node) {
                 if (node.nodeType === Node.TEXT_NODE) {
                     const text = node.textContent;
-                    
+
                     // Remove content in parentheses including the parentheses
                     // This catches any that might have been missed
                     let cleanedText = text.replace(/\s*\([^)]*\)\s*/g, ' ');
@@ -777,18 +924,18 @@ Example:
                     if (cleanedText !== text) {
                         node.textContent = cleanedText;
                     }
-                } else if (node.nodeType === Node.ELEMENT_NODE && 
-                          node.nodeName !== 'SCRIPT' && 
-                          node.nodeName !== 'STYLE') {
+                } else if (node.nodeType === Node.ELEMENT_NODE &&
+                    node.nodeName !== 'SCRIPT' &&
+                    node.nodeName !== 'STYLE') {
                     // Process child nodes - preserving all HTML structure
                     const children = Array.from(node.childNodes);
                     children.forEach(child => processNode(child));
                 }
             }
-            
+
             // Process the entire document body
             processNode(doc.body);
-            
+
             // Get the cleaned HTML
             let result = doc.body.innerHTML;
 
@@ -867,6 +1014,7 @@ Return ONLY the rewritten text, nothing else.`
         function displayResults(result) {
             document.getElementById('welcomeMessage').style.display = 'none';
             document.getElementById('resultsContainer').style.display = 'block';
+            document.getElementById('leftPanelActions').style.display = 'block';
 
             // Stats
             const statsHtml = `
@@ -953,14 +1101,7 @@ Return ONLY the rewritten text, nothing else.`
             color: #fff;
             padding: 20px;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: #000;
-            border: 1px solid #fff;
-            border-radius: 0;
-            padding: 40px;
-        }
+        
         .header {
             border-bottom: 1px solid #fff;
             padding-bottom: 20px;
@@ -1073,29 +1214,6 @@ Return ONLY the rewritten text, nothing else.`
             font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
             font-size: 0.9em;
         }
-        .rewritten-content {
-            background: transparent;
-            border-bottom: 2px solid rgba(0,0,0,0.4);
-            padding-left: 8px;
-            padding-right: 4px;
-            display: inline-block;
-            position: relative;
-            margin: 2px 0;
-        }
-        .rewritten-content::before {
-            content: "REWRITTEN";
-            position: absolute;
-            top: -18px;
-            left: 0;
-            font-size: 9px;
-            font-weight: bold;
-            color: #000;
-            background: #fff;
-            padding: 2px 5px;
-            border-radius: 0;
-            border: 1px solid #000;
-            white-space: nowrap;
-        }
         .footer {
             margin-top: 40px;
             padding-top: 20px;
@@ -1169,11 +1287,14 @@ Return ONLY the rewritten text, nothing else.`
         function showLoading() {
             document.getElementById('welcomeMessage').style.display = 'none';
             document.getElementById('resultsContainer').style.display = 'none';
+            document.getElementById('leftPanelActions').style.display = 'none';
             document.getElementById('loadingMessage').style.display = 'block';
+            _ra.startLoop();
         }
 
         function hideLoading() {
             document.getElementById('loadingMessage').style.display = 'none';
+            _ra.stopLoop();
         }
 
         function showError(message) {
@@ -1190,9 +1311,11 @@ Return ONLY the rewritten text, nothing else.`
             const successDiv = document.getElementById('successMessage');
             successDiv.textContent = message;
             successDiv.style.display = 'block';
-            setTimeout(() => {
-                successDiv.style.display = 'none';
-            }, 3000);
+        }
+
+        function hideSuccess() {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.style.display = 'none';
         }
 
         // Update button state
@@ -1202,9 +1325,134 @@ Return ONLY the rewritten text, nothing else.`
             if (isProcessing) {
                 button.textContent = 'Rewriting...';
             } else {
-                button.textContent = 'Rewrite with Claude AI';
+                button.textContent = 'Rewrite with AI';
             }
         }, 100);
+
+        // ── Rewrite animation (23 circles fanning out) ──
+        const _ra = (function () {
+            const svgns        = 'http://www.w3.org/2000/svg';
+            const svg          = document.querySelector('#rewrite-animation svg');
+            const DURATION     = 1900;
+            const CYCLE_DELAY  = 400;
+
+            function mix(a, b, t) { return a + (b - a) * t; }
+            function easeInOutCubic(t) {
+                return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+            }
+
+            const circles = [];
+            for (let i = 0; i < 23; i++) {
+                const a  = i / 22;
+                const el = document.createElementNS(svgns, 'circle');
+                el.setAttribute('cx', 50);
+                el.setAttribute('cy', 50);
+                el.setAttribute('r', 48);
+                svg.appendChild(el);
+                circles.push({
+                    el,
+                    final: { cx: 50 + i * 1.2 - 2.4 * Math.max(0, i - 14), r: mix(48, 15, a) },
+                    alt:   { cx: 50 - i * 1.2 + 2.4 * Math.max(0, i - 14), r: mix(48, 15, a) },
+                    cx: 50, r: 48, dir: true,
+                    timerId: null, rafId: null,
+                });
+            }
+            circles.reverse();
+
+            let _looping   = false;
+            let _stopNext  = false;
+            // track how many circles are mid-animation so we know when a full sweep ends
+            let _active    = 0;
+            let _onSweepDone = null;
+
+            function runCircle(c) {
+                const fromCx = c.cx, fromR = c.r;
+                const target = c.dir ? c.final : c.alt;
+                const t0     = performance.now();
+                _active++;
+                function frame(now) {
+                    const t    = Math.min((now - t0) / DURATION, 1);
+                    const ease = easeInOutCubic(t);
+                    c.cx = fromCx + (target.cx - fromCx) * ease;
+                    c.r  = fromR  + (target.r  - fromR)  * ease;
+                    c.el.setAttribute('cx', c.cx.toFixed(4));
+                    c.el.setAttribute('r',  c.r.toFixed(4));
+                    if (t < 1) {
+                        c.rafId = requestAnimationFrame(frame);
+                    } else {
+                        _active--;
+                        c.dir = !c.dir;
+                        if (_active === 0 && _onSweepDone) {
+                            _onSweepDone();
+                        }
+                    }
+                }
+                c.rafId = requestAnimationFrame(frame);
+            }
+
+            function startSweep(onDone) {
+                _onSweepDone = onDone;
+                _active = 0;
+                circles.forEach((c, i) => {
+                    c.timerId = setTimeout(() => runCircle(c), i * 30);
+                });
+            }
+
+            function reset() {
+                circles.forEach(c => {
+                    if (c.timerId)  clearTimeout(c.timerId);
+                    if (c.rafId)    cancelAnimationFrame(c.rafId);
+                    c.cx = 50; c.r = 48; c.dir = true;
+                    c.el.setAttribute('cx', 50);
+                    c.el.setAttribute('r', 48);
+                });
+                _active = 0;
+                _onSweepDone = null;
+            }
+
+            function pulseOnce() {
+                reset();
+                _looping  = false;
+                _stopNext = false;
+                // sweep right then left (2 half-cycles), then stop
+                startSweep(() => {
+                    setTimeout(() => {
+                        startSweep(() => { /* done — stay at rest */ });
+                    }, CYCLE_DELAY);
+                });
+            }
+
+            function startLoop() {
+                reset();
+                _looping  = true;
+                _stopNext = false;
+                function sweep() {
+                    startSweep(() => {
+                        if (!_looping) return;
+                        setTimeout(sweep, CYCLE_DELAY);
+                    });
+                }
+                sweep();
+            }
+
+            function stopLoop() {
+                _looping = false;
+            }
+
+            // page-load pulse
+            pulseOnce();
+
+            return { pulseOnce, startLoop, stopLoop };
+        })();
+
+        // ── Rewrite options toggle ──
+        document.getElementById('optionsToggle').addEventListener('click', () => {
+            const toggle = document.getElementById('optionsToggle');
+            const body = document.getElementById('optionsBody');
+            const isOpen = body.classList.toggle('open');
+            toggle.classList.toggle('open', isOpen);
+        });
     </script>
 </body>
+
 </html>
