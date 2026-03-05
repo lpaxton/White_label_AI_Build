@@ -50,7 +50,7 @@
             
             overflow-y: auto;
             background: #fff;
-            color: #000;
+            color: #fff;
         }
 
         /* select extends the shared form-group input rule */
@@ -384,7 +384,7 @@
 
 <body>
     <div class="site-header">
-        <h1><span style="color: #fa2D00;">a</span>RCH<span style="color: #fa2D00;">i</span> <span style="font-weight: 100;">[</span><span style="text-transform: uppercase;">Systems</span><span style="font-weight: 100;">]</span></h1>
+        <h1><span style="color: #fa2D00;">a</span>RCH<span style="color: #fa2D00;">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
         <p>Content &amp; Learning Tools</p>
     </div>
     <button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>
@@ -509,7 +509,7 @@
 
                 <button id="rewriteButton" class="button  CTA">Rewrite with AI</button>
 
-                <div id="rewrite-animation" style="margin-top: 28px; display: flex; justify-content: center;">
+                <div id="rewrite-animation" style="margin: 28px 0px; display: flex; justify-content: center;">
                     <svg width="300" height="300" viewBox="0 0 100 100" fill="none" stroke="white" xmlns="http://www.w3.org/2000/svg" style="stroke-width: 0.330033px;"></svg>
                 </div>
                 
@@ -559,6 +559,8 @@
                         <ul id="warningsList"></ul>
                     </div>
 
+                    <div id="metadataBar" class="content-meta" style="display:none;"></div>
+
                     <div id="outputHtml" class="content-display"
                         style="min-height: 300px; overflow-y: auto; padding: 20px; border: 1px solid rgba(0,0,0,0.15); margin-bottom: 20px; background: #fff; color: #000;">
                     </div>
@@ -572,6 +574,7 @@
         let isProcessing = false;
         let lastResult = null;
         let eReviewId = null; // Store eReview ID globally
+        let topics = [];   // Store topic tags globally
         let originalContent = null; // Store original HTML before rewriting
 
         // Check for content from article extractor on page load
@@ -580,6 +583,7 @@
             const sourceUrl = sessionStorage.getItem('rewriter_source_url');
             const title = sessionStorage.getItem('rewriter_title');
             const savedEReviewId = sessionStorage.getItem('rewriter_ereview_id');
+            const savedTopics = sessionStorage.getItem('rewriter_topics');
 
             if (savedContent) {
                 // Populate the textarea with the content
@@ -590,6 +594,14 @@
                     eReviewId = savedEReviewId;
                 }
 
+                // Store topics
+                if (savedTopics) {
+                    try { topics = JSON.parse(savedTopics); } catch(e) { topics = []; }
+                }
+
+                // Show metadata bar if we have eReview or topics
+                updateMetadataBar();
+
                 // Show a notification
                 showSuccess(`Loaded content from Article Extractor${title ? ': ' + title : ''}${eReviewId ? ' (eReview: ' + eReviewId + ')' : ''}`);
 
@@ -598,6 +610,7 @@
                 sessionStorage.removeItem('rewriter_source_url');
                 sessionStorage.removeItem('rewriter_title');
                 sessionStorage.removeItem('rewriter_ereview_id');
+                sessionStorage.removeItem('rewriter_topics');
 
                 // Scroll to the textarea
                 document.getElementById('htmlInput').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -612,6 +625,26 @@
                 document.getElementById('apiKey').value = savedApiKey;
             }
         });
+
+        function updateMetadataBar() {
+            const bar = document.getElementById('metadataBar');
+            if (!eReviewId && (!topics || topics.length === 0)) { bar.style.display = 'none'; return; }
+            let html = '';
+            if (eReviewId) {
+                html += `<div class="article-id-display">
+                    <span class="label">eReview ID:</span>
+                    <span class="value">${eReviewId}</span>
+                </div>`;
+            }
+            if (topics && topics.length > 0) {
+                html += `<div style="margin-bottom:12px;">
+                    <span class="label" style="display:block; margin-bottom:6px;">Topic Tags:</span>
+                    <div>${topics.map(t => `<span style="display:inline-block; border:1px solid rgba(255,255,255,0.4); color:#fff; font-size:11px; padding:3px 8px; margin:2px 4px 2px 0; letter-spacing:0.05em;">${t}</span>`).join('')}</div>
+                </div>`;
+            }
+            bar.innerHTML = html;
+            bar.style.display = 'block';
+        }
 
         // Tab switching
         document.querySelectorAll('.tab').forEach(tab => {
@@ -1018,6 +1051,7 @@ Return ONLY the rewritten text, nothing else.`
             document.getElementById('welcomeMessage').style.display = 'none';
             document.getElementById('resultsContainer').style.display = 'block';
             document.getElementById('leftPanelActions').style.display = 'block';
+            updateMetadataBar();
 
             // Stats
             const statsHtml = `
@@ -1081,6 +1115,19 @@ Return ONLY the rewritten text, nothing else.`
         <div style="background: #000; color: #fff; border: 1px solid #fff; border-radius: 0; padding: 15px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-weight: 600;">
             <span style="font-size: 12px; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.5px;">eReview ID:</span>
             <span style="font-size: 18px; font-family: 'Courier New', monospace; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 0;">${eReviewId}</span>
+        </div>`;
+            }
+
+            // Build topics section if available
+            let topicsSection = '';
+            if (topics && topics.length > 0) {
+                const tagSpans = topics.map(t =>
+                    `<span style="display:inline-block; border:1px solid rgba(255,255,255,0.4); color:#fff; font-size:11px; padding:3px 8px; margin:2px 4px 2px 0; letter-spacing:0.05em;">${t}</span>`
+                ).join('');
+                topicsSection = `
+        <div style="background: #000; color: #fff; border: 1px solid #fff; padding: 12px 20px; margin-bottom: 20px;">
+            <div style="font-size: 11px; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 8px;">Topic Tags</div>
+            <div>${tagSpans}</div>
         </div>`;
             }
 
@@ -1250,6 +1297,7 @@ Return ONLY the rewritten text, nothing else.`
         </div>
         
         ${eReviewSection}
+        ${topicsSection}
         
         <div class="content">
             ${styledContent}
@@ -1259,6 +1307,7 @@ Return ONLY the rewritten text, nothing else.`
             <p>This article has been processed for brand neutralization</p>
             <p>Generated by aRCHi Brand Neutralizer</p>
             ${eReviewId ? `<p style="margin-top: 10px;"><strong>eReview ID:</strong> ${eReviewId}</p>` : ''}
+            ${topics && topics.length > 0 ? `<p style="margin-top: 10px; color:"#fff"; opacity: 0.6;><strong>Topic Tags:</strong> ${topics.join(', ')}</p>` : ''}
         </div>
     </div>
 </body>
@@ -1283,6 +1332,8 @@ Return ONLY the rewritten text, nothing else.`
             sessionStorage.setItem('diff_original', originalContent);
             sessionStorage.setItem('diff_neutralized', lastResult.html);
             sessionStorage.setItem('diff_title', eReviewId ? `eReview: ${eReviewId}` : 'Article Comparison');
+            sessionStorage.setItem('diff_ereview_id', eReviewId || '');
+            sessionStorage.setItem('diff_topics', JSON.stringify(topics));
             window.location.href = 'article-diff.html';
         });
 

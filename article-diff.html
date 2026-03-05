@@ -126,7 +126,8 @@
         }
         /* rewritten-content in panel-body gets slight background tint */
         .panel-body .rewritten-content {
-            background: rgba(0,0,0,0.04);
+            background: rgb(170 197 220 / 59%);
+    border-left: 3px solid rgb(3 165 248 / 58%);
         }
         .panel-body .rewritten-content::before {
             top: -16px;
@@ -188,11 +189,41 @@
         @media (max-width: 900px) {
             .diff-wrapper { grid-template-columns: 1fr; }
         }
+        .content-meta {
+            background: #000;
+            color: #fff;
+            border: 1px solid #fff;
+            padding: 15px;
+            margin-bottom: 16px;
+        }
+        .article-id-display {
+            background: #000;
+            color: #fff;
+            border: 1px solid #fff;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+        .article-id-display .label {
+            font-size: 12px;
+            opacity: 0.6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .article-id-display .value {
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 8px;
+        }
     </style>
 </head>
 <body>
     <div class="site-header">
-        <h1><span style="color: #fa2D00;">a</span>RCH<span style="color: #fa2D00;">i</span> <span style="font-weight: 100;">[</span><span style="text-transform: uppercase;">Systems</span><span style="font-weight: 100;">]</span></h1>
+        <h1><span style="color: #fa2D00;">a</span>RCH<span style="color: #fa2D00;">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
         <p>Content &amp; Learning Tools</p>
     </div>
     <button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>
@@ -241,7 +272,7 @@
             </div>
         </div>
 
-        
+        <div id="diffMetadataBar" class="content-meta" style="display:none;"></div>
 
         <div class="diff-wrapper">
             <div class="diff-panel">
@@ -288,19 +319,48 @@
         let neutralizedHtml = '';
         let currentMode = 'rendered';
         let isSyncing = false;
+        let eReviewId = null;
+        let topics = [];
 
         // Load content from sessionStorage
         window.addEventListener('DOMContentLoaded', () => {
             originalHtml = sessionStorage.getItem('diff_original') || '';
             neutralizedHtml = sessionStorage.getItem('diff_neutralized') || '';
+            eReviewId = sessionStorage.getItem('diff_ereview_id') || null;
+            try { topics = JSON.parse(sessionStorage.getItem('diff_topics') || '[]'); } catch(e) { topics = []; }
 
             if (originalHtml || neutralizedHtml) {
                 renderPanels();
                 showStats();
             }
 
+            // Render metadata bar
+            renderMetadataBar();
+
             setupSyncScroll();
         });
+
+        function renderMetadataBar() {
+            const bar = document.getElementById('diffMetadataBar');
+            if (!bar) return;
+            console.log('[Diff] renderMetadataBar — eReviewId:', eReviewId, '| topics:', topics);
+            if (!eReviewId && (!topics || topics.length === 0)) { bar.style.display = 'none'; return; }
+            let html = '';
+            if (eReviewId) {
+                html += `<div class="article-id-display">
+                    <span class="label">eReview ID:</span>
+                    <span class="value">${eReviewId}</span>
+                </div>`;
+            }
+            if (topics && topics.length > 0) {
+                html += `<div style="margin-bottom:12px;">
+                    <span class="label" style="display:block; margin-bottom:6px; font-size:12px; opacity:0.6; text-transform:uppercase; letter-spacing:0.5px;">Topic Tags:</span>
+                    <div>${topics.map(t => `<span style="display:inline-block; border:1px solid rgba(255,255,255,0.4); color:#fff; font-size:11px; padding:3px 8px; margin:2px 4px 2px 0; letter-spacing:0.05em;">${t}</span>`).join('')}</div>
+                </div>`;
+            }
+            bar.innerHTML = html;
+            bar.style.display = 'block';
+        }
 
         function setMode(mode) {
             currentMode = mode;
@@ -526,6 +586,8 @@
                 return;
             }
             sessionStorage.setItem('editor_content', neutralizedHtml);
+            sessionStorage.setItem('editor_ereview_id', eReviewId || '');
+            sessionStorage.setItem('editor_topics', JSON.stringify(topics));
             window.location.href = 'article-editor.html';
         }
     </script>

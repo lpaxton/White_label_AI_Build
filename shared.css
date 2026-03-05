@@ -318,7 +318,7 @@ body {
 /* ── AI rewrite markers ── */
 [data-ai-rewrite="true"] {
     background-color: rgb(122 233 149 / 41%);
-    border: 1px solid rgb(13 87 35);
+    border: 1px solid rgb(245 158 11);
     padding-left: 5px;
     display: block;
     position: relative;
@@ -338,7 +338,7 @@ body {
 }
 .rewritten-content {
     background: #2dc54066;
-    border-bottom: 2px solid rgb(89 159 108 / 87%);
+    border: 1px solid rgb(3 165 248 / 32%);
     padding-left: 8px;
     padding-right: 4px;
     display: block;

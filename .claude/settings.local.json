@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git fetch origin claude/add-diff-tool-dZWGn)",
+      "Bash(git checkout claude/add-diff-tool-dZWGn)",
+      "Bash(python serve.py)",
+      "Bash(git push)"
+    ]
+  }
+}

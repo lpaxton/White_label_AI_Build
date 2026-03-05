@@ -217,6 +217,20 @@ class CORSHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         if not ereview_id:
             print('eReview ID not found')
         
+        # Extract topic tags from article-bottom-topics section
+        topics = []
+        topics_container = soup.select_one('div.article-bottom-topics ul.article-topics')
+        if topics_container:
+            for li in topics_container.find_all('li'):
+                a = li.find('a')
+                if a:
+                    topic_text = a.get_text().strip()
+                    if topic_text:
+                        topics.append(topic_text)
+            print(f'Found {len(topics)} topic tags: {topics}')
+        else:
+            print('No topic tags found')
+        
         # Clone the article content for cleaning
         content = BeautifulSoup(str(article), 'html.parser')
         
@@ -322,6 +336,7 @@ class CORSHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             'charCount': char_count,
             'readingTime': reading_time,
             'eReviewId': ereview_id,
+            'topics': topics,
             'extractedAt': json.dumps(None)  # Will be set by JavaScript
         }
     

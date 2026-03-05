@@ -131,7 +131,7 @@
 </head>
 <body>
     <div class="site-header">
-        <h1><span style="color: #fa2D00;">a</span>RCH<span style="color: #fa2D00;">i</span> <span style="font-weight: 100;">[</span><span style="text-transform: uppercase;">Systems</span><span style="font-weight: 100;">]</span></h1>
+        <h1><span style="color: #fa2D00;">a</span>RCH<span style="color: #fa2D00;">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
         <p>Content &amp; Learning Tools</p>
     </div>
     <button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>
@@ -324,7 +324,11 @@
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
             const filename = `article-content-${timestamp}.txt`;
 
-            const content = `Article Content Extracted from: ${extractedContent.url}\nExtracted at: ${new Date().toLocaleString()}\n\n${extractedContent.cleanText}`;
+            let topicsLine = '';
+            if (extractedContent.topics && extractedContent.topics.length > 0) {
+                topicsLine = `\nTopic Tags: ${extractedContent.topics.join(', ')}\n`;
+            }
+            const content = `Article Content Extracted from: ${extractedContent.url}\nExtracted at: ${new Date().toLocaleString()}${topicsLine}\n\n${extractedContent.cleanText}`;
 
             downloadTextFile(content, filename);
             showSuccess(`Content saved as ${filename}`);
@@ -352,6 +356,20 @@
                     <div style="background: #000; color: #fff; border: 1px solid #fff; padding: 12px 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; font-weight: 600;">
                         <span style="font-size: 12px; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.15em;">eReview ID:</span>
                         <span style="font-size: 16px; font-family: 'Courier New', monospace; background: rgba(255,255,255,0.1); padding: 4px 8px;">${extractedContent.eReviewId}</span>
+                    </div>
+                `;
+            }
+
+            // Build topics section if available
+            let topicsSection = '';
+            if (extractedContent.topics && extractedContent.topics.length > 0) {
+                const topicTags = extractedContent.topics.map(t =>
+                    `<span style="display:inline-block; border: 1px solid rgba(255,255,255,0.5); color:#fff; font-size:11px; padding:3px 8px; margin:2px 4px 2px 0; letter-spacing:0.05em;">${t}</span>`
+                ).join('');
+                topicsSection = `
+                    <div style="background: #000; color: #fff; border: 1px solid #fff; padding: 12px 15px; margin-bottom: 15px;">
+                        <div style="font-size: 11px; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 8px;">Topic Tags</div>
+                        <div>${topicTags}</div>
                     </div>
                 `;
             }
@@ -481,6 +499,7 @@
 
     <div class="content">
         ${eReviewSection}
+        ${topicsSection}
         <div class="stats">
             <h3>Content Statistics</h3>
             <span class="stat">${extractedContent.wordCount} words</span>
@@ -510,6 +529,7 @@
             sessionStorage.setItem('rewriter_source_url', extractedContent.url);
             sessionStorage.setItem('rewriter_title', extractedContent.title || 'Article Content');
             sessionStorage.setItem('rewriter_ereview_id', extractedContent.eReviewId || '');
+            sessionStorage.setItem('rewriter_topics', JSON.stringify(extractedContent.topics || []));
 
             // Navigate to the rewriter page
             window.location.href = 'article-rewriter.html';
@@ -935,14 +955,29 @@
                 `;
             }
 
+            // Build topics display if available
+            let topicsHTML = '';
+            if (result.topics && result.topics.length > 0) {
+                const tagSpans = result.topics.map(t =>
+                    `<span style="display:inline-block; border:1px solid rgba(0,0,0,0.5); color:#000; font-size:11px; padding:3px 8px; margin:2px 4px 2px 0; letter-spacing:0.05em;">${t}</span>`
+                ).join('');
+                topicsHTML = `
+                    <div style="margin-bottom: 12px;">
+                        <span class="label" style="display:block; margin-bottom:6px;">Topic Tags:</span>
+                        <div>${tagSpans}</div>
+                    </div>
+                `;
+            }
+
             // Update meta information
             metaDiv.innerHTML = `
                 ${eReviewHTML}
+                ${topicsHTML}
                 <h3>Content Statistics</h3>
                 <span class="stat">${result.wordCount} words</span>
                 <span class="stat">${result.charCount} characters</span>
                 <span class="stat">${result.readingTime} min read</span>
-                <span class="stat">Source: <a href="${result.url}" target="_blank" style="color: #fff;">View Original</a></span>
+                <span class="stat">Source: <a href="${result.url}" target="_blank" style="color: #000;">View Original</a></span>
             `;
 
             // Display content

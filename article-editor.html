@@ -157,7 +157,7 @@
 </head>
 <body>
     <div class="site-header">
-        <h1><span style="color: #fa2D00;">a</span>RCH<span style="color: #fa2D00;">i</span> <span style="font-weight: 100;">[</span><span style="text-transform: uppercase;">Systems</span><span style="font-weight: 100;">]</span></h1>
+        <h1><span style="color: #fa2D00;">a</span>RCH<span style="color: #fa2D00;">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
         <p>Content &amp; Learning Tools</p>
     </div>
     <button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>
@@ -166,6 +166,7 @@
         <div class="header">
             <h1>Word Editor</h1>
             <p>Review and refine your brand-neutralized article before final export</p>
+           
             <div class="breadcrumb">
                 <span class="breadcrumb-step done">Step 1: Article Extractor</span>
                 <span class="breadcrumb-arrow">&#8594;</span>
@@ -176,7 +177,7 @@
                 <span class="breadcrumb-step active">Step 4: Word Editor</span>
             </div>
         </div>
-
+ <div id="editorMetadataBar" style="display:none; margin:12px 0px; padding:10px 14px; border:1px solid rgba(255,255,255,0.3); background:rgba(255,255,255,0.04);"></div>
         <div class="editor-card">
             <div class="toolbar">
                 <!-- Text style -->
@@ -253,16 +254,36 @@
 
     <script>
         const editor = document.getElementById('editorContent');
+        let eReviewId = null;
+        let topics = [];
 
         // Load content from sessionStorage
         window.addEventListener('DOMContentLoaded', () => {
             const content = sessionStorage.getItem('editor_content') || '';
+            eReviewId = sessionStorage.getItem('editor_ereview_id') || null;
+            try { topics = JSON.parse(sessionStorage.getItem('editor_topics') || '[]'); } catch(e) { topics = []; }
+
             if (content) {
                 const cleaned = cleanForEditor(content);
                 editor.innerHTML = cleaned;
             }
             updateWordCount();
+            renderMetadataBar();
         });
+
+        function renderMetadataBar() {
+            const bar = document.getElementById('editorMetadataBar');
+            if (!bar) return;
+            if (!eReviewId && (!topics || topics.length === 0)) { bar.style.display = 'none'; return; }
+            let html = '';
+            if (eReviewId) html += `<span style="font-size:12px; opacity:0.6; text-transform:uppercase; letter-spacing:0.1em; margin-right:6px;">eReview ID:</span><span style="font-family:'Courier New',monospace; font-size:14px; margin-right:20px;">${eReviewId}</span>`;
+            if (topics && topics.length > 0) {
+                html += `<span style="font-size:12px; opacity:0.6; text-transform:uppercase; letter-spacing:0.1em; margin-right:6px;">Topics:</span>`;
+                html += topics.map(t => `<span style="display:inline-block; border:1px solid rgba(255,255,255,0.4); font-size:11px; padding:2px 7px; margin:1px 3px 1px 0;">${t}</span>`).join('');
+            }
+            bar.innerHTML = html;
+            bar.style.display = 'block';
+        }
 
         function cleanForEditor(html) {
             const parser = new DOMParser();
@@ -355,6 +376,9 @@
         function downloadHtml() {
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
             const filename = `edited-article-${timestamp}.html`;
+            let metaBlock = '';
+            if (eReviewId) metaBlock += `<div style="background:#000;color:#fff;border:1px solid #fff;padding:12px 15px;margin-bottom:15px;display:flex;align-items:center;gap:10px;font-weight:600;"><span style="font-size:12px;opacity:0.6;text-transform:uppercase;letter-spacing:0.15em;">eReview ID:</span><span style="font-family:'Courier New',monospace;font-size:16px;">${eReviewId}</span></div>`;
+            if (topics && topics.length > 0) { const tags = topics.map(t=>`<span style="display:inline-block;border:1px solid rgba(255,255,255,0.5);color:#fff;font-size:11px;padding:3px 8px;margin:2px 4px 2px 0;">${t}</span>`).join(''); metaBlock += `<div style="background:#000;color:#fff;border:1px solid #fff;padding:12px 15px;margin-bottom:15px;"><div style="font-size:11px;opacity:0.6;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:8px;">Topic Tags</div><div>${tags}</div></div>`; }
             const htmlDoc = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -390,6 +414,7 @@
     </style>
 </head>
 <body>
+${metaBlock}
 ${editor.innerHTML}
 </body>
 </html>`;
@@ -400,7 +425,11 @@ ${editor.innerHTML}
         function downloadText() {
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
             const filename = `edited-article-${timestamp}.txt`;
-            const text = editor.innerText || '';
+            let header = '';
+            if (eReviewId) header += `eReview ID: ${eReviewId}\n`;
+            if (topics && topics.length > 0) header += `Topic Tags: ${topics.join(', ')}\n`;
+            if (header) header += '\n';
+            const text = header + (editor.innerText || '');
             downloadFile(text, filename, 'text/plain');
             showToast(`Downloaded ${filename}`, 'success');
         }
