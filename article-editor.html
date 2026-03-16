@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Word Editor - Step 5</title>
     <link rel="stylesheet" href="shared.css">
+    <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
         .container {
             max-width: 1100px;
@@ -243,6 +245,7 @@
                 <button class="button primary" onclick="copyToClipboard()">Copy to Clipboard</button>
                 <button class="button orange" onclick="downloadHtml()">Download HTML</button>
                 <button class="button secondary" onclick="downloadText()">Download Text</button>
+                <button class="button" style="border-color:#4f8ef7;color:#4f8ef7;" onclick="downloadWord()">Download Word</button>
             </div>
             <div>
                 <button class="button green" onclick="clearAIMarkers()">Finalize (Remove Markers)</button>
@@ -431,6 +434,23 @@ ${editor.innerHTML}
             if (header) header += '\n';
             const text = header + (editor.innerText || '');
             downloadFile(text, filename, 'text/plain');
+            showToast(`Downloaded ${filename}`, 'success');
+        }
+
+        function downloadWord() {
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            const filename = `edited-article-${timestamp}.docx`;
+            let metaBlock = '';
+            if (eReviewId) metaBlock += `<p><strong>eReview ID:</strong> ${eReviewId}</p>`;
+            if (topics && topics.length > 0) metaBlock += `<p><strong>Topic Tags:</strong> ${topics.join(', ')}</p>`;
+            if (metaBlock) metaBlock += '<hr/>';
+            const htmlContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>${metaBlock}${editor.innerHTML}</body></html>`;
+            if (typeof htmlDocx === 'undefined') {
+                showToast('Word library not loaded. Check your internet connection.', 'error');
+                return;
+            }
+            const docxBlob = htmlDocx.asBlob(htmlContent);
+            saveAs(docxBlob, filename);
             showToast(`Downloaded ${filename}`, 'success');
         }
 
