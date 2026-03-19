@@ -530,6 +530,9 @@
             sessionStorage.setItem('rewriter_title', extractedContent.title || 'Article Content');
             sessionStorage.setItem('rewriter_ereview_id', extractedContent.eReviewId || '');
             sessionStorage.setItem('rewriter_topics', JSON.stringify(extractedContent.topics || []));
+            // Persistent keys — survive across all steps and never get wiped
+            if (extractedContent.eReviewId) sessionStorage.setItem('article_ereview_id', extractedContent.eReviewId);
+            if (extractedContent.topics && extractedContent.topics.length) sessionStorage.setItem('article_topics', JSON.stringify(extractedContent.topics));
 
             // Navigate to the rewriter page
             window.location.href = 'article-rewriter.html';

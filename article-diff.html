@@ -326,8 +326,11 @@
         window.addEventListener('DOMContentLoaded', () => {
             originalHtml = sessionStorage.getItem('diff_original') || '';
             neutralizedHtml = sessionStorage.getItem('diff_neutralized') || '';
-            eReviewId = sessionStorage.getItem('diff_ereview_id') || null;
+            eReviewId = sessionStorage.getItem('diff_ereview_id') || sessionStorage.getItem('article_ereview_id') || null;
+            if (eReviewId) sessionStorage.setItem('article_ereview_id', eReviewId);
             try { topics = JSON.parse(sessionStorage.getItem('diff_topics') || '[]'); } catch(e) { topics = []; }
+            if (!topics.length) { try { topics = JSON.parse(sessionStorage.getItem('article_topics') || '[]'); } catch(e) { topics = []; } }
+            if (topics.length) sessionStorage.setItem('article_topics', JSON.stringify(topics));
 
             if (originalHtml || neutralizedHtml) {
                 renderPanels();
@@ -586,8 +589,8 @@
                 return;
             }
             sessionStorage.setItem('editor_content', neutralizedHtml);
-            sessionStorage.setItem('editor_ereview_id', eReviewId || '');
-            sessionStorage.setItem('editor_topics', JSON.stringify(topics));
+            sessionStorage.setItem('editor_ereview_id', eReviewId || sessionStorage.getItem('article_ereview_id') || '');
+            sessionStorage.setItem('editor_topics', JSON.stringify(topics.length ? topics : JSON.parse(sessionStorage.getItem('article_topics') || '[]')));
             window.location.href = 'article-editor.html';
         }
     </script>

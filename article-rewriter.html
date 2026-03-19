@@ -589,15 +589,19 @@
                 // Populate the textarea with the content
                 document.getElementById('htmlInput').value = savedContent;
 
-                // Store eReview ID
-                if (savedEReviewId) {
-                    eReviewId = savedEReviewId;
-                }
+                // Store eReview ID — fall back to persistent key if step key is empty
+                eReviewId = savedEReviewId || sessionStorage.getItem('article_ereview_id') || null;
+                // Re-save persistent key so it stays available downstream
+                if (eReviewId) sessionStorage.setItem('article_ereview_id', eReviewId);
 
-                // Store topics
+                // Store topics — fall back to persistent key
                 if (savedTopics) {
                     try { topics = JSON.parse(savedTopics); } catch(e) { topics = []; }
                 }
+                if (!topics.length) {
+                    try { topics = JSON.parse(sessionStorage.getItem('article_topics') || '[]'); } catch(e) { topics = []; }
+                }
+                if (topics.length) sessionStorage.setItem('article_topics', JSON.stringify(topics));
 
                 // Show metadata bar if we have eReview or topics
                 updateMetadataBar();
@@ -1332,8 +1336,8 @@ Return ONLY the rewritten text, nothing else.`
             sessionStorage.setItem('diff_original', originalContent);
             sessionStorage.setItem('diff_neutralized', lastResult.html);
             sessionStorage.setItem('diff_title', eReviewId ? `eReview: ${eReviewId}` : 'Article Comparison');
-            sessionStorage.setItem('diff_ereview_id', eReviewId || '');
-            sessionStorage.setItem('diff_topics', JSON.stringify(topics));
+            sessionStorage.setItem('diff_ereview_id', eReviewId || sessionStorage.getItem('article_ereview_id') || '');
+            sessionStorage.setItem('diff_topics', JSON.stringify(topics.length ? topics : JSON.parse(sessionStorage.getItem('article_topics') || '[]')));
             window.location.href = 'article-diff.html';
         });
 

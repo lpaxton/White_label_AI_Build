@@ -179,7 +179,13 @@
                 <span class="breadcrumb-step active">Step 4: Word Editor</span>
             </div>
         </div>
- <div id="editorMetadataBar" style="display:none; margin:12px 0px; padding:10px 14px; border:1px solid rgba(255,255,255,0.3); background:rgba(255,255,255,0.04);"></div>
+        <div id="editorMetadataBar" style="margin:12px 0px; padding:12px 16px; border:1px solid rgba(255,255,255,0.3); background:rgba(255,255,255,0.04); display:flex; align-items:center; flex-wrap:wrap; gap:14px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:11px; opacity:0.6; text-transform:uppercase; letter-spacing:0.12em; white-space:nowrap;">eReview ID:</span>
+                <input id="eReviewInput" type="text" placeholder="Enter eReview ID" style="background:transparent; border:none; border-bottom:1px solid rgba(255,255,255,0.4); color:#fff; font-family:'Courier New',monospace; font-size:14px; padding:2px 4px; width:160px; outline:none;" oninput="eReviewId=this.value.trim()||null">
+            </div>
+            <div id="topicTagsBar" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;"></div>
+        </div>
         <div class="editor-card">
             <div class="toolbar">
                 <!-- Text style -->
@@ -263,8 +269,9 @@
         // Load content from sessionStorage
         window.addEventListener('DOMContentLoaded', () => {
             const content = sessionStorage.getItem('editor_content') || '';
-            eReviewId = sessionStorage.getItem('editor_ereview_id') || null;
+            eReviewId = sessionStorage.getItem('editor_ereview_id') || sessionStorage.getItem('article_ereview_id') || null;
             try { topics = JSON.parse(sessionStorage.getItem('editor_topics') || '[]'); } catch(e) { topics = []; }
+            if (!topics.length) { try { topics = JSON.parse(sessionStorage.getItem('article_topics') || '[]'); } catch(e) { topics = []; } }
 
             if (content) {
                 const cleaned = cleanForEditor(content);
@@ -275,17 +282,16 @@
         });
 
         function renderMetadataBar() {
-            const bar = document.getElementById('editorMetadataBar');
-            if (!bar) return;
-            if (!eReviewId && (!topics || topics.length === 0)) { bar.style.display = 'none'; return; }
-            let html = '';
-            if (eReviewId) html += `<span style="font-size:12px; opacity:0.6; text-transform:uppercase; letter-spacing:0.1em; margin-right:6px;">eReview ID:</span><span style="font-family:'Courier New',monospace; font-size:14px; margin-right:20px;">${eReviewId}</span>`;
-            if (topics && topics.length > 0) {
-                html += `<span style="font-size:12px; opacity:0.6; text-transform:uppercase; letter-spacing:0.1em; margin-right:6px;">Topics:</span>`;
-                html += topics.map(t => `<span style="display:inline-block; border:1px solid rgba(255,255,255,0.4); font-size:11px; padding:2px 7px; margin:1px 3px 1px 0;">${t}</span>`).join('');
+            // Populate eReview input from sessionStorage
+            const input = document.getElementById('eReviewInput');
+            if (input && eReviewId) input.value = eReviewId;
+
+            // Populate topic tags
+            const tagsBar = document.getElementById('topicTagsBar');
+            if (tagsBar && topics && topics.length > 0) {
+                tagsBar.innerHTML = `<span style="font-size:11px; opacity:0.6; text-transform:uppercase; letter-spacing:0.12em;">Topics:</span>` +
+                    topics.map(t => `<span style="display:inline-block; border:1px solid rgba(255,255,255,0.4); font-size:11px; padding:2px 7px;">${t}</span>`).join('');
             }
-            bar.innerHTML = html;
-            bar.style.display = 'block';
         }
 
         function cleanForEditor(html) {
@@ -376,12 +382,20 @@
             showToast('Content copied to clipboard', 'success');
         }
 
+        function buildMetaBlockHtml() {
+            const id = eReviewId || 'N/A';
+            let block = `<div style="background:#000;color:#fff;border:1px solid #fff;padding:12px 15px;margin-bottom:8px;display:flex;align-items:center;gap:10px;"><span style="font-size:11px;opacity:0.6;text-transform:uppercase;letter-spacing:0.15em;">eReview ID:</span><span style="font-family:'Courier New',monospace;font-size:15px;font-weight:600;">${id}</span></div>`;
+            const tags = (topics && topics.length > 0)
+                ? topics.map(t=>`<span style="display:inline-block;border:1px solid rgba(255,255,255,0.5);color:#fff;font-size:11px;padding:3px 8px;margin:2px 4px 2px 0;">${t}</span>`).join('')
+                : '<span style="font-size:12px;opacity:0.5;">None</span>';
+            block += `<div style="background:#000;color:#fff;border:1px solid #fff;border-top:none;padding:12px 15px;margin-bottom:20px;"><div style="font-size:11px;opacity:0.6;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:8px;">Topic Tags</div><div>${tags}</div></div>`;
+            return block;
+        }
+
         function downloadHtml() {
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
             const filename = `edited-article-${timestamp}.html`;
-            let metaBlock = '';
-            if (eReviewId) metaBlock += `<div style="background:#000;color:#fff;border:1px solid #fff;padding:12px 15px;margin-bottom:15px;display:flex;align-items:center;gap:10px;font-weight:600;"><span style="font-size:12px;opacity:0.6;text-transform:uppercase;letter-spacing:0.15em;">eReview ID:</span><span style="font-family:'Courier New',monospace;font-size:16px;">${eReviewId}</span></div>`;
-            if (topics && topics.length > 0) { const tags = topics.map(t=>`<span style="display:inline-block;border:1px solid rgba(255,255,255,0.5);color:#fff;font-size:11px;padding:3px 8px;margin:2px 4px 2px 0;">${t}</span>`).join(''); metaBlock += `<div style="background:#000;color:#fff;border:1px solid #fff;padding:12px 15px;margin-bottom:15px;"><div style="font-size:11px;opacity:0.6;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:8px;">Topic Tags</div><div>${tags}</div></div>`; }
+            const metaBlock = buildMetaBlockHtml();
             const htmlDoc = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -428,10 +442,9 @@ ${editor.innerHTML}
         function downloadText() {
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
             const filename = `edited-article-${timestamp}.txt`;
-            let header = '';
-            if (eReviewId) header += `eReview ID: ${eReviewId}\n`;
-            if (topics && topics.length > 0) header += `Topic Tags: ${topics.join(', ')}\n`;
-            if (header) header += '\n';
+            const id = eReviewId || 'N/A';
+            const tagList = (topics && topics.length > 0) ? topics.join(', ') : 'None';
+            const header = `eReview ID: ${id}\nTopic Tags: ${tagList}\n\n`;
             const text = header + (editor.innerText || '');
             downloadFile(text, filename, 'text/plain');
             showToast(`Downloaded ${filename}`, 'success');
@@ -440,11 +453,20 @@ ${editor.innerHTML}
         function downloadWord() {
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
             const filename = `edited-article-${timestamp}.docx`;
-            let metaBlock = '';
-            if (eReviewId) metaBlock += `<p><strong>eReview ID:</strong> ${eReviewId}</p>`;
-            if (topics && topics.length > 0) metaBlock += `<p><strong>Topic Tags:</strong> ${topics.join(', ')}</p>`;
-            if (metaBlock) metaBlock += '<hr/>';
-            const htmlContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>${metaBlock}${editor.innerHTML}</body></html>`;
+            const id = eReviewId || 'N/A';
+            const tagList = (topics && topics.length > 0) ? topics.join(', ') : 'None';
+            const metaBlock = `<p><strong>eReview ID:</strong> ${id}</p><p><strong>Topic Tags:</strong> ${tagList}</p><hr/>`;
+
+            // Clone the editor and apply inline highlight styles to AI marker spans
+            // so Word preserves the highlights (CSS classes don't carry over to .docx)
+            const clone = editor.cloneNode(true);
+            clone.querySelectorAll('[data-ai-rewrite], .rewritten-content').forEach(el => {
+                el.style.backgroundColor = '#fff59d';
+                el.style.borderRadius = '2px';
+                el.style.padding = '0 2px';
+            });
+
+            const htmlContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>${metaBlock}${clone.innerHTML}</body></html>`;
             if (typeof htmlDocx === 'undefined') {
                 showToast('Word library not loaded. Check your internet connection.', 'error');
                 return;
