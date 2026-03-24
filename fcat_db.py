@@ -9,6 +9,7 @@ import os
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 from pymongo import MongoClient
+from pymongo.server_api import ServerApi
 from bson.objectid import ObjectId
 
 load_dotenv()
@@ -45,7 +46,7 @@ def connect():
         raise ValueError("MONGODB_URI environment variable is not set")
 
     print(f"[fcat_db] Connecting to MongoDB Atlas...")
-    _client = MongoClient(uri)
+    _client = MongoClient(uri, server_api=ServerApi('1'))
 
     # Verify connectivity
     _client.admin.command("ping")

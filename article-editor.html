@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="shared.css">
     <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         .container {
             max-width: 1100px;
@@ -252,8 +253,10 @@
                 <button class="button orange" onclick="downloadHtml()">Download HTML</button>
                 <button class="button secondary" onclick="downloadText()">Download Text</button>
                 <button class="button" style="border-color:#4f8ef7;color:#4f8ef7;" onclick="downloadWord()">Download Word</button>
+                <button class="button" style="border-color:#e05252;color:#e05252;" onclick="downloadPdf()">Download PDF</button>
             </div>
-            <div>
+            <div style="display:flex;gap:10px;">
+                <button class="button" style="border-color:#22c55e;color:#22c55e;" onclick="saveToFcat()" id="saveFcatBtn">Save to FCAT</button>
                 <button class="button green" onclick="clearAIMarkers()">Finalize (Remove Markers)</button>
             </div>
         </div>
@@ -448,6 +451,94 @@ ${editor.innerHTML}
             const text = header + (editor.innerText || '');
             downloadFile(text, filename, 'text/plain');
             showToast(`Downloaded ${filename}`, 'success');
+        }
+
+        function downloadPdf() {
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            const filename = `edited-article-${timestamp}.pdf`;
+            const id = eReviewId || 'N/A';
+            const tagList = (topics && topics.length > 0) ? topics.join(', ') : 'None';
+
+            // Clone editor and apply inline highlights for AI markers
+            const clone = editor.cloneNode(true);
+            clone.querySelectorAll('[data-ai-rewrite], .rewritten-content').forEach(el => {
+                el.style.backgroundColor = '#fff59d';
+                el.style.padding = '0 2px';
+            });
+
+            const metaHtml = `
+                <div style="font-family:monospace;font-size:12px;border:1px solid #000;padding:10px 14px;margin-bottom:6px;">
+                    <strong>eReview ID:</strong> ${id}
+                </div>
+                <div style="font-family:sans-serif;font-size:12px;border:1px solid #000;border-top:none;padding:10px 14px;margin-bottom:24px;">
+                    <strong>Topic Tags:</strong> ${tagList}
+                </div>`;
+
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'font-family:Georgia,serif;font-size:14px;line-height:1.8;color:#000;padding:20px;';
+            wrapper.innerHTML = metaHtml + clone.innerHTML;
+
+            const opt = {
+                margin: [15, 15, 15, 15],
+                filename,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            showToast('Generating PDF…', 'success');
+            html2pdf().set(opt).from(wrapper).save().then(() => {
+                showToast(`Downloaded ${filename}`, 'success');
+            });
+        }
+
+        async function saveToFcat() {
+            const btn = document.getElementById('saveFcatBtn');
+            const neutralizedHtml = editor.innerHTML;
+            if (!neutralizedHtml.trim()) {
+                showToast('No content to save', 'error');
+                return;
+            }
+            const sourceUrl = sessionStorage.getItem('article_source_url') || '';
+            const originalHtml = sessionStorage.getItem('diff_original') || '';
+
+            btn.disabled = true;
+            btn.textContent = 'Saving…';
+            showToast('Saving to FCAT database…', 'success');
+
+            try {
+                const res = await fetch('http://127.0.0.1:5000/api/save-to-fcat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        neutralized_html: neutralizedHtml,
+                        original_html: originalHtml,
+                        source_url: sourceUrl || `manual-entry-${Date.now()}`,
+                        source: 'fidelity_cms',
+                        ereview_id: eReviewId || null,
+                        topics: topics || [],
+                    })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    showToast(`Saved to FCAT! ID: ${data.article_id}`, 'success');
+                    btn.textContent = 'Saved ✓';
+                    btn.style.borderColor = '#86efac';
+                    btn.style.color = '#86efac';
+                } else if (res.status === 409) {
+                    showToast('Article already exists in FCAT (duplicate URL)', 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Save to FCAT';
+                } else {
+                    showToast(`FCAT error: ${data.error || 'Unknown error'}`, 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Save to FCAT';
+                }
+            } catch (err) {
+                showToast('Could not reach API server. Is it running?', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Save to FCAT';
+            }
         }
 
         function downloadWord() {

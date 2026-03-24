@@ -577,6 +577,7 @@ def save_to_fcat():
         article_doc = {
             "source": source,
             "source_url": source_url,
+            "ereview_id": data.get('ereview_id', None),
             "ingest_date": now,
             "content": {
                 "original_html": original_html,
