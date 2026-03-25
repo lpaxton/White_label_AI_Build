@@ -156,6 +156,28 @@
         @media (max-width: 768px) {
             .editor-content { padding: 20px; }
         }
+        /* Save-to-FCAT modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: #000;
+            border: 1px solid #fff;
+            padding: 36px 40px;
+            max-width: 480px;
+            width: 90%;
+            text-align: center;
+        }
+        .modal h2 { font-size: 20px; margin-bottom: 12px; }
+        .modal p { font-size: 14px; opacity: 0.7; margin-bottom: 28px; line-height: 1.6; }
+        .modal-actions { display: flex; gap: 12px; justify-content: center; }
     </style>
 </head>
 <body>
@@ -264,6 +286,18 @@
 
     <div class="toast hidden" id="toast"></div>
 
+    <!-- Save to FCAT confirmation modal -->
+    <div class="modal-overlay" id="fcatModal" onclick="if(event.target===this)closeFcatModal()">
+        <div class="modal">
+            <h2>Save to Database?</h2>
+            <p>Markers have been removed. Would you like to save this finalized article to the FCAT database?</p>
+            <div class="modal-actions">
+                <button class="button green" onclick="confirmSaveToFcat()">Yes, Save</button>
+                <button class="button secondary" onclick="closeFcatModal()">No, Skip</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const editor = document.getElementById('editorContent');
         let eReviewId = null;
@@ -325,6 +359,17 @@
             });
             showToast('AI markers removed', 'success');
             updateWordCount();
+            // Show save-to-FCAT prompt
+            document.getElementById('fcatModal').classList.add('active');
+        }
+
+        function closeFcatModal() {
+            document.getElementById('fcatModal').classList.remove('active');
+        }
+
+        async function confirmSaveToFcat() {
+            closeFcatModal();
+            await saveToFcat();
         }
 
         function execCmd(command, value = null) {
@@ -514,6 +559,7 @@ ${editor.innerHTML}
                         neutralized_html: neutralizedHtml,
                         original_html: originalHtml,
                         source_url: sourceUrl || `manual-entry-${Date.now()}`,
+                        origin_url: sourceUrl || null,
                         source: 'fidelity_cms',
                         ereview_id: eReviewId || null,
                         topics: topics || [],

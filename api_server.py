@@ -76,7 +76,8 @@ def index():
             'GET /api/rewrite/config': 'Get rewrite configuration',
             'GET /api/rewrite/health': 'Rewrite API health check',
             'POST /api/save-to-fcat': 'Save processed article to MongoDB Atlas (FCAT)',
-            'GET /api/fcat/status': 'FCAT MongoDB connection status'
+            'GET /api/fcat/status': 'FCAT MongoDB connection status',
+            'POST /api/chat': 'Ask questions answered solely from the FCAT article database',
         }
     })
 
@@ -547,6 +548,7 @@ def save_to_fcat():
         original_html = data.get('original_html', '').strip()
         source_url = data.get('source_url', '').strip()
         source = data.get('source', '').strip()
+        origin_url = data.get('origin_url', None)  # Actual origin URL (may differ from source_url dedup key)
 
         if not neutralized_html:
             return jsonify({'error': 'neutralized_html is required'}), 400
@@ -577,6 +579,7 @@ def save_to_fcat():
         article_doc = {
             "source": source,
             "source_url": source_url,
+            "origin_url": origin_url or None,
             "ereview_id": data.get('ereview_id', None),
             "ingest_date": now,
             "content": {
@@ -625,6 +628,138 @@ def save_to_fcat():
     except Exception as e:
         traceback.print_exc()
         return jsonify({'error': f'Save to FCAT failed: {str(e)}'}), 500
+
+
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    """
+    DB-grounded chatbot endpoint.
+
+    Retrieves relevant articles from the FCAT MongoDB database and passes
+    their content to Claude with strict instructions to answer ONLY from
+    that retrieved context.  No outside knowledge is used.
+
+    Request body:
+        - message: The user's question (required)
+        - history: Array of {role, content} prior turns (optional, max 6)
+    """
+    if not FCAT_AVAILABLE:
+        return jsonify({'error': 'FCAT modules not available'}), 503
+
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No JSON data provided'}), 400
+
+        user_message = data.get('message', '').strip()
+        if not user_message:
+            return jsonify({'error': 'message is required'}), 400
+
+        history = data.get('history', [])
+
+        # ── Retrieve relevant articles from the database ───────────────────
+        articles = fcat_db.search_articles(user_message, limit=5)
+
+        if not articles:
+            return jsonify({
+                'success': True,
+                'answer': "The knowledge base doesn't contain any articles yet, or none matched your question. Please add articles to the database first.",
+                'sources': [],
+                'articles_used': 0,
+            })
+
+        # ── Build grounded context ─────────────────────────────────────────
+        context_parts = []
+        sources = []
+        for i, article in enumerate(articles, 1):
+            plain_text = (article.get('content') or {}).get('plain_text', '').strip()
+            if not plain_text:
+                continue
+            # Cap individual article length to keep prompt manageable
+            if len(plain_text) > 4000:
+                plain_text = plain_text[:4000] + ' [...]'
+            topics = (article.get('taxonomy') or {}).get('topics', [])
+            display_url = article.get('origin_url') or article.get('source_url', '')
+            context_parts.append(f'=== ARTICLE {i} ===\n{plain_text}')
+            sources.append({
+                'id': article['_id'],
+                'source_url': display_url,
+                'topics': topics,
+            })
+
+        if not context_parts:
+            return jsonify({
+                'success': True,
+                'answer': "Articles were found in the database but contained no readable text.",
+                'sources': [],
+                'articles_used': 0,
+            })
+
+        grounded_context = "\n\n".join(context_parts)
+
+        # ── Call Claude with strict grounding instructions ─────────────────
+        from anthropic import Anthropic
+        api_key = os.environ.get('ANTHROPIC_API_KEY')
+        if not api_key:
+            return jsonify({'error': 'ANTHROPIC_API_KEY is not configured on the server'}), 503
+
+        client = Anthropic(api_key=api_key)
+
+        SYSTEM_PROMPT = """\
+You are a financial education assistant that operates under strict regulatory constraints.
+
+YOU MAY ONLY USE THE ARTICLE CONTENT PROVIDED IN EACH MESSAGE TO ANSWER QUESTIONS.
+
+MANDATORY RULES — NO EXCEPTIONS:
+1. Base every answer exclusively on the article excerpts provided.  
+   Do NOT use your training data, general knowledge, or any information
+   not explicitly present in the provided articles.
+2. If the provided articles do not contain sufficient information to answer
+   the question, respond with exactly:
+   "The available articles don\'t contain enough information to answer that question."
+3. Do NOT speculate, infer beyond what is written, or fill gaps with outside knowledge.
+4. Do NOT introduce any facts, statistics, or guidance not found in the articles.
+5. Keep your tone clear, helpful, and professional.
+6. Where relevant, indicate which article your answer draws from (e.g. "According to the article...").
+
+This is a regulatory requirement. Violating these rules is not acceptable under any circumstances."""
+
+        # Build message list — inject fresh context into every user turn
+        # so the model always answers from the retrieved documents
+        messages = []
+        for turn in history[-6:]:
+            if turn.get('role') in ('user', 'assistant'):
+                messages.append({'role': turn['role'], 'content': turn['content']})
+
+        grounded_user_message = (
+            f"Below are the relevant articles retrieved from the knowledge base:\n\n"
+            f"{grounded_context}\n\n"
+            f"---\n\n"
+            f"Using ONLY the article content above, please answer the following question:\n\n"
+            f"{user_message}"
+        )
+        messages.append({'role': 'user', 'content': grounded_user_message})
+
+        response = client.messages.create(
+            model='claude-opus-4-5',
+            max_tokens=1024,
+            system=SYSTEM_PROMPT,
+            messages=messages,
+        )
+
+        answer = response.content[0].text
+        print(f"[chat] Answered using {len(context_parts)} article(s)")
+
+        return jsonify({
+            'success': True,
+            'answer': answer,
+            'sources': sources,
+            'articles_used': len(context_parts),
+        })
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': f'Chat failed: {str(e)}'}), 500
 
 
 @app.route('/api/fcat/status', methods=['GET'])
@@ -677,6 +812,7 @@ if __name__ == '__main__':
     print("FCAT (MongoDB Atlas):")
     print("  POST /api/save-to-fcat - Save article to MongoDB Atlas")
     print("  GET /api/fcat/status - FCAT connection status")
+    print("  POST /api/chat - DB-grounded chatbot (answers from database only)")
     if FCAT_AVAILABLE:
         print("  Status: FCAT modules loaded")
     else:

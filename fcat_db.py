@@ -6,6 +6,7 @@ Part of the aRCHie content pipeline.
 """
 
 import os
+import re
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 from pymongo import MongoClient
@@ -154,3 +155,81 @@ def article_exists_by_url(source_url: str) -> bool:
     exists = collection.count_documents({"source_url": source_url}, limit=1) > 0
     print(f"[fcat_db] article_exists_by_url({source_url}) -> {exists}")
     return exists
+
+
+def search_articles(query: str, limit: int = 5) -> list:
+    """
+    Search articles by query string.
+    Attempts MongoDB $text search first (requires a text index); falls back to
+    a multi-keyword regex scan of content.plain_text.
+    Returns a list of document dicts (no embedding vectors — plain text + metadata only).
+    """
+    collection = _get_collection()
+    projection = {
+        "content.plain_text": 1,
+        "source_url": 1,
+        "origin_url": 1,
+        "taxonomy": 1,
+        "ereview_id": 1,
+        "_id": 1,
+    }
+
+    # ── Primary: $text index search ──────────────────────────────────────────
+    try:
+        cursor = (
+            collection
+            .find({"$text": {"$search": query}}, {"score": {"$meta": "textScore"}, **projection})
+            .sort([("score", {"$meta": "textScore"})])
+            .limit(limit)
+        )
+        results = []
+        for doc in cursor:
+            doc["_id"] = str(doc["_id"])
+            results.append(doc)
+        if results:
+            print(f"[fcat_db] search_articles (text index) -> {len(results)} results")
+            return results
+    except Exception:
+        pass  # No text index configured — fall through to regex
+
+    # ── Fallback: multi-keyword regex scan ───────────────────────────────────
+    words = [w for w in re.split(r"\W+", query) if len(w) > 3]
+    if not words:
+        words = query.split()
+    pattern = "|".join(re.escape(w) for w in words[:10])
+    cursor = (
+        collection
+        .find({"content.plain_text": {"$regex": pattern, "$options": "i"}}, projection)
+        .limit(limit)
+    )
+    results = []
+    for doc in cursor:
+        doc["_id"] = str(doc["_id"])
+        results.append(doc)
+    print(f"[fcat_db] search_articles (regex fallback) -> {len(results)} results")
+    return results
+
+
+def get_all_articles_for_chat(limit: int = 50) -> list:
+    """
+    Fetch all articles (plain text + metadata, no vectors) for client-side
+    ranking when no text/vector index is available.
+    """
+    collection = _get_collection()
+    cursor = collection.find(
+        {},
+        {
+            "content.plain_text": 1,
+            "source_url": 1,
+            "origin_url": 1,
+            "taxonomy": 1,
+            "ereview_id": 1,
+            "_id": 1,
+        }
+    ).limit(limit)
+    results = []
+    for doc in cursor:
+        doc["_id"] = str(doc["_id"])
+        results.append(doc)
+    print(f"[fcat_db] get_all_articles_for_chat -> {len(results)} articles")
+    return results
