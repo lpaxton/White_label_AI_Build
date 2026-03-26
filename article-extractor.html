@@ -18,19 +18,20 @@
             margin-bottom: 30px;
         }
         .input-section {
-            background: #000;
-            border: 1px solid #fff;
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            border: none;
             padding: 25px;
-            
         }
         .results-section {
             background: #fff;
-            border: 1px solid #fff;
+            border-radius: var(--radius);
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            border: none;
             padding: 25px;
             min-height: 600px;
-            
-            
-            color: #000;
+            color: var(--text);
         }
         /* Full-width stacked buttons in the input panel */
         .button {
@@ -40,13 +41,15 @@
             font-size: 14px;
         }
         .extraction-options {
-            background: #000;
+            background: var(--surface);
             padding: 15px;
             margin-bottom: 20px;
-            border: 1px solid #fff;
+            border-radius: var(--radius-sm);
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+            border: none;
         }
         .extraction-options h4 {
-            color: #fff;
+            color: var(--text-muted);
             margin-bottom: 10px;
             font-size: 11px;
             text-transform: uppercase;
@@ -79,16 +82,18 @@
             max-height: 400px;
             margin-top: 10px;
         }
-        /* content-meta uses light bg (results panel is white) */
+        /* content-meta uses neumorphic styling */
         .content-meta {
-            background: #f5f5f5;
+            background: var(--surface);
             padding: 15px;
             margin-bottom: 20px;
-            border: 1px solid #ccc;
+            border-radius: var(--radius-sm);
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            border: none;
         }
         .content-meta h3 {
             margin-bottom: 10px;
-            color: #000;
+            color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.15em;
             font-size: 11px;
@@ -97,19 +102,23 @@
         .content-meta .stat {
             display: inline-block;
             background: transparent;
-            border: 1px solid rgba(0,0,0,0.3);
-            color: #000;
+            border: none;
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            border-radius: 20px;
+            color: var(--text);
             padding: 4px 8px;
             font-size: 12px;
             margin-right: 10px;
             margin-bottom: 5px;
         }
         .article-id-display {
-            background: #f5f5f5;
-            color: #000;
+            background: var(--surface);
+            color: var(--text);
             padding: 12px 15px;
             margin-bottom: 15px;
-            border: 1px solid #ccc;
+            border-radius: var(--radius-sm);
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+            border: none;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -124,14 +133,15 @@
         .article-id-display .value {
             font-size: 16px;
             font-family: 'Courier New', monospace;
-            background: rgba(0,0,0,0.07);
+            background: rgba(0,0,0,0.05);
             padding: 4px 8px;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
     <div class="site-header">
-        <h1><span style="color: #fa2D00;">a</span>RCH<span style="color: #fa2D00;">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
+        <h1><span style="color: var(--accent-red);">a</span>RCH<span style="color: var(--accent-red);">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
         <p>Content &amp; Learning Tools</p>
     </div>
     <button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>

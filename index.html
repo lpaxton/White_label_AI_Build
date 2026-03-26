@@ -8,38 +8,46 @@
     <link rel="stylesheet" href="shared.css">
     <style>
         .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    
-}
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
         /* ── Tools Grid ── */
         .tools-grid {
             display: grid;
-            border-top: 1px solid #fff;
             grid-template-columns: repeat(2, minmax(300px, 1fr));
+            gap: 24px;
+            padding: 0 20px;
         }
 
         .tool-card {
-            border-right: 1px solid #fff;
-            border-left: 1px solid #fff;
-            border-bottom: 1px solid #fff;
-            padding: 40px;
-            transition: background 0.2s;
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 36px;
+            box-shadow: 6px 6px 12px var(--shadow-dark),
+                        -6px -6px 12px var(--shadow-light);
+            transition: box-shadow 0.3s, transform 0.2s;
         }
 
         .tool-card:hover {
-            background: #111;
+            box-shadow: 8px 8px 16px var(--shadow-dark),
+                        -8px -8px 16px var(--shadow-light);
+            transform: translateY(-2px);
         }
 
         .tool-card .badge {
             display: inline-block;
-            border: 1px solid #fff;
-            padding: 3px 10px;
+            padding: 5px 14px;
             font-size: 10px;
             font-weight: 700;
             letter-spacing: 0.2em;
             text-transform: uppercase;
             margin-bottom: 20px;
+            border-radius: 20px;
+            background: var(--surface);
+            color: var(--accent);
+            box-shadow: inset 2px 2px 4px var(--shadow-dark),
+                        inset -2px -2px 4px var(--shadow-light);
         }
 
         .tool-card h2 {
@@ -47,12 +55,13 @@
             font-weight: 600;
             margin-bottom: 14px;
             line-height: 1.2;
+            color: var(--text);
         }
 
         .tool-card p {
             font-size: 14px;
             line-height: 1.7;
-            opacity: 0.65;
+            color: var(--text-muted);
             margin-bottom: 24px;
         }
 
@@ -63,34 +72,27 @@
 
         .tool-card ul li {
             font-size: 13px;
-            padding: 6px 0 6px 16px;
+            padding: 8px 0 8px 20px;
             position: relative;
-            opacity: 0.75;
-            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-muted);
+            border-top: 1px solid rgba(163, 177, 198, 0.25);
         }
 
         .tool-card ul li:last-child {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            border-bottom: 1px solid rgba(163, 177, 198, 0.25);
         }
 
         .tool-card ul li:before {
             content: "—";
             position: absolute;
             left: 0;
-            opacity: 0.4;
-        }
-
-        /* button size override for homepage */
-        .button {
-            padding: 10px 22px;
-            font-size: 12px;
-            letter-spacing: 0.15em;
+            opacity: 0.35;
+            color: var(--accent);
         }
 
         /* ── Docs Section ── */
         .docs-section {
-            
-            padding: 48px 0px;
+            padding: 48px 20px;
         }
 
         .docs-section h2 {
@@ -98,7 +100,7 @@
             font-weight: 700;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            
+            color: var(--text);
             margin-bottom: 28px;
         }
 
@@ -112,37 +114,42 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            border: 1px solid #fff;
-            padding: 12px 20px;
+            padding: 14px 22px;
             text-decoration: none;
-            color: #fff;
+            color: var(--text);
             font-size: 13px;
             font-weight: 500;
             letter-spacing: 0.05em;
-            transition: background 0.2s, color 0.2s;
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            box-shadow: 4px 4px 8px var(--shadow-dark),
+                        -4px -4px 8px var(--shadow-light);
+            transition: box-shadow 0.2s;
+            border: none;
         }
 
         .doc-link:hover {
-            background: #fff;
-            color: #000;
+            box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                        inset -3px -3px 6px var(--shadow-light);
         }
 
         .doc-link .icon {
             font-size: 16px;
+            color: var(--accent);
         }
 
         /* ── Footer ── */
         .footer {
-            border-top: 1px solid #fff;
             padding: 28px 60px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-top: 20px;
         }
 
         .footer p {
             font-size: 12px;
-            opacity: 0.4;
+            color: var(--text-muted);
             letter-spacing: 0.08em;
         }
 
@@ -157,12 +164,17 @@
             flex: 1;
         }
 
+        .welcome-text p {
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
         .animation.right {
             display: grid;
             grid-template-columns: 1fr 1fr;
             grid-template-rows: 1fr 1fr;
-            width: 300px;
-            height: 300px;
+            width: 280px;
+            height: 280px;
             flex-shrink: 0;
         }
 
@@ -172,48 +184,48 @@
         }
 
         @keyframes drawCircle {
-            from {
-                stroke-dashoffset: 301.635px;
-            }
-
-            to {
-                stroke-dashoffset: 0;
-            }
+            from { stroke-dashoffset: 301.635px; }
+            to   { stroke-dashoffset: 0; }
         }
 
         .animation.right svg path {
             stroke-dashoffset: 301.635px;
             animation: drawCircle 1.8s ease-out forwards;
         }
+        .animation.right svg:nth-child(1) path { animation-delay: 0.0s; }
+        .animation.right svg:nth-child(2) path { animation-delay: 0.4s; }
+        .animation.right svg:nth-child(3) path { animation-delay: 0.8s; }
+        .animation.right svg:nth-child(4) path { animation-delay: 1.2s; }
 
-        .animation.right svg:nth-child(1) path {
-            animation-delay: 0.0s;
-        }
-
-        .animation.right svg:nth-child(2) path {
-            animation-delay: 0.4s;
-        }
-
-        .animation.right svg:nth-child(3) path {
-            animation-delay: 0.8s;
-        }
-
-        .animation.right svg:nth-child(4) path {
-            animation-delay: 1.2s;
+        /* ── Step number circles ── */
+        .step-number {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: var(--surface);
+            box-shadow: 4px 4px 8px var(--shadow-dark),
+                        -4px -4px 8px var(--shadow-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 20px;
         }
     </style>
 </head>
 
 <body>
     <div class="site-header">
-        <h1><span style="color: #fa2D00;">a</span>RCH<span style="color: #fa2D00;">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
+        <h1><span style="color: var(--accent-red);">a</span>RCH<span style="color: var(--accent-red);">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
         <p>Content &amp; Learning Tools</p>
     </div>
 
 <div class="container">
     <div class="docs-section" id="welcome-section">
         <div class="welcome-text">
-            <h2>Welcome to <span style="color: #fa2D00; text-transform: lowercase;">a</span>RCH<span style="color: #fa2D00; text-transform: lowercase;">i</span> <span style="font-weight: 100;">[</span><span style="text-transform: capitalize;">Intelligence</span><span style="font-weight: 100;">]</span></h2>
+            <h2>Welcome to <span style="color: var(--accent-red); text-transform: lowercase;">a</span>RCH<span style="color: var(--accent-red); text-transform: lowercase;">i</span> <span style="font-weight: 100;">[</span><span style="text-transform: capitalize;">Intelligence</span><span style="font-weight: 100;">]</span></h2>
             <p>aRCHi [Intelligence] is a suite of tools designed to help you extract, neutralize, compare, and edit article content
                 with ease. Whether you're looking to clean up an article for review or transform it into a brand-neutral
                 version, aRCHi has you covered.</p>
@@ -223,11 +235,11 @@
                 style="stroke-width: 1.00503px;">
                 <path d="M 2 50 A 48 48 0 0 0 98 50 A 48 48 0 0 0 2 50" style="stroke-dasharray: 301.635px;"></path>
             </svg>
-            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="white"
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#a3b1c6"
                 style="stroke-width: 1.00503px;">
                 <path d="M 2 50 A 48 48 0 0 0 98 50 A 48 48 0 0 0 2 50" style="stroke-dasharray: 301.635px;"></path>
             </svg>
-            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="white"
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#a3b1c6"
                 style="stroke-width: 1.00503px;">
                 <path d="M 2 50 A 48 48 0 0 0 98 50 A 48 48 0 0 0 2 50" style="stroke-dasharray: 301.635px;"></path>
             </svg>
@@ -240,7 +252,7 @@
     <div class="tools-grid">
 
         <div class="tool-card">
-            <span class="badge">Step 01</span>
+            <div class="step-number">01</div>
             <h2>Article Extractor</h2>
             <p>Extract and clean article content from any URL. Perfect for reviewing and processing article text.</p>
             <ul>
@@ -253,7 +265,7 @@
         </div>
 
         <div class="tool-card">
-            <span class="badge">Step 02</span>
+            <div class="step-number">02</div>
             <h2>Brand Neutralizer</h2>
             <p>Transform brand-specific content into generic, white-label alternatives using AI for intelligent
                 rewriting.</p>
@@ -268,7 +280,7 @@
         </div>
 
         <div class="tool-card">
-            <span class="badge">Step 03</span>
+            <div class="step-number">03</div>
             <h2>Content Diff Tool</h2>
             <p>Compare original article content against brand-neutralized output side by side to verify every change
                 made by the AI.</p>
@@ -283,7 +295,7 @@
         </div>
 
         <div class="tool-card">
-            <span class="badge">Step 04</span>
+            <div class="step-number">04</div>
             <h2>Word Editor</h2>
             <p>Review and refine the brand-neutralized article in a word-processor-style editor before final export.</p>
             <ul>
@@ -297,7 +309,7 @@
         </div>
 
         <div class="tool-card">
-            <span class="badge">Knowledge Base</span>
+            <div class="step-number">KB</div>
             <h2>Knowledge Base Chat</h2>
             <p>Ask questions and get answers drawn exclusively from the articles stored in the FCAT database. No outside knowledge — built for regulatory compliance.</p>
             <ul>
@@ -356,8 +368,6 @@
         </div>
     </div>
     </div>
-
-   
 
     <div class="footer">
         <p>aRCHi is the creation of Jim Janeteas, Luke Paxton & Matt Ledoux</p>

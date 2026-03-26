@@ -17,8 +17,10 @@
         .header p  { font-size: 15px; }
         /* Controls bar */
         .controls-bar {
-            background: #000;
-            border: 1px solid #fff;
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            border: none;
             padding: 14px 20px;
             margin-bottom: 16px;
             display: flex;
@@ -34,23 +36,25 @@
         }
         .mode-toggle {
             display: flex;
-            border: 1px solid #fff;
+            border-radius: var(--radius-sm);
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+            border: none;
+            overflow: hidden;
         }
         .mode-btn {
             padding: 7px 16px;
             border: none;
-            border-right: 1px solid #fff;
             cursor: pointer;
             font-size: 12px;
             font-weight: 600;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: #fff;
+            color: var(--text-muted);
             background: transparent;
             transition: all 0.2s;
         }
         .mode-btn:last-child { border-right: none; }
-        .mode-btn.active { background: #fff; color: #000; }
+        .mode-btn.active { background: var(--accent); color: #fff; box-shadow: inset 2px 2px 4px rgba(0,0,0,0.15); }
         .sync-scroll-toggle {
             display: flex;
             align-items: center;
@@ -59,7 +63,7 @@
             font-weight: 600;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: #fff;
+            color: var(--text-muted);
             opacity: 0.7;
             cursor: pointer;
         }
@@ -67,7 +71,7 @@
             width: 16px;
             height: 16px;
             cursor: pointer;
-            accent-color: #fff;
+            accent-color: var(--accent);
         }
         .controls-right { display: flex; gap: 10px; align-items: center; }
         /* button size override for this page */
@@ -79,6 +83,7 @@
             left: auto;
             z-index: 100;
             font-size: 11px;
+            border-radius: var(--radius-sm);
         }
         /* Diff panels */
         .diff-wrapper {
@@ -88,8 +93,10 @@
             margin-bottom: 20px;
         }
         .diff-panel {
-            background: #000;
-            border: 1px solid #fff;
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            border: none;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -103,9 +110,9 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            border-bottom: 1px solid #fff;
-            background: #111;
-            color: #fff;
+            border-bottom: none;
+            background: var(--bg-dark);
+            color: var(--text);
         }
         .panel-body {
             flex: 1;
@@ -117,6 +124,7 @@
             line-height: 1.7;
             background: #fff;
             color: #000;
+            border-radius: 0 0 var(--radius) var(--radius);
         }
         /* Override shared [data-ai-rewrite] label: diff left panel = "ORIGINAL" */
         .panel-body [data-ai-rewrite="true"]::before {
@@ -127,7 +135,7 @@
         /* rewritten-content in panel-body gets slight background tint */
         .panel-body .rewritten-content {
             background: rgb(170 197 220 / 59%);
-    border-left: 3px solid rgb(3 165 248 / 58%);
+            border-left: 3px solid rgb(3 165 248 / 58%);
         }
         .panel-body .rewritten-content::before {
             top: -16px;
@@ -150,8 +158,7 @@
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: #000;
-            opacity: 0.4;
+            color: var(--text-muted);
         }
         .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
         .empty-state h3    { font-size: 20px; margin-bottom: 8px; }
@@ -164,14 +171,15 @@
             font-size: 11px;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: #fff;
-            opacity: 0.7;
+            color: var(--text-muted);
         }
-        .legend-dot { width: 14px; height: 14px; border: 1px solid #fff; }
+        .legend-dot { width: 14px; height: 14px; border: 1px solid var(--shadow-dark); border-radius: 3px; }
         /* Stats bar */
         .stats-bar {
-            background: #000;
-            border: 1px solid #fff;
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            border: none;
             padding: 12px 20px;
             margin-bottom: 16px;
             display: flex;
@@ -182,24 +190,18 @@
             font-size: 12px;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: #fff;
-            opacity: 0.6;
+            color: var(--text-muted);
         }
-        .stat-item strong { color: #fff; opacity: 1; }
+        .stat-item strong { color: var(--text); opacity: 1; }
         @media (max-width: 900px) {
             .diff-wrapper { grid-template-columns: 1fr; }
         }
-        .content-meta {
-            background: #000;
-            color: #fff;
-            border: 1px solid #fff;
-            padding: 15px;
-            margin-bottom: 16px;
-        }
         .article-id-display {
-            background: #000;
-            color: #fff;
-            border: 1px solid #fff;
+            background: var(--surface);
+            color: var(--text);
+            border-radius: var(--radius-sm);
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+            border: none;
             padding: 12px 15px;
             margin-bottom: 15px;
             display: flex;
@@ -216,14 +218,15 @@
         .article-id-display .value {
             font-size: 16px;
             font-family: 'Courier New', monospace;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0,0,0,0.05);
             padding: 4px 8px;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
     <div class="site-header">
-        <h1><span style="color: #fa2D00;">a</span>RCH<span style="color: #fa2D00;">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
+        <h1><span style="color: var(--accent-red);">a</span>RCH<span style="color: var(--accent-red);">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
         <p>Content &amp; Learning Tools</p>
     </div>
     <button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>

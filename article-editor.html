@@ -20,15 +20,18 @@
         .header p  { font-size: 15px; }
         /* Editor card */
         .editor-card {
-            background: #000;
-            border: 1px solid #fff;
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            border: none;
             overflow: hidden;
             margin-bottom: 20px;
         }
         /* Toolbar */
         .toolbar {
-            background: #111;
-            border-bottom: 1px solid #fff;
+            background: var(--bg-dark);
+            border-bottom: none;
+            border-radius: var(--radius) var(--radius) 0 0;
             padding: 10px 16px;
             display: flex;
             align-items: center;
@@ -40,7 +43,7 @@
             gap: 2px;
             padding-right: 10px;
             margin-right: 6px;
-            border-right: 1px solid rgba(255,255,255,0.3);
+            border-right: 1px solid var(--shadow-dark);
         }
         .toolbar-group:last-child { border-right: none; }
         .tb-btn {
@@ -50,41 +53,43 @@
             cursor: pointer;
             font-size: 13px;
             font-weight: 600;
-            color: #fff;
+            color: var(--text);
             transition: all 0.15s;
             min-width: 32px;
             text-align: center;
         }
-        .tb-btn:hover  { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); }
-        .tb-btn.active { background: #fff; color: #000; }
+        .tb-btn:hover  { background: rgba(0,0,0,0.06); border-color: var(--shadow-dark); }
+        .tb-btn.active { background: var(--accent); color: #fff; border-radius: var(--radius-xs); }
         .tb-select {
             padding: 5px 8px;
-            border: 1px solid #fff;
-            background: #000;
+            border: none;
+            background: var(--surface);
             font-size: 12px;
-            color: #fff;
+            color: var(--text);
+            border-radius: var(--radius-xs);
+            box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
             cursor: pointer;
         }
         .tb-divider {
             width: 1px;
             height: 24px;
-            background: rgba(255,255,255,0.3);
+            background: var(--shadow-dark);
             margin: 0 4px;
         }
         /* Word count bar */
         .word-count-bar {
-            background: #111;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
+            background: var(--bg-dark);
+            border-bottom: none;
             padding: 6px 20px;
             display: flex;
             gap: 16px;
             font-size: 11px;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: #fff;
+            color: var(--text-muted);
             opacity: 0.6;
         }
-        .word-count-bar span strong { color: #fff; opacity: 1; }
+        .word-count-bar span strong { color: var(--text); opacity: 1; }
         /* Editable content area */
         .editor-content {
             min-height: 500px;
@@ -97,6 +102,7 @@
             line-height: 1.8;
             color: #000;
             background: #fff;
+            border-radius: 0 0 var(--radius) var(--radius);
         }
         .editor-content:focus { outline: none; }
         /* Strip AI marker labels inside editor */
@@ -114,8 +120,7 @@
         /* Placeholder */
         .editor-content:empty::before {
             content: 'Start typing or load content from Step 2 (Brand Neutralizer)...';
-            color: #000;
-            opacity: 0.3;
+            color: #999;
             pointer-events: none;
         }
         /* Headings inside editor */
@@ -132,7 +137,7 @@
         .editor-content ul, .editor-content ol { padding-left: 28px; margin-bottom: 14px; }
         .editor-content li { margin-bottom: 6px; }
         .editor-content blockquote {
-            border-left: 3px solid rgba(0,0,0,0.3);
+            border-left: 3px solid var(--accent);
             padding-left: 16px;
             margin: 16px 0;
             color: #000;
@@ -141,8 +146,10 @@
         }
         /* Action bar */
         .action-bar {
-            background: #000;
-            border: 1px solid #fff;
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            border: none;
             padding: 16px 20px;
             display: flex;
             align-items: center;
@@ -161,28 +168,31 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.75);
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
             z-index: 1000;
             align-items: center;
             justify-content: center;
         }
         .modal-overlay.active { display: flex; }
         .modal {
-            background: #000;
-            border: 1px solid #fff;
+            background: var(--surface);
+            border: none;
+            border-radius: var(--radius);
+            box-shadow: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
             padding: 36px 40px;
             max-width: 480px;
             width: 90%;
             text-align: center;
         }
-        .modal h2 { font-size: 20px; margin-bottom: 12px; }
-        .modal p { font-size: 14px; opacity: 0.7; margin-bottom: 28px; line-height: 1.6; }
+        .modal h2 { font-size: 20px; margin-bottom: 12px; color: var(--text); }
+        .modal p { font-size: 14px; color: var(--text-muted); margin-bottom: 28px; line-height: 1.6; }
         .modal-actions { display: flex; gap: 12px; justify-content: center; }
     </style>
 </head>
 <body>
     <div class="site-header">
-        <h1><span style="color: #fa2D00;">a</span>RCH<span style="color: #fa2D00;">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
+        <h1><span style="color: var(--accent-red);">a</span>RCH<span style="color: var(--accent-red);">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
         <p>Content &amp; Learning Tools</p>
     </div>
     <button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>
