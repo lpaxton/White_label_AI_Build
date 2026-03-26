@@ -49,81 +49,35 @@
             max-width: 520px;
         }
 
-        /* Animated circles ornament — now properly floats as a raised circle cluster */
-        .hero-ornament {
-            flex-shrink: 0;
+        /* ── SVG circle animation ornament ─────────────── */
+        .animation.right {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
             width: 240px;
             height: 240px;
-            position: relative;
+            flex-shrink: 0;
         }
 
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            background: var(--surface);
+        .animation.right svg {
+            width: 100%;
+            height: 100%;
         }
 
-        /* Shadow directions give the 3D "floating sphere" illusion */
-        .orb-lg {
-            width: 160px; height: 160px;
-            top: 40px; left: 40px;
-            box-shadow: 10px 10px 20px var(--shadow-dark),
-                        -10px -10px 20px var(--shadow-light);
-        }
-        .orb-md-tl {
-            width: 80px; height: 80px;
-            top: 0; left: 10px;
-            box-shadow: 6px 6px 12px var(--shadow-dark),
-                        -6px -6px 12px var(--shadow-light);
-        }
-        .orb-md-tr {
-            width: 64px; height: 64px;
-            top: 8px; right: 8px;
-            box-shadow: 5px 5px 10px var(--shadow-dark),
-                        -5px -5px 10px var(--shadow-light);
-        }
-        .orb-sm-bl {
-            width: 44px; height: 44px;
-            bottom: 28px; left: 4px;
-            box-shadow: 4px 4px 8px var(--shadow-dark),
-                        -4px -4px 8px var(--shadow-light);
-        }
-        .orb-sm-br {
-            width: 52px; height: 52px;
-            bottom: 14px; right: 14px;
-            box-shadow: 4px 4px 8px var(--shadow-dark),
-                        -4px -4px 8px var(--shadow-light);
-        }
-        .orb-xs-t {
-            width: 28px; height: 28px;
-            top: 50px; right: 60px;
-            box-shadow: 3px 3px 6px var(--shadow-dark),
-                        -3px -3px 6px var(--shadow-light);
-        }
-        .orb-xs-b {
-            width: 22px; height: 22px;
-            bottom: 50px; left: 60px;
-            box-shadow: 3px 3px 6px var(--shadow-dark),
-                        -3px -3px 6px var(--shadow-light);
+        @keyframes drawCircle {
+            from { stroke-dashoffset: 301.635px; }
+            to   { stroke-dashoffset: 0; }
         }
 
-        .orb-lg-inner {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%; height: 100%;
-            border-radius: 50%;
+        .animation.right svg path {
+            stroke-dasharray: 301.635px;
+            stroke-dashoffset: 301.635px;
+            animation: drawCircle 1.8s ease-out forwards;
         }
-
-        .orb-lg-inner span {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            text-align: center;
-            line-height: 1.5;
-        }
+        .animation.right svg:nth-child(1) path { animation-delay: 0.0s; }
+        .animation.right svg:nth-child(2) path { animation-delay: 0.4s; }
+        .animation.right svg:nth-child(3) path { animation-delay: 0.8s; }
+        .animation.right svg:nth-child(4) path { animation-delay: 1.2s; }
 
         /* ── Section label ─────────────────────────────────── */
         .section-label {
@@ -425,18 +379,19 @@
                 <h2>Welcome to <span style="color:var(--accent-red)">a</span>RCH<span style="color:var(--accent-red)">i</span> [Intelligence]</h2>
                 <p>A suite of tools designed to extract, neutralize, compare, and edit article content with ease. Transform brand-specific content into white-label alternatives, review every change with AI-powered tools, and ask questions backed by your own regulatory-grade knowledge base.</p>
             </div>
-            <div class="hero-ornament">
-                <div class="orb orb-lg">
-                    <div class="orb-lg-inner">
-                        <span>aRCHi<br>Suite</span>
-                    </div>
-                </div>
-                <div class="orb orb-md-tl"></div>
-                <div class="orb orb-md-tr"></div>
-                <div class="orb orb-sm-bl"></div>
-                <div class="orb orb-sm-br"></div>
-                <div class="orb orb-xs-t"></div>
-                <div class="orb orb-xs-b"></div>
+            <div class="animation right">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fa2D00" style="stroke-width: 1.00503px;">
+                    <path d="M 2 50 A 48 48 0 0 0 98 50 A 48 48 0 0 0 2 50"></path>
+                </svg>
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#b0bfcf" style="stroke-width: 1.00503px;">
+                    <path d="M 2 50 A 48 48 0 0 0 98 50 A 48 48 0 0 0 2 50"></path>
+                </svg>
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#b0bfcf" style="stroke-width: 1.00503px;">
+                    <path d="M 2 50 A 48 48 0 0 0 98 50 A 48 48 0 0 0 2 50"></path>
+                </svg>
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fa2D00" style="stroke-width: 1.00503px;">
+                    <path d="M 2 50 A 48 48 0 0 0 98 50 A 48 48 0 0 0 2 50"></path>
+                </svg>
             </div>
         </div>
 
