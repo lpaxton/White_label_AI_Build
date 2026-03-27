@@ -531,7 +531,7 @@
                 <button id="rewriteButton" class="button  CTA">Rewrite with AI</button>
 
                 <div id="rewrite-animation" style="margin: 28px 0px; display: flex; justify-content: center;">
-                    <svg width="300" height="300" viewBox="0 0 100 100" fill="none" stroke="white" xmlns="http://www.w3.org/2000/svg" style="stroke-width: 0.330033px;"></svg>
+                    <svg width="300" height="300" viewBox="0 0 100 100" fill="none" stroke="#308bff" xmlns="http://www.w3.org/2000/svg" style="stroke-width: 0.330033px;"></svg>
                 </div>
                 
                 <div id="leftPanelActions" style="display: none; position: sticky; top: 83%;">
@@ -829,7 +829,11 @@
                 showSuccess('Content rewritten successfully!');
             } catch (error) {
                 console.error('Rewrite error:', error);
-                showError('Rewrite failed: ' + error.message);
+                if (error.noMarkers) {
+                    showNothingToNeutralizeError();
+                } else {
+                    showError('Rewrite failed: ' + error.message);
+                }
             } finally {
                 isProcessing = false;
                 hideLoading();
@@ -869,7 +873,9 @@
             const spans = doc.querySelectorAll('[data-ai-rewrite="true"]');
 
             if (spans.length === 0) {
-                throw new Error('No content marked with data-ai-rewrite="true" found. Please mark the content you want to rewrite.');
+                const err = new Error('NO_MARKERS');
+                err.noMarkers = true;
+                throw err;
             }
 
             const replacements = [];
@@ -1379,6 +1385,33 @@ Return ONLY the rewritten text, nothing else.`
         function showError(message) {
             const errorDiv = document.getElementById('errorMessage');
             errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function showNothingToNeutralizeError() {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.innerHTML = `
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;">
+                    <span style="font-size:15px; font-weight:600;">aRCHi did not find anything to Neutralize!</span>
+                    <a href="article-editor.html"
+                       style="
+                           display:inline-block;
+                           text-decoration:none;
+                           padding:10px 22px;
+                           border-radius:30px;
+                           font-size:11px;
+                           font-weight:700;
+                           letter-spacing:0.14em;
+                           text-transform:uppercase;
+                           background:var(--surface);
+                           color:var(--text);
+                           box-shadow:4px 4px 8px var(--shadow-dark),-4px -4px 8px var(--shadow-light);
+                           white-space:nowrap;
+                       ">
+                        Skip to Step 4 &rarr; Word Editor
+                    </a>
+                </div>
+            `;
             errorDiv.style.display = 'block';
         }
 
