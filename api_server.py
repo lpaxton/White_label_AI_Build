@@ -152,6 +152,48 @@ def get_status():
     
     return jsonify(status)
 
+@app.route('/api/extract-article', methods=['POST'])
+def extract_article():
+    """
+    Proxy-fetch a URL server-side and return the raw HTML.
+    Avoids browser CORS restrictions and uses proper browser-like headers
+    so that Fidelity's server returns the full page (including disclosure
+    sections with <s-assigned-wrapper> eReview IDs).
+    The client parses the HTML locally after receiving it.
+    """
+    try:
+        import requests as req
+        data = request.get_json()
+        url = (data or {}).get('url', '').strip()
+        if not url:
+            return jsonify({'error': 'url is required'}), 400
+
+        headers = {
+            'User-Agent': (
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                'AppleWebKit/537.36 (KHTML, like Gecko) '
+                'Chrome/124.0.0.0 Safari/537.36'
+            ),
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache',
+        }
+
+        resp = req.get(url, headers=headers, timeout=20, allow_redirects=True)
+        resp.raise_for_status()
+
+        # Detect encoding and decode body correctly
+        html = resp.content.decode(resp.apparent_encoding or 'utf-8', errors='replace')
+
+        return jsonify({'success': True, 'html': html, 'url': url})
+
+    except Exception as e:
+        print(f'[extract-article] Error fetching {url}: {e}')
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/api/upload', methods=['POST'])
 def upload_articles():
     """Upload and store article files"""

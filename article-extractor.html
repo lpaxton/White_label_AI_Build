@@ -561,17 +561,21 @@
                     let response, data;
 
                     if (endpoint.startsWith('/api/')) {
-                        // Use our local server
+                        // Use our local server — returns raw HTML which we parse client-side
                         response = await fetch(endpoint, {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
+                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ url, options })
                         });
 
                         if (response.ok) {
                             data = await response.json();
+                            if (data.html) {
+                                // Server returned raw HTML — parse it the same way the CORS proxy does
+                                console.log('[extract] Using server-side fetched HTML for', url);
+                                return parseArticleContent(data.html, url, options);
+                            }
+                            // Legacy: server already parsed — return as-is
                             return data;
                         }
                         continue; // Try next endpoint
