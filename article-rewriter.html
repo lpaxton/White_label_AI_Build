@@ -1393,26 +1393,42 @@ Return ONLY the rewritten text, nothing else.`
             errorDiv.innerHTML = `
                 <div style="display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;">
                     <span style="font-size:15px; font-weight:600;">aRCHi did not find anything to Neutralize!</span>
-                    <a href="article-editor.html"
-                       style="
-                           display:inline-block;
-                           text-decoration:none;
-                           padding:10px 22px;
-                           border-radius:30px;
-                           font-size:11px;
-                           font-weight:700;
-                           letter-spacing:0.14em;
-                           text-transform:uppercase;
-                           background:var(--surface);
-                           color:var(--text);
-                           box-shadow:4px 4px 8px var(--shadow-dark),-4px -4px 8px var(--shadow-light);
-                           white-space:nowrap;
-                       ">
+                    <button
+                        onclick="skipToEditor()"
+                        style="
+                            cursor:pointer;
+                            border:none;
+                            padding:10px 22px;
+                            border-radius:30px;
+                            font-size:11px;
+                            font-weight:700;
+                            letter-spacing:0.14em;
+                            text-transform:uppercase;
+                            background:var(--surface);
+                            color:var(--text);
+                            box-shadow:4px 4px 8px var(--shadow-dark),-4px -4px 8px var(--shadow-light);
+                            white-space:nowrap;
+                        ">
                         Skip to Step 4 &rarr; Word Editor
-                    </a>
+                    </button>
                 </div>
             `;
             errorDiv.style.display = 'block';
+        }
+
+        function skipToEditor() {
+            // Write the current article HTML into editor_content so the
+            // Word Editor shows this article, not a stale previous one.
+            const html = document.getElementById('htmlInput').value.trim();
+            if (html) {
+                sessionStorage.setItem('editor_content', html);
+            }
+            // Carry eReview + topics forward
+            const erId = eReviewId || sessionStorage.getItem('article_ereview_id') || '';
+            if (erId) sessionStorage.setItem('editor_ereview_id', erId);
+            const tp = topics.length ? topics : JSON.parse(sessionStorage.getItem('article_topics') || '[]');
+            if (tp.length) sessionStorage.setItem('editor_topics', JSON.stringify(tp));
+            window.location.href = 'article-editor.html';
         }
 
         function hideError() {
