@@ -1,0 +1,17 @@
+# FastAPI + async
+fastapi>=0.110.0
+uvicorn[standard]
+pydantic>=2.0
+pydantic-settings>=2.0
+
+# Database
+sqlalchemy[asyncio]>=2.0
+asyncpg
+alembic
+
+# Security
+python-jose[cryptography]
+cryptography
+
+# Utilities
+python-dotenv
