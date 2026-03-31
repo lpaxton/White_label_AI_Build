@@ -28,6 +28,15 @@ except ImportError:
     CLAUDE_REWRITER_AVAILABLE = False
     print("Warning: claude_rewriter module not available. Rewrite API will require client-side processing.")
 
+# Import FCAT modules (MongoDB Atlas + embedding service)
+try:
+    import fcat_db
+    from embedding_service import generate_embedding, strip_html, build_embedding_metadata
+    FCAT_AVAILABLE = True
+except ImportError as e:
+    FCAT_AVAILABLE = False
+    print(f"Warning: FCAT modules not available ({e}). /api/save-to-fcat endpoint disabled.")
+
 app = Flask(__name__)
 CORS(app)  # Enable CORS for web interface
 
@@ -65,7 +74,10 @@ def index():
             'GET /api/health': 'Health check with model validation',
             'POST /api/rewrite': 'Rewrite article with Claude AI (brand neutralization)',
             'GET /api/rewrite/config': 'Get rewrite configuration',
-            'GET /api/rewrite/health': 'Rewrite API health check'
+            'GET /api/rewrite/health': 'Rewrite API health check',
+            'POST /api/save-to-fcat': 'Save processed article to MongoDB Atlas (FCAT)',
+            'GET /api/fcat/status': 'FCAT MongoDB connection status',
+            'POST /api/chat': 'Ask questions answered solely from the FCAT article database',
         }
     })
 
@@ -139,6 +151,48 @@ def get_status():
     }
     
     return jsonify(status)
+
+@app.route('/api/extract-article', methods=['POST'])
+def extract_article():
+    """
+    Proxy-fetch a URL server-side and return the raw HTML.
+    Avoids browser CORS restrictions and uses proper browser-like headers
+    so that Fidelity's server returns the full page (including disclosure
+    sections with <s-assigned-wrapper> eReview IDs).
+    The client parses the HTML locally after receiving it.
+    """
+    try:
+        import requests as req
+        data = request.get_json()
+        url = (data or {}).get('url', '').strip()
+        if not url:
+            return jsonify({'error': 'url is required'}), 400
+
+        headers = {
+            'User-Agent': (
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                'AppleWebKit/537.36 (KHTML, like Gecko) '
+                'Chrome/124.0.0.0 Safari/537.36'
+            ),
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache',
+        }
+
+        resp = req.get(url, headers=headers, timeout=20, allow_redirects=True)
+        resp.raise_for_status()
+
+        # Detect encoding and decode body correctly
+        html = resp.content.decode(resp.apparent_encoding or 'utf-8', errors='replace')
+
+        return jsonify({'success': True, 'html': html, 'url': url})
+
+    except Exception as e:
+        print(f'[extract-article] Error fetching {url}: {e}')
+        return jsonify({'error': str(e)}), 500
+
 
 @app.route('/api/upload', methods=['POST'])
 def upload_articles():
@@ -500,6 +554,274 @@ def rewrite_health():
     })
 
 
+# ============================================================
+# FCAT MONGODB ATLAS ENDPOINTS
+# ============================================================
+
+@app.route('/api/save-to-fcat', methods=['POST'])
+def save_to_fcat():
+    """
+    Save a processed article to MongoDB Atlas (FCAT database).
+
+    Request body:
+        - original_html: Raw HTML before neutralization
+        - neutralized_html: Output of ClaudeRewriter
+        - source_url: Original URL the article came from
+        - source: "fidelity_cms" or "vendor_enrichment"
+        - topics: List of topic tags (optional)
+        - persona_tags: List of persona tags (optional)
+        - categories: List of categories (optional)
+        - difficulty_level: "beginner" | "intermediate" | "advanced" (optional)
+        - pipeline_status: Pipeline status (default: "areview_pending")
+    """
+    if not FCAT_AVAILABLE:
+        return jsonify({
+            'error': 'FCAT modules not available. Install pymongo, openai, python-dotenv.',
+            'fcat_available': False
+        }), 503
+
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No JSON data provided'}), 400
+
+        # Required fields
+        neutralized_html = data.get('neutralized_html', '').strip()
+        original_html = data.get('original_html', '').strip()
+        source_url = data.get('source_url', '').strip()
+        source = data.get('source', '').strip()
+        origin_url = data.get('origin_url', None)  # Actual origin URL (may differ from source_url dedup key)
+
+        if not neutralized_html:
+            return jsonify({'error': 'neutralized_html is required'}), 400
+        if not source_url:
+            return jsonify({'error': 'source_url is required'}), 400
+        if not source:
+            return jsonify({'error': 'source is required'}), 400
+
+        # Dedupe check
+        if fcat_db.article_exists_by_url(source_url):
+            return jsonify({
+                'error': f'Article with source_url already exists: {source_url}',
+                'duplicate': True
+            }), 409
+
+        # Generate plain text from neutralized HTML
+        plain_text = strip_html(neutralized_html)
+
+        # Generate embedding (non-blocking — returns None on failure)
+        print(f"[save-to-fcat] Generating embedding for article from {source_url}...")
+        vector = generate_embedding(plain_text)
+        embedding_doc = build_embedding_metadata(vector)
+
+        # Build the full article document
+        from datetime import datetime, timezone
+        now = datetime.now(timezone.utc)
+
+        article_doc = {
+            "source": source,
+            "source_url": source_url,
+            "origin_url": origin_url or None,
+            "ereview_id": data.get('ereview_id', None),
+            "ingest_date": now,
+            "content": {
+                "original_html": original_html,
+                "neutralized_html": neutralized_html,
+                "plain_text": plain_text,
+            },
+            "pipeline_status": data.get('pipeline_status', 'areview_pending'),
+            "hitl_reviewed_by": None,
+            "hitl_reviewed_at": None,
+            "areview_approved_at": None,
+            "taxonomy": {
+                "categories": data.get('categories', []),
+                "topics": data.get('topics', []),
+                "persona_tags": data.get('persona_tags', []),
+                "difficulty_level": data.get('difficulty_level', None),
+            },
+            "reading_grade_level": None,
+            "white_label_ready": False,
+            "associated_actions": [],
+            "embedding": embedding_doc,
+            "stats": {
+                "views": 0,
+                "completions": 0,
+                "actions_taken": 0,
+            },
+            "created_at": now,
+            "updated_at": now,
+        }
+
+        # Save to MongoDB Atlas
+        article_id = fcat_db.save_article(article_doc)
+
+        print(f"[save-to-fcat] Article saved successfully: {article_id}")
+
+        return jsonify({
+            'success': True,
+            'article_id': article_id,
+            'message': f'Article saved to FCAT database',
+            'embedding_generated': vector is not None,
+            'plain_text_length': len(plain_text),
+        })
+
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': f'Save to FCAT failed: {str(e)}'}), 500
+
+
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    """
+    DB-grounded chatbot endpoint.
+
+    Retrieves relevant articles from the FCAT MongoDB database and passes
+    their content to Claude with strict instructions to answer ONLY from
+    that retrieved context.  No outside knowledge is used.
+
+    Request body:
+        - message: The user's question (required)
+        - history: Array of {role, content} prior turns (optional, max 6)
+    """
+    if not FCAT_AVAILABLE:
+        return jsonify({'error': 'FCAT modules not available'}), 503
+
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No JSON data provided'}), 400
+
+        user_message = data.get('message', '').strip()
+        if not user_message:
+            return jsonify({'error': 'message is required'}), 400
+
+        history = data.get('history', [])
+
+        # ── Retrieve relevant articles from the database ───────────────────
+        articles = fcat_db.search_articles(user_message, limit=5)
+
+        if not articles:
+            return jsonify({
+                'success': True,
+                'answer': "The knowledge base doesn't contain any articles yet, or none matched your question. Please add articles to the database first.",
+                'sources': [],
+                'articles_used': 0,
+            })
+
+        # ── Build grounded context ─────────────────────────────────────────
+        context_parts = []
+        sources = []
+        for i, article in enumerate(articles, 1):
+            plain_text = (article.get('content') or {}).get('plain_text', '').strip()
+            if not plain_text:
+                continue
+            # Cap individual article length to keep prompt manageable
+            if len(plain_text) > 4000:
+                plain_text = plain_text[:4000] + ' [...]'
+            topics = (article.get('taxonomy') or {}).get('topics', [])
+            display_url = article.get('origin_url') or article.get('source_url', '')
+            context_parts.append(f'=== ARTICLE {i} ===\n{plain_text}')
+            sources.append({
+                'id': article['_id'],
+                'source_url': display_url,
+                'topics': topics,
+            })
+
+        if not context_parts:
+            return jsonify({
+                'success': True,
+                'answer': "Articles were found in the database but contained no readable text.",
+                'sources': [],
+                'articles_used': 0,
+            })
+
+        grounded_context = "\n\n".join(context_parts)
+
+        # ── Call Claude with strict grounding instructions ─────────────────
+        from anthropic import Anthropic
+        api_key = os.environ.get('ANTHROPIC_API_KEY')
+        if not api_key:
+            return jsonify({'error': 'ANTHROPIC_API_KEY is not configured on the server'}), 503
+
+        client = Anthropic(api_key=api_key)
+
+        SYSTEM_PROMPT = """\
+You are a financial education assistant that operates under strict regulatory constraints.
+
+YOU MAY ONLY USE THE ARTICLE CONTENT PROVIDED IN EACH MESSAGE TO ANSWER QUESTIONS.
+
+MANDATORY RULES — NO EXCEPTIONS:
+1. Base every answer exclusively on the article excerpts provided.  
+   Do NOT use your training data, general knowledge, or any information
+   not explicitly present in the provided articles.
+2. If the provided articles do not contain sufficient information to answer
+   the question, respond with exactly:
+   "The available articles don\'t contain enough information to answer that question."
+3. Do NOT speculate, infer beyond what is written, or fill gaps with outside knowledge.
+4. Do NOT introduce any facts, statistics, or guidance not found in the articles.
+5. Keep your tone clear, helpful, and professional.
+6. Where relevant, indicate which article your answer draws from (e.g. "According to the article...").
+
+This is a regulatory requirement. Violating these rules is not acceptable under any circumstances."""
+
+        # Build message list — inject fresh context into every user turn
+        # so the model always answers from the retrieved documents
+        messages = []
+        for turn in history[-6:]:
+            if turn.get('role') in ('user', 'assistant'):
+                messages.append({'role': turn['role'], 'content': turn['content']})
+
+        grounded_user_message = (
+            f"Below are the relevant articles retrieved from the knowledge base:\n\n"
+            f"{grounded_context}\n\n"
+            f"---\n\n"
+            f"Using ONLY the article content above, please answer the following question:\n\n"
+            f"{user_message}"
+        )
+        messages.append({'role': 'user', 'content': grounded_user_message})
+
+        response = client.messages.create(
+            model='claude-opus-4-5',
+            max_tokens=1024,
+            system=SYSTEM_PROMPT,
+            messages=messages,
+        )
+
+        answer = response.content[0].text
+        print(f"[chat] Answered using {len(context_parts)} article(s)")
+
+        return jsonify({
+            'success': True,
+            'answer': answer,
+            'sources': sources,
+            'articles_used': len(context_parts),
+        })
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': f'Chat failed: {str(e)}'}), 500
+
+
+@app.route('/api/fcat/status', methods=['GET'])
+def fcat_status():
+    """Health check for the FCAT MongoDB connection."""
+    if not FCAT_AVAILABLE:
+        return jsonify({'status': 'unavailable', 'reason': 'FCAT modules not installed'}), 503
+
+    try:
+        fcat_db.connect()
+        return jsonify({
+            'status': 'ok',
+            'database': fcat_db.DATABASE_NAME,
+            'collection': fcat_db.COLLECTION_NAME,
+            'timestamp': time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime()),
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'error': str(e)}), 500
+
+
 @app.errorhandler(413)
 def too_large(e):
     """Handle file too large error"""
@@ -528,6 +850,15 @@ if __name__ == '__main__':
         print("  Status: Claude Rewriter module loaded")
     else:
         print("  Status: Client-side processing only (module not available)")
+    print("")
+    print("FCAT (MongoDB Atlas):")
+    print("  POST /api/save-to-fcat - Save article to MongoDB Atlas")
+    print("  GET /api/fcat/status - FCAT connection status")
+    print("  POST /api/chat - DB-grounded chatbot (answers from database only)")
+    if FCAT_AVAILABLE:
+        print("  Status: FCAT modules loaded")
+    else:
+        print("  Status: FCAT modules not available (install pymongo, openai, python-dotenv)")
     print("\nStarting server on http://localhost:5000")
 
     ensure_upload_dir()

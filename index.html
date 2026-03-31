@@ -7,162 +7,55 @@
     <title>aRCHi — Content and Learning System</title>
     <link rel="stylesheet" href="shared.css">
     <style>
-        .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    
-}
-        /* ── Tools Grid ── */
-        .tools-grid {
-            display: grid;
-            border-top: 1px solid #fff;
-            grid-template-columns: repeat(2, minmax(300px, 1fr));
+        body {
+            background: var(--bg);
         }
 
-        .tool-card {
-            border-right: 1px solid #fff;
-            border-left: 1px solid #fff;
-            border-bottom: 1px solid #fff;
-            padding: 40px;
-            transition: background 0.2s;
+        /* ── Page wrapper ── */
+        .page-body {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 36px 32px 0;
         }
 
-        .tool-card:hover {
-            background: #111;
-        }
-
-        .tool-card .badge {
-            display: inline-block;
-            border: 1px solid #fff;
-            padding: 3px 10px;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-        }
-
-        .tool-card h2 {
-            font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 14px;
-            line-height: 1.2;
-        }
-
-        .tool-card p {
-            font-size: 14px;
-            line-height: 1.7;
-            opacity: 0.65;
-            margin-bottom: 24px;
-        }
-
-        .tool-card ul {
-            list-style: none;
-            margin-bottom: 32px;
-        }
-
-        .tool-card ul li {
-            font-size: 13px;
-            padding: 6px 0 6px 16px;
-            position: relative;
-            opacity: 0.75;
-            border-top: 1px solid rgba(255, 255, 255, 0.12);
-        }
-
-        .tool-card ul li:last-child {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-        }
-
-        .tool-card ul li:before {
-            content: "—";
-            position: absolute;
-            left: 0;
-            opacity: 0.4;
-        }
-
-        /* button size override for homepage */
-        .button {
-            padding: 10px 22px;
-            font-size: 12px;
-            letter-spacing: 0.15em;
-        }
-
-        /* ── Docs Section ── */
-        .docs-section {
-            
-            padding: 48px 0px;
-        }
-
-        .docs-section h2 {
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            
-            margin-bottom: 28px;
-        }
-
-        .docs-grid {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .doc-link {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border: 1px solid #fff;
-            padding: 12px 20px;
-            text-decoration: none;
-            color: #fff;
-            font-size: 13px;
-            font-weight: 500;
-            letter-spacing: 0.05em;
-            transition: background 0.2s, color 0.2s;
-        }
-
-        .doc-link:hover {
-            background: #fff;
-            color: #000;
-        }
-
-        .doc-link .icon {
-            font-size: 16px;
-        }
-
-        /* ── Footer ── */
-        .footer {
-            border-top: 1px solid #fff;
-            padding: 28px 60px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .footer p {
-            font-size: 12px;
-            opacity: 0.4;
-            letter-spacing: 0.08em;
-        }
-
-        /* ── Welcome / Animation ── */
-        #welcome-section {
+        /* ── Hero card ─────────────────────────────────────── */
+        .hero-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 8px 8px 18px var(--shadow-dark),
+                        -8px -8px 18px var(--shadow-light);
+            padding: 44px 52px;
             display: flex;
             align-items: center;
             gap: 60px;
+            margin-bottom: 32px;
         }
 
-        .welcome-text {
-            flex: 1;
+        .hero-text { flex: 1; }
+
+        .hero-text h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 16px;
+            line-height: 1.2;
+            letter-spacing: -0.3px;
         }
 
+        .hero-text p {
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--text-muted);
+            max-width: 520px;
+        }
+
+        /* ── SVG circle animation ornament ─────────────── */
         .animation.right {
             display: grid;
             grid-template-columns: 1fr 1fr;
             grid-template-rows: 1fr 1fr;
-            width: 300px;
-            height: 300px;
+            width: 240px;
+            height: 240px;
             flex-shrink: 0;
         }
 
@@ -172,184 +65,476 @@
         }
 
         @keyframes drawCircle {
-            from {
-                stroke-dashoffset: 301.635px;
-            }
-
-            to {
-                stroke-dashoffset: 0;
-            }
+            from { stroke-dashoffset: 301.635px; }
+            to   { stroke-dashoffset: 0; }
         }
 
         .animation.right svg path {
+            stroke-dasharray: 301.635px;
             stroke-dashoffset: 301.635px;
             animation: drawCircle 1.8s ease-out forwards;
         }
+        .animation.right svg:nth-child(1) path { animation-delay: 0.0s; }
+        .animation.right svg:nth-child(2) path { animation-delay: 0.4s; }
+        .animation.right svg:nth-child(3) path { animation-delay: 0.8s; }
+        .animation.right svg:nth-child(4) path { animation-delay: 1.2s; }
 
-        .animation.right svg:nth-child(1) path {
-            animation-delay: 0.0s;
+        /* ── Section label ─────────────────────────────────── */
+        .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            padding-left: 2px;
         }
 
-        .animation.right svg:nth-child(2) path {
-            animation-delay: 0.4s;
+        /* ── Tools grid ────────────────────────────────────── */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+            margin-bottom: 32px;
         }
 
-        .animation.right svg:nth-child(3) path {
-            animation-delay: 0.8s;
+        /* ── Tool card ─────────────────────────────────────── */
+        .tool-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 32px 28px 28px;
+            box-shadow: 8px 8px 16px var(--shadow-dark),
+                        -8px -8px 16px var(--shadow-light);
+            display: flex;
+            flex-direction: column;
+            transition: box-shadow 0.25s, transform 0.2s;
         }
 
-        .animation.right svg:nth-child(4) path {
-            animation-delay: 1.2s;
+        .tool-card:hover {
+            box-shadow: 10px 10px 20px var(--shadow-dark),
+                        -10px -10px 20px var(--shadow-light);
+            transform: translateY(-3px);
+        }
+
+        /* Circular step number — raised off the card surface */
+        .step-circle {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--bg);
+            box-shadow: 5px 5px 10px var(--shadow-dark),
+                        -5px -5px 10px var(--shadow-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            color: var(--accent);
+            margin-bottom: 22px;
+            flex-shrink: 0;
+        }
+
+        /* KB chat uses accent-red */
+        .step-circle.accent-red {
+            color: var(--accent-red);
+        }
+
+        .tool-card h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text);
+            line-height: 1.2;
+        }
+
+        .tool-card > p {
+            font-size: 13px;
+            line-height: 1.7;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            flex: 1;
+        }
+
+        /* Feature list */
+        .tool-card ul {
+            list-style: none;
+            margin-bottom: 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .tool-card ul li {
+            font-size: 12px;
+            padding: 7px 0 7px 18px;
+            position: relative;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(176, 191, 207, 0.3);
+        }
+
+        .tool-card ul li:last-child {
+            border-bottom: 1px solid rgba(176, 191, 207, 0.3);
+        }
+
+        .tool-card ul li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--bg);
+            box-shadow: 1px 1px 3px var(--shadow-dark),
+                        -1px -1px 3px var(--shadow-light);
+        }
+
+        /* Pill open button */
+        .tool-card .open-btn {
+            display: inline-block;
+            text-decoration: none;
+            align-self: flex-start;
+            padding: 10px 26px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            background: var(--bg);
+            color: var(--text);
+            box-shadow: 5px 5px 10px var(--shadow-dark),
+                        -5px -5px 10px var(--shadow-light);
+            transition: box-shadow 0.18s;
+        }
+
+        .tool-card .open-btn:hover {
+            box-shadow: inset 4px 4px 8px var(--shadow-dark),
+                        inset -4px -4px 8px var(--shadow-light);
+        }
+
+        /* Primary variant for KB chat */
+        .tool-card .open-btn.primary {
+            background: var(--accent-red);
+            color: #fff;
+            box-shadow: 5px 5px 10px var(--shadow-dark),
+                        -5px -5px 10px var(--shadow-light);
+        }
+
+        .tool-card .open-btn.primary:hover {
+            box-shadow: inset 3px 3px 8px rgba(0,0,0,0.2),
+                        inset -3px -3px 8px rgba(255,255,255,0.1);
+        }
+
+        /* ── Bottom row: docs + pipeline info ──────────────── */
+        .bottom-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+            margin-bottom: 32px;
+        }
+
+        .bottom-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 28px 30px;
+            box-shadow: 8px 8px 16px var(--shadow-dark),
+                        -8px -8px 16px var(--shadow-light);
+        }
+
+        .bottom-card h3 {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 18px;
+        }
+
+        .docs-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .doc-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            border-radius: var(--radius-sm);
+            background: var(--bg);
+            box-shadow: 4px 4px 8px var(--shadow-dark),
+                        -4px -4px 8px var(--shadow-light);
+            transition: box-shadow 0.2s;
+        }
+
+        .doc-link:hover {
+            box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                        inset -3px -3px 6px var(--shadow-light);
+        }
+
+        .doc-link .doc-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--surface);
+            box-shadow: 3px 3px 6px var(--shadow-dark),
+                        -3px -3px 6px var(--shadow-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        /* Pipeline steps */
+        .pipeline-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .pipeline-step {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            background: var(--bg);
+            box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                        inset -3px -3px 6px var(--shadow-light);
+        }
+
+        .pipeline-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--surface);
+            box-shadow: 3px 3px 6px var(--shadow-dark),
+                        -3px -3px 6px var(--shadow-light);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .pipeline-step-text {
+            font-size: 13px;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .pipeline-step-text span {
+            display: block;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 1px;
+        }
+
+        .pipeline-arrow {
+            margin-left: auto;
+            color: var(--text-muted);
+            opacity: 0.4;
+            font-size: 14px;
+        }
+
+        /* ── Footer ────────────────────────────────────────── */
+        .footer {
+            padding: 24px 0 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer p {
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 0.07em;
         }
     </style>
 </head>
 
 <body>
     <div class="site-header">
-        <h1><span style="color: #fa2D00;">a</span>RCH<span style="color: #fa2D00;">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
+        <h1><span style="color: var(--accent-red);">a</span>RCH<span style="color: var(--accent-red);">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
         <p>Content &amp; Learning Tools</p>
     </div>
 
-<div class="container">
-    <div class="docs-section" id="welcome-section">
-        <div class="welcome-text">
-            <h2>Welcome to <span style="color: #fa2D00; text-transform: lowercase;">a</span>RCH<span style="color: #fa2D00; text-transform: lowercase;">i</span> <span style="font-weight: 100;">[</span><span style="text-transform: capitalize;">Intelligence</span><span style="font-weight: 100;">]</span></h2>
-            <p>aRCHi [Intelligence] is a suite of tools designed to help you extract, neutralize, compare, and edit article content
-                with ease. Whether you're looking to clean up an article for review or transform it into a brand-neutral
-                version, aRCHi has you covered.</p>
+    <div class="page-body">
+
+        <!-- ── Hero ──────────────────────────────────────────── -->
+        <div class="hero-card">
+            <div class="hero-text">
+                <h2>Welcome to <span style="color:var(--accent-red)">a</span>RCH<span style="color:var(--accent-red)">i</span> [Intelligence]</h2>
+                <p>A suite of tools designed to extract, neutralize, compare, and edit article content with ease. Transform brand-specific content into white-label alternatives, review every change with AI-powered tools, and ask questions backed by your own regulatory-grade knowledge base.</p>
+            </div>
+            <div class="animation right">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fa2D00" style="stroke-width: 1.00503px;">
+                    <path d="M 2 50 A 48 48 0 0 0 98 50 A 48 48 0 0 0 2 50"></path>
+                </svg>
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#b0bfcf" style="stroke-width: 1.00503px;">
+                    <path d="M 2 50 A 48 48 0 0 0 98 50 A 48 48 0 0 0 2 50"></path>
+                </svg>
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#b0bfcf" style="stroke-width: 1.00503px;">
+                    <path d="M 2 50 A 48 48 0 0 0 98 50 A 48 48 0 0 0 2 50"></path>
+                </svg>
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fa2D00" style="stroke-width: 1.00503px;">
+                    <path d="M 2 50 A 48 48 0 0 0 98 50 A 48 48 0 0 0 2 50"></path>
+                </svg>
+            </div>
         </div>
-        <div class="animation right">
-            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fa2D00"
-                style="stroke-width: 1.00503px;">
-                <path d="M 2 50 A 48 48 0 0 0 98 50 A 48 48 0 0 0 2 50" style="stroke-dasharray: 301.635px;"></path>
-            </svg>
-            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="white"
-                style="stroke-width: 1.00503px;">
-                <path d="M 2 50 A 48 48 0 0 0 98 50 A 48 48 0 0 0 2 50" style="stroke-dasharray: 301.635px;"></path>
-            </svg>
-            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="white"
-                style="stroke-width: 1.00503px;">
-                <path d="M 2 50 A 48 48 0 0 0 98 50 A 48 48 0 0 0 2 50" style="stroke-dasharray: 301.635px;"></path>
-            </svg>
-            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fa2D00"
-                style="stroke-width: 1.00503px;">
-                <path d="M 2 50 A 48 48 0 0 0 98 50 A 48 48 0 0 0 2 50" style="stroke-dasharray: 301.635px;"></path>
-            </svg>
+
+        <!-- ── Tools grid ────────────────────────────────────── -->
+        <p class="section-label">Tools</p>
+        <div class="tools-grid">
+
+            <div class="tool-card">
+                <div class="step-circle">01</div>
+                <h2>Article Extractor</h2>
+                <p>Extract and clean article content from any URL. Perfect for reviewing and processing article text.</p>
+                <ul>
+                    <li>Extract &lt;article&gt; content from URLs</li>
+                    <li>Remove unwanted elements &amp; call-outs</li>
+                    <li>Clean, readable text output</li>
+                    <li>Real-time content preview</li>
+                </ul>
+                <a href="article-extractor.html" class="open-btn">Open</a>
+            </div>
+
+            <div class="tool-card">
+                <div class="step-circle">02</div>
+                <h2>Brand Neutralizer</h2>
+                <p>Transform brand-specific content into generic, white-label alternatives using AI for intelligent rewriting.</p>
+                <ul>
+                    <li>AI-powered brand neutralization</li>
+                    <li>Automatic trademark removal</li>
+                    <li>Smart product name replacement</li>
+                    <li>Validation and warning detection</li>
+                    <li>HTML structure preservation</li>
+                </ul>
+                <a href="article-rewriter.html" class="open-btn">Open</a>
+            </div>
+
+            <div class="tool-card">
+                <div class="step-circle">03</div>
+                <h2>Content Diff Tool</h2>
+                <p>Compare original content against brand-neutralized output side-by-side to verify every AI change.</p>
+                <ul>
+                    <li>Side-by-side rendered view</li>
+                    <li>Word-level diff highlighting</li>
+                    <li>Original vs. rewritten markers</li>
+                    <li>Synchronized scrolling</li>
+                    <li>Change count statistics</li>
+                </ul>
+                <a href="article-diff.html" class="open-btn">Open</a>
+            </div>
+
+            <div class="tool-card">
+                <div class="step-circle">04</div>
+                <h2>Word Editor</h2>
+                <p>Review and refine the brand-neutralized article in a word-processor-style editor before final export.</p>
+                <ul>
+                    <li>Rich text editing (bold, italic, lists…)</li>
+                    <li>Heading &amp; paragraph formatting</li>
+                    <li>Remove AI highlight markers</li>
+                    <li>Live word &amp; character count</li>
+                    <li>Download as HTML or plain text</li>
+                </ul>
+                <a href="article-editor.html" class="open-btn">Open</a>
+            </div>
+
+            <div class="tool-card">
+                <div class="step-circle accent-red">KB</div>
+                <h2>Knowledge Base Chat</h2>
+                <p>Ask questions and get answers drawn exclusively from the FCAT database. No outside knowledge — built for regulatory compliance.</p>
+                <ul>
+                    <li>Answers grounded solely in the DB</li>
+                    <li>Semantic article retrieval per query</li>
+                    <li>Source article citations per response</li>
+                    <li>Conversation history support</li>
+                    <li>Zero outside-knowledge contamination</li>
+                </ul>
+                <a href="chat.html" class="open-btn primary">Open</a>
+            </div>
+
         </div>
+
+        <!-- ── Bottom row ─────────────────────────────────────── -->
+        <div class="bottom-row">
+            <div class="bottom-card">
+                <h3>Pipeline Overview</h3>
+                <div class="pipeline-steps">
+                    <div class="pipeline-step">
+                        <div class="pipeline-num">01</div>
+                        <div class="pipeline-step-text">
+                            Extract
+                            <span>Pull raw HTML article from URL</span>
+                        </div>
+                        <span class="pipeline-arrow">›</span>
+                    </div>
+                    <div class="pipeline-step">
+                        <div class="pipeline-num">02</div>
+                        <div class="pipeline-step-text">
+                            Neutralize
+                            <span>AI removes brand references</span>
+                        </div>
+                        <span class="pipeline-arrow">›</span>
+                    </div>
+                    <div class="pipeline-step">
+                        <div class="pipeline-num">03</div>
+                        <div class="pipeline-step-text">
+                            Review &amp; Edit
+                            <span>Diff, then refine in the editor</span>
+                        </div>
+                        <span class="pipeline-arrow">›</span>
+                    </div>
+                    <div class="pipeline-step">
+                        <div class="pipeline-num">04</div>
+                        <div class="pipeline-step-text">
+                            Save to FCAT
+                            <span>Publish to the knowledge base</span>
+                        </div>
+                        <span class="pipeline-arrow">›</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-card">
+                <h3>Documentation &amp; Resources</h3>
+                <div class="docs-grid">
+                    <a href="QUICK_START.md" class="doc-link" download>
+                        <span class="doc-icon">↗</span>
+                        Quick Start Guide
+                    </a>
+                    <a href="README.md" class="doc-link" download>
+                        <span class="doc-icon">↗</span>
+                        Full Documentation
+                    </a>
+                    <a href="requirements.txt" class="doc-link" download>
+                        <span class="doc-icon">↗</span>
+                        Requirements.txt
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>aRCHi is the creation of Jim Janeteas, Luke Paxton &amp; Matt Ledoux</p>
+            <p>Started | November 2025</p>
+        </div>
+
     </div>
-    <div class="tools-grid">
-
-        <div class="tool-card">
-            <span class="badge">Step 01</span>
-            <h2>Article Extractor</h2>
-            <p>Extract and clean article content from any URL. Perfect for reviewing and processing article text.</p>
-            <ul>
-                <li>Extract &lt;article&gt; content from URLs</li>
-                <li>Remove unwanted elements (links, call-outs)</li>
-                <li>Clean, readable text output</li>
-                <li>Real-time content preview</li>
-            </ul>
-            <a href="article-extractor.html" class="button">Open</a>
-        </div>
-
-        <div class="tool-card">
-            <span class="badge">Step 02</span>
-            <h2>Brand Neutralizer</h2>
-            <p>Transform brand-specific content into generic, white-label alternatives using AI for intelligent
-                rewriting.</p>
-            <ul>
-                <li>AI-powered brand neutralization</li>
-                <li>Automatic trademark removal</li>
-                <li>Smart product name replacement</li>
-                <li>Validation and warning detection</li>
-                <li>HTML structure preservation</li>
-            </ul>
-            <a href="article-rewriter.html" class="button">Open</a>
-        </div>
-
-        <div class="tool-card">
-            <span class="badge">Step 03</span>
-            <h2>Content Diff Tool</h2>
-            <p>Compare original article content against brand-neutralized output side by side to verify every change
-                made by the AI.</p>
-            <ul>
-                <li>Side-by-side rendered view</li>
-                <li>Word-level diff highlighting</li>
-                <li>Original vs. rewritten markers</li>
-                <li>Synchronized scrolling</li>
-                <li>Change count statistics</li>
-            </ul>
-            <a href="article-diff.html" class="button">Open</a>
-        </div>
-
-        <div class="tool-card">
-            <span class="badge">Step 04</span>
-            <h2>Word Editor</h2>
-            <p>Review and refine the brand-neutralized article in a word-processor-style editor before final export.</p>
-            <ul>
-                <li>Rich text editing (bold, italic, lists…)</li>
-                <li>Heading &amp; paragraph formatting</li>
-                <li>Remove AI highlight markers</li>
-                <li>Live word &amp; character count</li>
-                <li>Download as HTML or plain text</li>
-            </ul>
-            <a href="article-editor.html" class="button">Open</a>
-        </div>
-
-        <div class="tool-card" style="display: none;">
-            <span class="badge">Enhanced</span>
-            <h2>Enhanced Persona Finder</h2>
-            <p>Advanced persona finder with both AI and smart keyword-based matching options.</p>
-            <ul>
-                <li>Smart Search (no AI required)</li>
-                <li>AI Analysis (with Ollama)</li>
-                <li>CORS issue workarounds</li>
-                <li>Dual-mode functionality</li>
-            </ul>
-            <a href="enhanced-persona-finder.html" class="button">Open</a>
-        </div>
-
-        <div class="tool-card" style="display: none;">
-            <span class="badge">New</span>
-            <h2>Article Generator</h2>
-            <p>Generate new articles in your writing style using your existing content as examples. Combines
-                Retrieval-Augmented Generation (RAG) with Ollama.</p>
-            <ul>
-                <li>Uses your own articles as examples</li>
-                <li>RAG-powered: finds similar content for context</li>
-                <li>Ollama LLM for generation</li>
-                <li>Interactive and script modes</li>
-                <li>Style analysis and creativity controls</li>
-            </ul>
-            <a href="article-generator.html" class="button">Open</a>
-        </div>
-        </div>
- <div class="docs-section">
-        <h2>Documentation &amp; Resources</h2>
-        <div class="docs-grid">
-            <a href="QUICK_START.md" class="doc-link" download="">
-                <span class="icon">↗</span>
-                Quick Start Guide
-            </a>
-            <a href="README.md" class="doc-link" download="">
-                <span class="icon">↗</span>
-                Full Documentation
-            </a>
-            <a href="requirements.txt" class="doc-link" download="">
-                <span class="icon">↗</span>
-                Requirements.txt
-            </a>
-        </div>
-    </div>
-    </div>
-
-   
-
-    <div class="footer">
-        <p>aRCHi is the creation of Jim Janeteas, Luke Paxton & Matt Ledoux</p>
-        <p>Started | November 2025</p>
-    </div>
-
 </body>
 
 </html>

@@ -27,14 +27,16 @@
         }
 
         .panel {
-            background: #000;
-            border: 1px solid #fff;
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            border: none;
             padding: 25px;
         }
 
         .panel h2 {
             font-size: 20px;
-            color: #fff;
+            color: var(--text);
             margin-bottom: 15px;
             display: flex;
             align-items: center;
@@ -42,31 +44,33 @@
         }
 
         .input-panel {
-            
+
         }
 
         .output-panel {
             min-height: 600px;
-            
             overflow-y: auto;
             background: #fff;
-            color: #fff;
+            color: var(--text);
+            border-radius: var(--radius);
         }
 
         /* select extends the shared form-group input rule */
         .form-group select {
             width: 100%;
             padding: 12px;
-            border: 1px solid #fff;
+            border: none;
             font-size: 14px;
             font-family: inherit;
-            background: #000;
-            color: #fff;
+            background: var(--surface);
+            color: var(--text);
+            border-radius: var(--radius-sm);
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
         }
 
         .form-group select:focus {
-            outline: 1px solid #fff;
-            border-color: #fff;
+            outline: none;
+            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light), 0 0 0 2px var(--accent);
         }
 
         .form-group textarea {
@@ -85,15 +89,16 @@
         }
 
         .options-section {
-            background: #000;
-            border: 1px solid #fff;
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+            border: none;
             padding: 15px;
             margin-bottom: 20px;
         }
 
         .options-section h4 {
-            color: #fff;
-            opacity: 0.5;
+            color: var(--text-muted);
             margin-bottom: 10px;
             font-size: 11px;
             text-transform: uppercase;
@@ -101,12 +106,11 @@
         }
 
         .options-section-title {
-            color: #fff;
-
+            color: var(--text-muted);
+            border-top: 1px solid var(--shadow-dark);
             margin: 20px 0px;
             font-size: 11px;
             padding-top: 10px;
-            border-top: 1px solid #8b8282;
             text-transform: uppercase;
             letter-spacing: 0.15em;
         }
@@ -169,34 +173,37 @@
 
         .radio-item input[type="radio"] {
             width: auto;
-            accent-color: #fff;
+            accent-color: var(--accent);
         }
 
         .radio-item label {
             font-weight: normal;
             font-size: 14px;
             margin-bottom: 0;
-            color: #fff;
+            color: var(--text);
         }
 
-        /* content-meta stays white-on-black (it's in the input panel) */
         .content-meta {
-            background: #000;
-            border: 1px solid #fff;
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            border: none;
             padding: 15px;
             margin-bottom: 20px;
         }
 
         .content-meta h3 {
             margin-bottom: 10px;
-            color: #fff;
+            color: var(--text);
         }
 
         .content-meta .stat {
             display: inline-block;
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            color: #fff;
+            border: none;
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            border-radius: 20px;
+            color: var(--text);
+            background: var(--surface);
             padding: 4px 8px;
             font-size: 12px;
             margin-right: 10px;
@@ -204,9 +211,11 @@
         }
 
         .article-id-display {
-            background: #000;
-            color: #fff;
-            border: 1px solid #fff;
+            background: var(--surface);
+            color: var(--text);
+            border-radius: var(--radius-sm);
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+            border: none;
             padding: 12px 15px;
             margin-bottom: 15px;
             display: flex;
@@ -225,33 +234,38 @@
         .article-id-display .value {
             font-size: 16px;
             font-family: 'Courier New', monospace;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0,0,0,0.05);
+            border-radius: 4px;
             padding: 4px 8px;
         }
 
         .stats-box {
-            background: #000;
-            border: 1px solid #fff;
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            border: none;
             padding: 15px;
             margin-bottom: 20px;
         }
 
         .stats-box h3 {
             margin-bottom: 10px;
-            color: #fff;
+            color: var(--text);
             font-size: 16px;
         }
 
         .replacement-list {
             max-height: 300px;
             overflow-y: auto;
-            border: 1px solid #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
             margin-top: 15px;
         }
 
         .replacement-item {
             padding: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            border-bottom: 1px solid var(--shadow-dark);
         }
 
         .replacement-item:last-child {
@@ -259,10 +273,10 @@
         }
 
         .replacement-item .original {
-            color: #fff;
-            opacity: 0.6;
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: var(--text-muted);
+            border: none;
+            background: rgba(0,0,0,0.04);
+            border-radius: 4px;
             padding: 4px 8px;
             font-size: 13px;
             display: block;
@@ -270,9 +284,10 @@
         }
 
         .replacement-item .rewritten {
-            color: #fff;
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.6);
+            color: var(--text);
+            border: none;
+            background: rgba(0,0,0,0.06);
+            border-radius: 4px;
             padding: 4px 8px;
             font-size: 13px;
             display: block;
@@ -280,7 +295,7 @@
 
         /* fidelity-highlight override: border-bottom only (no bg fill) */
         .fidelity-highlight {
-            border-bottom: 2px solid rgba(0, 0, 0, 0.4);
+            border-bottom: 2px solid var(--accent);
             background: transparent;
             border-top: none;
             border-left: none;
@@ -289,9 +304,9 @@
 
         .tabs {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             margin-bottom: 20px;
-            border-bottom: 1px solid #fff;
+            border-bottom: none;
             padding-bottom: 10px;
         }
 
@@ -299,20 +314,23 @@
             padding: 10px 20px;
             cursor: pointer;
             background: transparent;
-            border: 1px solid #fff;
+            border: none;
             font-weight: 600;
-            color: #fff;
+            color: var(--text-muted);
+            border-radius: var(--radius-sm);
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            transition: background 0.15s, color 0.15s;
+            transition: background 0.15s, color 0.15s, box-shadow 0.15s;
         }
 
         .tab.active {
-            background: #fff;
-            color: #000;
+            background: var(--accent);
+            color: #fff;
+            box-shadow: inset 3px 3px 6px rgba(0,0,0,0.15);
         }
 
         .tab:hover:not(.active) {
-            background: rgba(255, 255, 255, 0.1);
+            box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
         }
 
         .tab-content {
@@ -336,44 +354,47 @@
             right: 10px;
             top: 50%;
             transform: translateY(-50%);
-            background: #000;
-            border: 1px solid #fff;
-            color: #fff;
+            background: var(--surface);
+            border: none;
+            color: var(--text-muted);
+            border-radius: var(--radius-xs);
+            box-shadow: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light);
             padding: 5px 10px;
             cursor: pointer;
             font-size: 12px;
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            transition: background 0.15s, color 0.15s;
+            transition: background 0.15s, color 0.15s, box-shadow 0.15s;
         }
 
         .api-key-input .toggle-visibility:hover {
-            background: #fff;
-            color: #000;
+            box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
         }
 
         .brand-highlight {
-            border-bottom: 2px solid rgba(255, 255, 255, 0.6);
+            border-bottom: 2px solid var(--shadow-dark);
             background: transparent;
             padding: 2px 4px;
             font-weight: 600;
         }
 
         .file-upload-area {
-            border: 1px dashed #fff;
+            border: 2px dashed var(--shadow-dark);
             padding: 30px;
             text-align: center;
             cursor: pointer;
             transition: background 0.15s;
             margin-bottom: 20px;
-            color: #fff;
+            color: var(--text-muted);
+            border-radius: var(--radius-sm);
         }
 
         .file-upload-area:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(0,0,0,0.03);
         }
 
         .file-upload-area.dragover {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0,0,0,0.05);
+            border-color: var(--accent);
         }
 
         .file-upload-area input {
@@ -384,7 +405,7 @@
 
 <body>
     <div class="site-header">
-        <h1><span style="color: #fa2D00;">a</span>RCH<span style="color: #fa2D00;">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
+        <h1><span style="color: var(--accent-red);">a</span>RCH<span style="color: var(--accent-red);">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
         <p>Content &amp; Learning Tools</p>
     </div>
     <button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>
@@ -510,7 +531,7 @@
                 <button id="rewriteButton" class="button  CTA">Rewrite with AI</button>
 
                 <div id="rewrite-animation" style="margin: 28px 0px; display: flex; justify-content: center;">
-                    <svg width="300" height="300" viewBox="0 0 100 100" fill="none" stroke="white" xmlns="http://www.w3.org/2000/svg" style="stroke-width: 0.330033px;"></svg>
+                    <svg width="300" height="300" viewBox="0 0 100 100" fill="none" stroke="#308bff" xmlns="http://www.w3.org/2000/svg" style="stroke-width: 0.330033px;"></svg>
                 </div>
                 
                 <div id="leftPanelActions" style="display: none; position: sticky; top: 83%;">
@@ -808,7 +829,11 @@
                 showSuccess('Content rewritten successfully!');
             } catch (error) {
                 console.error('Rewrite error:', error);
-                showError('Rewrite failed: ' + error.message);
+                if (error.noMarkers) {
+                    showNothingToNeutralizeError();
+                } else {
+                    showError('Rewrite failed: ' + error.message);
+                }
             } finally {
                 isProcessing = false;
                 hideLoading();
@@ -848,7 +873,9 @@
             const spans = doc.querySelectorAll('[data-ai-rewrite="true"]');
 
             if (spans.length === 0) {
-                throw new Error('No content marked with data-ai-rewrite="true" found. Please mark the content you want to rewrite.');
+                const err = new Error('NO_MARKERS');
+                err.noMarkers = true;
+                throw err;
             }
 
             const replacements = [];
@@ -1359,6 +1386,49 @@ Return ONLY the rewritten text, nothing else.`
             const errorDiv = document.getElementById('errorMessage');
             errorDiv.textContent = message;
             errorDiv.style.display = 'block';
+        }
+
+        function showNothingToNeutralizeError() {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.innerHTML = `
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;">
+                    <span style="font-size:15px; font-weight:600;">aRCHi did not find anything to Neutralize!</span>
+                    <button
+                        onclick="skipToEditor()"
+                        style="
+                            cursor:pointer;
+                            border:none;
+                            padding:10px 22px;
+                            border-radius:30px;
+                            font-size:11px;
+                            font-weight:700;
+                            letter-spacing:0.14em;
+                            text-transform:uppercase;
+                            background:var(--surface);
+                            color:var(--text);
+                            box-shadow:4px 4px 8px var(--shadow-dark),-4px -4px 8px var(--shadow-light);
+                            white-space:nowrap;
+                        ">
+                        Skip to Step 4 &rarr; Word Editor
+                    </button>
+                </div>
+            `;
+            errorDiv.style.display = 'block';
+        }
+
+        function skipToEditor() {
+            // Write the current article HTML into editor_content so the
+            // Word Editor shows this article, not a stale previous one.
+            const html = document.getElementById('htmlInput').value.trim();
+            if (html) {
+                sessionStorage.setItem('editor_content', html);
+            }
+            // Carry eReview + topics forward
+            const erId = eReviewId || sessionStorage.getItem('article_ereview_id') || '';
+            if (erId) sessionStorage.setItem('editor_ereview_id', erId);
+            const tp = topics.length ? topics : JSON.parse(sessionStorage.getItem('article_topics') || '[]');
+            if (tp.length) sessionStorage.setItem('editor_topics', JSON.stringify(tp));
+            window.location.href = 'article-editor.html';
         }
 
         function hideError() {

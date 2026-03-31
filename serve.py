@@ -114,7 +114,14 @@ class CORSHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             
             # Fetch the webpage
             headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                'User-Agent': (
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                    'AppleWebKit/537.36 (KHTML, like Gecko) '
+                    'Chrome/124.0.0.0 Safari/537.36'
+                ),
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Cache-Control': 'no-cache',
             }
             req = urllib.request.Request(url, headers=headers)
             
@@ -179,41 +186,52 @@ class CORSHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         # Extract eReview ID from the full document before cleaning
         ereview_id = None
         print('Searching for eReview ID...')
-        
-        # Try multiple selector variations for the disclosures section
-        disclosures_selectors = [
-            'div[role="complementary"][aria-label="disclosures"]',
-            'div[aria-label="disclosures"]',
-            '[role="complementary"]'
-        ]
-        
-        for selector in disclosures_selectors:
-            disclosures_div = soup.select_one(selector)
-            if disclosures_div:
-                print(f' Found disclosures div with selector: {selector}')
-                s_assigned = disclosures_div.find('s-assigned-wrapper')
+
+        # eReview IDs like 763565.14.0 or 1049825.3.0 (5–8 digits, then dot-separated segments)
+        EREVIEW_PATTERN = re.compile(r'\b(\d{5,8}\.\d{1,3}\.\d{1,3})\b')
+
+        # Pass 0: search raw HTML string directly — most reliable,
+        # catches the number even when BeautifulSoup can\'t parse the web-component tag
+        raw_match = EREVIEW_PATTERN.search(html)
+        if raw_match:
+            ereview_id = raw_match.group(1)
+            print(f'Found eReview ID in raw HTML: {ereview_id}')
+
+        if not ereview_id:
+            # Try multiple selector variations for the disclosures section
+            disclosures_selectors = [
+                'div[role="complementary"][aria-label="disclosures"]',
+                'div[aria-label="disclosures"]',
+                '[role="complementary"]'
+            ]
+
+            for selector in disclosures_selectors:
+                disclosures_div = soup.select_one(selector)
+                if disclosures_div:
+                    print(f' Found disclosures div with selector: {selector}')
+                    s_assigned = disclosures_div.find('s-assigned-wrapper')
+                    if s_assigned:
+                        ereview_id = s_assigned.get_text().strip()
+                        print(f'Found eReview ID in disclosures: {ereview_id}')
+                        break
+
+            # Fallback: check anywhere in document
+            if not ereview_id:
+                print('Trying fallback: searching entire document')
+                s_assigned = soup.find('s-assigned-wrapper')
                 if s_assigned:
                     ereview_id = s_assigned.get_text().strip()
-                    print(f'Found eReview ID in disclosures: {ereview_id}')
-                    break
-        
-        # Fallback: check anywhere in document
-        if not ereview_id:
-            print('Trying fallback: searching entire document')
-            s_assigned = soup.find('s-assigned-wrapper')
-            if s_assigned:
-                ereview_id = s_assigned.get_text().strip()
-                print(f'Found eReview ID in document: {ereview_id}')
-        
-        # Additional fallback: pattern matching for format like "763565.14.0"
-        if not ereview_id:
-            print('Trying pattern match fallback')
-            body_text = soup.get_text()
-            match = re.search(r'\b\d{6}\.\d{1,2}\.\d{1,2}\b', body_text)
-            if match:
-                ereview_id = match.group(0)
-                print(f'Found eReview ID via pattern match: {ereview_id}')
-        
+                    print(f'Found eReview ID in document: {ereview_id}')
+
+            # Additional fallback: pattern matching on body text
+            if not ereview_id:
+                print('Trying pattern match fallback on body text')
+                body_text = soup.get_text()
+                match = EREVIEW_PATTERN.search(body_text)
+                if match:
+                    ereview_id = match.group(1)
+                    print(f'Found eReview ID via body text pattern match: {ereview_id}')
+
         if not ereview_id:
             print('eReview ID not found')
         

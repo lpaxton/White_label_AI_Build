@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="shared.css">
     <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         .container {
             max-width: 1100px;
@@ -19,15 +20,18 @@
         .header p  { font-size: 15px; }
         /* Editor card */
         .editor-card {
-            background: #000;
-            border: 1px solid #fff;
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            border: none;
             overflow: hidden;
             margin-bottom: 20px;
         }
         /* Toolbar */
         .toolbar {
-            background: #111;
-            border-bottom: 1px solid #fff;
+            background: var(--bg-dark);
+            border-bottom: none;
+            border-radius: var(--radius) var(--radius) 0 0;
             padding: 10px 16px;
             display: flex;
             align-items: center;
@@ -39,7 +43,7 @@
             gap: 2px;
             padding-right: 10px;
             margin-right: 6px;
-            border-right: 1px solid rgba(255,255,255,0.3);
+            border-right: 1px solid var(--shadow-dark);
         }
         .toolbar-group:last-child { border-right: none; }
         .tb-btn {
@@ -49,41 +53,43 @@
             cursor: pointer;
             font-size: 13px;
             font-weight: 600;
-            color: #fff;
+            color: var(--text);
             transition: all 0.15s;
             min-width: 32px;
             text-align: center;
         }
-        .tb-btn:hover  { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); }
-        .tb-btn.active { background: #fff; color: #000; }
+        .tb-btn:hover  { background: rgba(0,0,0,0.06); border-color: var(--shadow-dark); }
+        .tb-btn.active { background: var(--accent); color: #fff; border-radius: var(--radius-xs); }
         .tb-select {
             padding: 5px 8px;
-            border: 1px solid #fff;
-            background: #000;
+            border: none;
+            background: var(--surface);
             font-size: 12px;
-            color: #fff;
+            color: var(--text);
+            border-radius: var(--radius-xs);
+            box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
             cursor: pointer;
         }
         .tb-divider {
             width: 1px;
             height: 24px;
-            background: rgba(255,255,255,0.3);
+            background: var(--shadow-dark);
             margin: 0 4px;
         }
         /* Word count bar */
         .word-count-bar {
-            background: #111;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
+            background: var(--bg-dark);
+            border-bottom: none;
             padding: 6px 20px;
             display: flex;
             gap: 16px;
             font-size: 11px;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: #fff;
+            color: var(--text-muted);
             opacity: 0.6;
         }
-        .word-count-bar span strong { color: #fff; opacity: 1; }
+        .word-count-bar span strong { color: var(--text); opacity: 1; }
         /* Editable content area */
         .editor-content {
             min-height: 500px;
@@ -96,6 +102,7 @@
             line-height: 1.8;
             color: #000;
             background: #fff;
+            border-radius: 0 0 var(--radius) var(--radius);
         }
         .editor-content:focus { outline: none; }
         /* Strip AI marker labels inside editor */
@@ -113,8 +120,7 @@
         /* Placeholder */
         .editor-content:empty::before {
             content: 'Start typing or load content from Step 2 (Brand Neutralizer)...';
-            color: #000;
-            opacity: 0.3;
+            color: #999;
             pointer-events: none;
         }
         /* Headings inside editor */
@@ -131,7 +137,7 @@
         .editor-content ul, .editor-content ol { padding-left: 28px; margin-bottom: 14px; }
         .editor-content li { margin-bottom: 6px; }
         .editor-content blockquote {
-            border-left: 3px solid rgba(0,0,0,0.3);
+            border-left: 3px solid var(--accent);
             padding-left: 16px;
             margin: 16px 0;
             color: #000;
@@ -140,8 +146,10 @@
         }
         /* Action bar */
         .action-bar {
-            background: #000;
-            border: 1px solid #fff;
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            border: none;
             padding: 16px 20px;
             display: flex;
             align-items: center;
@@ -155,11 +163,36 @@
         @media (max-width: 768px) {
             .editor-content { padding: 20px; }
         }
+        /* Save-to-FCAT modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--surface);
+            border: none;
+            border-radius: var(--radius);
+            box-shadow: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
+            padding: 36px 40px;
+            max-width: 480px;
+            width: 90%;
+            text-align: center;
+        }
+        .modal h2 { font-size: 20px; margin-bottom: 12px; color: var(--text); }
+        .modal p { font-size: 14px; color: var(--text-muted); margin-bottom: 28px; line-height: 1.6; }
+        .modal-actions { display: flex; gap: 12px; justify-content: center; }
     </style>
 </head>
 <body>
     <div class="site-header">
-        <h1><span style="color: #fa2D00;">a</span>RCH<span style="color: #fa2D00;">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
+        <h1><span style="color: var(--accent-red);">a</span>RCH<span style="color: var(--accent-red);">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
         <p>Content &amp; Learning Tools</p>
     </div>
     <button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>
@@ -252,14 +285,28 @@
                 <button class="button orange" onclick="downloadHtml()">Download HTML</button>
                 <button class="button secondary" onclick="downloadText()">Download Text</button>
                 <button class="button" style="border-color:#4f8ef7;color:#4f8ef7;" onclick="downloadWord()">Download Word</button>
+                <button class="button" style="border-color:#e05252;color:#e05252;" onclick="downloadPdf()">Download PDF</button>
             </div>
-            <div>
+            <div style="display:flex;gap:10px;">
+                <button class="button" style="border-color:#22c55e;color:#22c55e;" onclick="saveToFcat()" id="saveFcatBtn">Save to FCAT</button>
                 <button class="button green" onclick="clearAIMarkers()">Finalize (Remove Markers)</button>
             </div>
         </div>
     </div>
 
     <div class="toast hidden" id="toast"></div>
+
+    <!-- Save to FCAT confirmation modal -->
+    <div class="modal-overlay" id="fcatModal" onclick="if(event.target===this)closeFcatModal()">
+        <div class="modal">
+            <h2>Save to Database?</h2>
+            <p>Markers have been removed. Would you like to save this finalized article to the FCAT database?</p>
+            <div class="modal-actions">
+                <button class="button green" onclick="confirmSaveToFcat()">Yes, Save</button>
+                <button class="button secondary" onclick="closeFcatModal()">No, Skip</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         const editor = document.getElementById('editorContent');
@@ -322,6 +369,17 @@
             });
             showToast('AI markers removed', 'success');
             updateWordCount();
+            // Show save-to-FCAT prompt
+            document.getElementById('fcatModal').classList.add('active');
+        }
+
+        function closeFcatModal() {
+            document.getElementById('fcatModal').classList.remove('active');
+        }
+
+        async function confirmSaveToFcat() {
+            closeFcatModal();
+            await saveToFcat();
         }
 
         function execCmd(command, value = null) {
@@ -448,6 +506,95 @@ ${editor.innerHTML}
             const text = header + (editor.innerText || '');
             downloadFile(text, filename, 'text/plain');
             showToast(`Downloaded ${filename}`, 'success');
+        }
+
+        function downloadPdf() {
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            const filename = `edited-article-${timestamp}.pdf`;
+            const id = eReviewId || 'N/A';
+            const tagList = (topics && topics.length > 0) ? topics.join(', ') : 'None';
+
+            // Clone editor and apply inline highlights for AI markers
+            const clone = editor.cloneNode(true);
+            clone.querySelectorAll('[data-ai-rewrite], .rewritten-content').forEach(el => {
+                el.style.backgroundColor = '#fff59d';
+                el.style.padding = '0 2px';
+            });
+
+            const metaHtml = `
+                <div style="font-family:monospace;font-size:12px;border:1px solid #000;padding:10px 14px;margin-bottom:6px;">
+                    <strong>eReview ID:</strong> ${id}
+                </div>
+                <div style="font-family:sans-serif;font-size:12px;border:1px solid #000;border-top:none;padding:10px 14px;margin-bottom:24px;">
+                    <strong>Topic Tags:</strong> ${tagList}
+                </div>`;
+
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'font-family:Georgia,serif;font-size:14px;line-height:1.8;color:#000;padding:20px;';
+            wrapper.innerHTML = metaHtml + clone.innerHTML;
+
+            const opt = {
+                margin: [15, 15, 15, 15],
+                filename,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            showToast('Generating PDF…', 'success');
+            html2pdf().set(opt).from(wrapper).save().then(() => {
+                showToast(`Downloaded ${filename}`, 'success');
+            });
+        }
+
+        async function saveToFcat() {
+            const btn = document.getElementById('saveFcatBtn');
+            const neutralizedHtml = editor.innerHTML;
+            if (!neutralizedHtml.trim()) {
+                showToast('No content to save', 'error');
+                return;
+            }
+            const sourceUrl = sessionStorage.getItem('article_source_url') || '';
+            const originalHtml = sessionStorage.getItem('diff_original') || '';
+
+            btn.disabled = true;
+            btn.textContent = 'Saving…';
+            showToast('Saving to FCAT database…', 'success');
+
+            try {
+                const res = await fetch('http://127.0.0.1:5000/api/save-to-fcat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        neutralized_html: neutralizedHtml,
+                        original_html: originalHtml,
+                        source_url: sourceUrl || `manual-entry-${Date.now()}`,
+                        origin_url: sourceUrl || null,
+                        source: 'fidelity_cms',
+                        ereview_id: eReviewId || null,
+                        topics: topics || [],
+                    })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    showToast(`Saved to FCAT! ID: ${data.article_id}`, 'success');
+                    btn.textContent = 'Saved ✓';
+                    btn.style.borderColor = '#86efac';
+                    btn.style.color = '#86efac';
+                } else if (res.status === 409) {
+                    showToast('Article already exists in FCAT (duplicate URL)', 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Save to FCAT';
+                } else {
+                    showToast(`FCAT error: ${data.error || 'Unknown error'}`, 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Save to FCAT';
+                }
+            } catch (err) {
+                showToast('Could not reach API server. Is it running?', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Save to FCAT';
+            }
         }
 
         function downloadWord() {
