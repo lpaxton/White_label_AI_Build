@@ -1,297 +1,205 @@
-# Fidelity Learning Center Article Scraper & Persona Finder
+# aRCHi — Content and Learning System
 
-A comprehensive toolkit for scraping Fidelity Learning Center articles and finding the most relevant content for specific user personas using AI.
+A web-based toolkit for extracting, rewriting, and managing Fidelity Learning Center articles, backed by MongoDB Atlas and powered by Claude (Anthropic) and Ollama.
 
-## 🎯 What It Does
+---
 
-This toolkit includes:
+## What's Included
 
-### 📊 Article Scraper
-- ✅ Visits all 51 Fidelity Learning Center category pages
-- ✅ Extracts article cards from each page including:
-  - Title
-  - URL
-  - Description
-  - Article type (Article/Video/Podcast)
-  - Reading time
-  - Images
-- ✅ Exports results in multiple formats (JSON, CSV)
-- ✅ Provides detailed progress logging
-- ✅ Respects rate limits (2-second delay between requests)
+| Tool | File | Description |
+|---|---|---|
+| **Dashboard** | `index.html` | Main navigation hub |
+| **Article Extractor** | `article-extractor.html` | Fetch & clean articles from URLs |
+| **Word Editor** | `article-editor.html` | Edit articles with live formatting |
+| **Article Rewriter** | `article-rewriter.html` | AI rewrite using Claude (Anthropic) |
+| **Article Generator** | `article-generator.html` | RAG-based article generation via Ollama |
+| **Persona Finder** | `enhanced-persona-finder.html` | Match articles to user personas via Ollama |
 
-### 🎯 Persona-Based Article Finder (NEW!)
-- ✅ AI-powered article matching using Ollama
-- ✅ Detailed persona descriptions supported
-- ✅ Relevance scoring (1-100) with explanations
-- ✅ Both web interface and command-line tools
-- ✅ Multiple LLM models supported
+---
 
-## 📦 Installation
+## Prerequisites
 
+- **Python 3.9+** — [python.org](https://python.org)
+- **Ollama** (for AI generation/persona features) — [ollama.ai](https://ollama.ai)
+- **MongoDB Atlas account** (for article storage pipeline)
+- **Anthropic API key** (for article rewriter)
+- **OpenAI API key** (for text embeddings)
+
+---
+
+## Setup
+
+### 1. Clone / copy the project files
+
+Place the project folder on the server. All commands below run from that folder.
+
+### 2. Create a Python virtual environment
+
+```bash
 python -m venv venv
 
+# Activate (Linux/Mac)
+source venv/bin/activate
+
+# Activate (Windows)
 venv\Scripts\activate
+```
 
-1. **Install Python dependencies:**
+### 3. Install dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
-2. **Install and setup Ollama (for Persona Finder):**
+### 4. Create the `.env` file
+
+Copy the template below into a file named `.env` in the project root and fill in your credentials:
+
+```env
+# MongoDB Atlas connection string
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/?appName=<AppName>
+
+# OpenAI API key (for text-embedding-3-small embeddings)
+OPENAI_API_KEY=sk-...
+
+# Anthropic API key (for Claude rewriter)
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+> **Never commit `.env` to version control.** It is already listed in `.gitignore`.
+
+### 5. Install and start Ollama
+
 ```bash
-# Visit https://ollama.ai for installation instructions
-ollama pull llama3.2  # or your preferred model
+# Install from https://ollama.ai, then:
 ollama serve
+
+# Pull the recommended model (in a second terminal)
+ollama pull llama3.2
 ```
 
-## 🚀 Quick Start
+---
 
-### Step 1: Scrape Articles
+## Starting the Servers
+
+This project uses **two** servers that must both be running:
+
+### Server 1 — Main HTTP server (port 8000)
+
+Serves the HTML tools and proxies requests to Ollama. Also handles article extraction (`/api/extract-article`).
+
+```bash
+python serve.py
+# or on a custom port:
+python serve.py 9000
+```
+
+Open the dashboard at: `http://localhost:8000`
+
+### Server 2 — Flask API server (port 5000)
+
+Required only for the **Article Generator** (RAG pipeline).
+
+```bash
+python api_server.py
+```
+
+### Windows shortcut
+
+Run `start_server.bat` to install dependencies and start the Flask API server automatically.
+
+---
+
+## Using the Tools
+
+### Article Extractor
+1. Open `http://localhost:8000/article-extractor.html`
+2. Paste a Fidelity Learning Center article URL
+3. Click **Extract** — the tool fetches, cleans, and displays the article content
+4. Optionally save to MongoDB Atlas
+
+### Article Rewriter
+1. Open `http://localhost:8000/article-rewriter.html`
+2. Paste or load an article
+3. Select a rewrite style and click **Rewrite** — uses Claude via Anthropic API
+
+### Article Generator (RAG)
+1. Make sure the Flask server (`api_server.py`) is running on port 5000
+2. Open `http://localhost:8000/article-generator.html`
+3. Upload `.txt` article files as style examples
+4. Enter a topic prompt and generate
+
+### Persona Finder
+1. Open `http://localhost:8000/enhanced-persona-finder.html`
+2. Upload the scraped articles JSON file (`fidelity_articles_flat_*.json`)
+3. Describe your persona and get AI-powered article recommendations
+
+### Scraping Articles (optional, one-time)
 ```bash
 python fidelity_scraper.py
 ```
+Outputs `fidelity_articles_[timestamp].json`, `fidelity_articles_flat_[timestamp].json`, and a `.csv`.
 
-### Step 2: Find Articles for Your Persona
+---
 
-**Web Interface:**
-1. Open `persona-article-finder.html` in your browser
-2. Upload the generated JSON file
-3. Describe your persona
-4. Get AI-powered recommendations
+## MongoDB Atlas Setup
 
-**Command Line:**
-```bash
-python persona_finder.py fidelity_articles_flat_20251106_154850.json "25-year-old recent college graduate, starting first job, wants to learn about budgeting and saving for the future"
-```
+The FCAT pipeline (`fcat_db.py`) connects to an Atlas cluster. To configure:
 
-## 🎯 Persona Finder Features
+1. Log in to [cloud.mongodb.com](https://cloud.mongodb.com)
+2. Go to **Database > Connect > Drivers** and copy your connection string
+3. Paste it as `MONGODB_URI` in your `.env` file
+4. Ensure your server's IP is whitelisted in **Network Access**
 
-### Supported Persona Examples
-- **New Graduate**: Recent college grad with student loans, needs budgeting basics
-- **Mid-Career Professional**: Stable income, wants investment advice, planning major purchases
-- **Pre-Retiree**: High earner focused on retirement planning and wealth preservation
-- **Small Business Owner**: Irregular income, needs business and personal finance strategies
+Database: `fcat` | Collection: `articles`
 
-### AI Models Supported
-- llama3.2 (recommended)
-- llama3.1
-- mistral
-- phi3
-- Any Ollama-compatible model
+---
 
-### Output Formats
-- Interactive web interface with clickable results
-- Formatted command-line output
-- JSON export for integration with other tools
-
-## 📦 Installation
-
-1. **Install Python dependencies:**
-```bash
-pip install -r requirements.txt
-```
-
-Or manually:
-```bash
-pip install requests beautifulsoup4 lxml
-```
-
-## 🚀 Usage
-
-### Basic Usage
-
-Simply run the script:
-```bash
-python fidelity_scraper.py
-```
-
-### What You'll Get
-
-The script creates 3 files:
-
-1. **`fidelity_articles_[timestamp].json`** - Full results with all metadata
-2. **`fidelity_articles_flat_[timestamp].json`** - Flat list of all articles
-3. **`fidelity_articles_[timestamp].csv`** - CSV export for easy viewing
-
-## 📊 Output Format
-
-### JSON Structure (Full Results)
-```json
-[
-  {
-    "url": "https://www.fidelity.com/learning-center/personal-finance/saving-and-budgeting-money",
-    "success": true,
-    "articles": [
-      {
-        "title": "What is financial literacy?",
-        "url": "https://www.fidelity.com/learning-center/smart-money/financial-literacy",
-        "description": "And why is financial literacy important?",
-        "image": "https://www.fidelity.com/bin-public/...",
-        "metadata": {
-          "type": "Article",
-          "duration": "8 min"
-        }
-      }
-    ],
-    "total_articles": 15,
-    "all_links_found": 45,
-    "scraped_at": "2024-01-15T10:30:00"
-  }
-]
-```
-
-### CSV Columns
-- `title` - Article title
-- `url` - Direct link to article
-- `description` - Article description
-- `type` - Content type (Article/Video/Podcast)
-- `duration` - Reading/viewing time
-- `source_page` - Category page where found
-
-## 🔧 Advanced Usage
-
-### Modify URLs to Scrape
-
-Edit the `FIDELITY_URLS` list in the script to add/remove pages:
-
-```python
-FIDELITY_URLS = [
-    "https://www.fidelity.com/learning-center/personal-finance/saving-and-budgeting-money",
-    # Add more URLs here...
-]
-```
-
-### Adjust Rate Limiting
-
-Change the delay between requests (line ~220):
-
-```python
-time.sleep(2)  # Change to desired seconds
-```
-
-### Custom Headers
-
-Modify the `get_headers()` function to change User-Agent or other headers.
-
-## 📝 Example Output
+## Project Structure
 
 ```
-================================================================================
-FIDELITY LEARNING CENTER ARTICLE SCRAPER
-================================================================================
-Total URLs to scrape: 51
-Started at: 2024-01-15 10:30:00
-================================================================================
-
-Progress: 1/51
-
-================================================================================
-Scraping: https://www.fidelity.com/learning-center/personal-finance/saving-and-budgeting-money
-================================================================================
-  Found 15 article cards
-    ✓ What is financial literacy?
-    ✓ How to create a budget
-    ✓ Emergency fund: How much to save
-    ...
-
-================================================================================
-SCRAPING COMPLETE
-================================================================================
-Total URLs processed: 51
-Successful: 50
-Failed: 1
-Total articles found: 450
-Results saved to: fidelity_articles_20240115_103045.json
-Flat article list saved to: fidelity_articles_flat_20240115_103045.json
-CSV export saved to: fidelity_articles_20240115_103045.csv
-================================================================================
+article_getter_done/
+├── serve.py                    # Main HTTP server + Ollama proxy + article extraction API
+├── api_server.py               # Flask server for RAG article generator
+├── fcat_db.py                  # MongoDB Atlas client
+├── claude_rewriter.py          # Claude-based article rewriter backend
+├── embedding_service.py        # OpenAI embedding service
+├── article_generator.py        # RAG implementation (ChromaDB)
+├── fidelity_scraper.py         # Fidelity Learning Center scraper
+├── persona_finder.py           # CLI persona finder
+├── requirements.txt            # Python dependencies
+├── .env                        # API keys and connection strings (create this)
+├── start_server.bat            # Windows startup script
+├── index.html                  # Dashboard
+├── article-extractor.html      # Article extraction tool
+├── article-editor.html         # Word editor
+├── article-rewriter.html       # AI rewriter
+├── article-generator.html      # RAG generator
+├── enhanced-persona-finder.html
+├── shared.css                  # Shared styles
+├── article_generator_db/       # ChromaDB vector store (auto-created)
+└── uploaded_articles/          # Temp article uploads (auto-created)
 ```
 
-## 🔍 Troubleshooting
+---
 
-### No articles found
-- Check if Fidelity's HTML structure has changed
-- Verify the URL is accessible
-- Check for bot detection (add delays between requests)
+## Troubleshooting
 
-### Connection errors
-- Check your internet connection
-- Verify the URLs are correct
-- Try adding a longer delay between requests
+| Problem | Fix |
+|---|---|
+| `Cannot connect to Ollama` | Run `ollama serve` and confirm it's on port 11434 |
+| `Model not found` | Run `ollama pull llama3.2` |
+| `MONGODB_URI not set` | Check your `.env` file is in the project root |
+| `Article extraction failed` | The target page may block server-side requests; try a different article |
+| Flask server errors | Check that `api_server.py` is running on port 5000 |
+| Port already in use | Pass a different port: `python serve.py 8080` |
 
-### Import errors
-- Make sure all dependencies are installed: `pip install -r requirements.txt`
+---
 
-## 🤖 Using with Ollama
+## Environment Variables Reference
 
-### Persona-Based Article Finding
-Use the new persona finder to get personalized article recommendations:
-
-```bash
-# Find articles for a new graduate
-python persona_finder.py articles.json "Recent college graduate with student loans, new to budgeting" --max-results 10
-
-# Save results to file
-python persona_finder.py articles.json "Mid-career professional planning retirement" --output recommendations.json
-```
-
-### Custom Analysis
-For custom analysis of scraped articles:
-
-```python
-import json
-import requests
-
-# Load scraped articles
-with open('fidelity_articles_flat_20240115_103045.json') as f:
-    articles = json.load(f)
-
-# Analyze with Ollama
-for article in articles[:5]:  # First 5 articles
-    prompt = f"Analyze this article: {article['title']}\nDescription: {article['description']}"
-    
-    response = requests.post('http://localhost:11434/api/generate', json={
-        'model': 'llama2',
-        'prompt': prompt,
-        'stream': False
-    })
-    
-    print(f"\n{article['title']}")
-    print(response.json()['response'])
-```
-
-## 📚 Categories Covered
-
-The scraper covers these main categories:
-- Financial Essentials (10 pages)
-- Life Events (14 pages)
-- Investing and Trading (8 pages)
-- Investment Products (6 pages)
-- Advanced Trading (7 pages)
-- Content Hubs (6 pages)
-
-## ⚠️ Important Notes
-
-- **Be Respectful**: The script includes delays to avoid overwhelming the server
-- **Terms of Service**: Make sure your use complies with Fidelity's terms of service
-- **Rate Limiting**: If you get blocked, increase the delay between requests
-- **Dynamic Content**: Some content may be loaded via JavaScript and not captured
-
-## 📄 License
-
-This is a utility script for educational purposes. Please respect Fidelity's terms of service and robots.txt when using this tool.
-
-## 🤝 Contributing
-
-Feel free to improve the script:
-- Better error handling
-- Support for JavaScript-rendered content
-- Additional export formats
-- Enhanced article metadata extraction
-
-## 💡 Tips
-
-1. **Run during off-peak hours** to be more respectful of server resources
-2. **Save results regularly** - the script creates timestamped files
-3. **Check CSV output first** for a quick overview before diving into JSON
-4. **Combine with web_fetch** if you need full article content
+| Variable | Required | Description |
+|---|---|---|
+| `MONGODB_URI` | Yes (for DB features) | MongoDB Atlas connection string |
+| `ANTHROPIC_API_KEY` | Yes (for rewriter) | Claude API key from [console.anthropic.com](https://console.anthropic.com) |
+| `OPENAI_API_KEY` | Yes (for embeddings) | OpenAI key from [platform.openai.com](https://platform.openai.com) |

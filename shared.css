@@ -11,8 +11,8 @@
     --surface:      #e8ecf4;   /* raised elements — lighter than bg for the lift effect */
     --text:         #2d3748;
     --text-muted:   #718096;
-    --accent:       #e8850c;
-    --accent-red:   #fa2D00;
+    --accent: #308bff;
+    --accent-red: #f63aa5;
     --shadow-dark:  #b0bfcf;   /* stronger dark shadow for more visible depth */
     --shadow-light: #ffffff;
     --radius:       18px;
