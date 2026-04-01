@@ -516,13 +516,39 @@
                         </div>
 
                         <div class="options-section-title">
-                            <h4>AI API Key</h4>
+                            <h4>AI Provider</h4>
+                            <div class="radio-group" style="margin-top: 10px;">
+                                <div class="radio-item">
+                                    <input type="radio" id="providerClaude" name="aiProvider" value="claude" checked>
+                                    <label for="providerClaude">Claude</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="providerOllama" name="aiProvider" value="ollama">
+                                    <label for="providerOllama">Ollama (Local)</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="claudeConfig" class="options-section-title">
+                            <h4>Claude API Key</h4>
                             <div class="form-group api-key-input" style="margin-bottom: 0;">
                                 <input type="password" id="apiKey" placeholder="sk-ant-api...">
                                 <button class="toggle-visibility" onclick="toggleApiKeyVisibility()">Show</button>
                             </div>
                             <p style="font-size: 12px; color: #fff; opacity: 0.6; margin-top: 8px;">Your API key is
                                 stored locally and never sent to our servers.</p>
+                        </div>
+
+                        <div id="ollamaConfig" class="options-section-title" style="display: none;">
+                            <h4>Ollama Settings</h4>
+                            <div class="form-group" style="margin-bottom: 8px;">
+                                <label style="font-size:12px; opacity:0.7; margin-bottom: 4px; display:block;">Model</label>
+                                <input type="text" id="ollamaModel" value="llama3.2" placeholder="llama3.2">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-size:12px; opacity:0.7; margin-bottom: 4px; display:block;">Ollama URL</label>
+                                <input type="text" id="ollamaUrl" value="http://localhost:11434" placeholder="http://localhost:11434">
+                            </div>
                         </div>
 
                     </div><!-- /options-body -->
@@ -777,6 +803,15 @@
             localStorage.setItem('claude_api_key', e.target.value);
         });
 
+        // AI Provider toggle
+        document.querySelectorAll('input[name="aiProvider"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const isOllama = e.target.value === 'ollama';
+                document.getElementById('claudeConfig').style.display = isOllama ? 'none' : '';
+                document.getElementById('ollamaConfig').style.display = isOllama ? '' : 'none';
+            });
+        });
+
         // Main rewrite function
         document.getElementById('rewriteButton').addEventListener('click', async () => {
             if (isProcessing) return;
@@ -784,6 +819,7 @@
             const htmlContent = document.getElementById('htmlInput').value.trim();
             const apiKey = document.getElementById('apiKey').value.trim();
             const useAI = document.getElementById('useAI').checked;
+            const aiProvider = document.querySelector('input[name="aiProvider"]:checked')?.value || 'claude';
 
             if (!htmlContent) {
                 showError('Please go to Article Extractor');
@@ -791,8 +827,8 @@
                 return;
             }
 
-            if (useAI && !apiKey) {
-                showError('Please enter your AI API key');
+            if (useAI && aiProvider === 'claude' && !apiKey) {
+                showError('Please enter your Claude API key');
                 return;
             }
 
@@ -809,6 +845,9 @@
             const options = {
                 use_ai: useAI,
                 brand: brand,
+                ai_provider: aiProvider,
+                ollama_model: document.getElementById('ollamaModel')?.value.trim() || 'llama3.2',
+                ollama_url: document.getElementById('ollamaUrl')?.value.trim() || 'http://localhost:11434',
                 remove_trademark_symbols: document.getElementById('removeTrademarks').checked,
                 remove_parenthetical_content: false,
                 remove_footnotes: document.getElementById('removeFootnotes').checked,
@@ -884,8 +923,10 @@
             for (const span of spans) {
                 const originalText = span.innerHTML;
 
-                // Call Claude API
-                const rewrittenText = await callClaudeAPI(originalText, apiKey, options.brand);
+                // Call the selected AI provider
+                const rewrittenText = options.ai_provider === 'ollama'
+                    ? await callOllamaAPI(originalText, options.brand, options.ollama_model, options.ollama_url)
+                    : await callClaudeAPI(originalText, apiKey, options.brand);
 
                 if (rewrittenText !== originalText) {
                     replacements.push({
@@ -965,7 +1006,7 @@
                 unmarked_links: unmarkedLinks,
                 possessive_references: possessiveRefs,
                 warnings: warnings,
-                method: 'ai_direct'
+                method: options.ai_provider === 'ollama' ? 'ollama_direct' : 'ai_direct'
             };
         }
 
@@ -1011,6 +1052,45 @@
 
             console.log('Parentheses removal complete - all HTML tags preserved');
             return result;
+        }
+
+        async function callOllamaAPI(text, brand, model, ollamaUrl) {
+            const systemPrompt = `You are a professional content editor specializing in brand neutralization. Your task is to rewrite brand-specific content to make it generic and suitable for white-label distribution.
+
+CRITICAL RULES:
+1. ONLY modify the text content - preserve ALL HTML structure, attributes, and tags exactly
+2. MUST preserve all HTML tags including: <em>, <strong>, <ul>, <ol>, <li>, <p>, <div>, <span>, <a>, etc.
+3. Replace brand names (like "${brand}") with generic alternatives
+4. When you encounter specific product names (like "${brand} Go", etc.), REMOVE them and adjust the sentence naturally
+5. Remove trademark symbols (\u00ae, \u2122, \u2120)
+6. Keep the same tone and informational content
+7. DO NOT add new information or fix grammar - only neutralize brand references
+8. PRESERVE all existing parenthetical content exactly as written
+
+Return ONLY the rewritten text with no explanations or additional commentary.`;
+
+            const response = await fetch(`${ollamaUrl}/api/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: model,
+                    stream: false,
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        {
+                            role: 'user',
+                            content: `Rewrite the following text to remove all references to "${brand}" and make it brand-neutral. When you see specific product names, REMOVE them completely. PRESERVE any existing parenthetical content. Return ONLY the rewritten text:\n\n${text}`
+                        }
+                    ]
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Ollama API request failed: ${response.status} ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            return (data.message?.content || '').trim();
         }
 
         async function callClaudeAPI(text, apiKey, brand) {
