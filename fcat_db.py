@@ -21,6 +21,8 @@ _db = None
 
 DATABASE_NAME = "fcat"
 COLLECTION_NAME = "articles"
+PROFILES_COLLECTION = "user_profiles"
+ANALYTICS_COLLECTION = "profile_analytics"
 
 VALID_STATUSES = {
     "ingested",
@@ -318,3 +320,134 @@ def backfill_embeddings(batch_size: int = 50) -> dict:
     still_missing = collection.count_documents({"embedding.vector": {"$exists": False}})
     print(f"[fcat_db] backfill_embeddings -> updated={updated}, failed={failed}, still_missing={still_missing}")
     return {"updated": updated, "failed": failed, "still_missing": still_missing}
+
+
+# ============================================================
+# USER PROFILES (Adaptive-Explainer)
+# ============================================================
+
+def _get_profiles_collection():
+    """Get the user_profiles collection, connecting if needed."""
+    global _db
+    if _db is None:
+        connect()
+    return _db[PROFILES_COLLECTION]
+
+
+def _get_analytics_collection():
+    """Get the profile_analytics collection, connecting if needed."""
+    global _db
+    if _db is None:
+        connect()
+    return _db[ANALYTICS_COLLECTION]
+
+
+def get_user_profile(user_id: str, session_id: str = None) -> dict | None:
+    """
+    Retrieve a user profile by user_id.
+    If session_id is provided, prefer a profile matching both;
+    otherwise return the most recently updated profile for that user.
+    """
+    collection = _get_profiles_collection()
+
+    if session_id:
+        doc = collection.find_one({"user_id": user_id, "session_id": session_id})
+        if doc:
+            doc["_id"] = str(doc["_id"])
+            return doc
+
+    # Fall back to most recent profile for this user
+    doc = collection.find_one(
+        {"user_id": user_id},
+        sort=[("updated_at", -1)],
+    )
+    if doc:
+        doc["_id"] = str(doc["_id"])
+    return doc
+
+
+def upsert_user_profile(profile: dict) -> str:
+    """
+    Insert or update a user profile.
+    Uses (user_id, session_id) as the compound key.
+    Returns the document _id as a string.
+    """
+    collection = _get_profiles_collection()
+
+    profile["updated_at"] = datetime.now(timezone.utc)
+
+    result = collection.update_one(
+        {"user_id": profile["user_id"], "session_id": profile["session_id"]},
+        {"$set": profile},
+        upsert=True,
+    )
+
+    doc_id = result.upserted_id or None
+    if doc_id is None:
+        # Document was updated, not inserted — fetch _id
+        existing = collection.find_one(
+            {"user_id": profile["user_id"], "session_id": profile["session_id"]},
+            {"_id": 1},
+        )
+        doc_id = existing["_id"] if existing else None
+
+    doc_id_str = str(doc_id) if doc_id else ""
+    print(f"[fcat_db] upsert_user_profile({profile['user_id']}) -> {doc_id_str}")
+    return doc_id_str
+
+
+def delete_user_profile(user_id: str, session_id: str = None) -> bool:
+    """
+    Delete a user profile. If session_id is given, delete only that
+    session's profile; otherwise delete all profiles for the user.
+    """
+    collection = _get_profiles_collection()
+
+    query = {"user_id": user_id}
+    if session_id:
+        query["session_id"] = session_id
+
+    result = collection.delete_many(query)
+    deleted = result.deleted_count > 0
+    print(f"[fcat_db] delete_user_profile({user_id}) -> deleted={result.deleted_count}")
+    return deleted
+
+
+def log_profile_analytics(event: dict) -> str:
+    """
+    Log a profiling analytics event.
+
+    Expected event shape::
+
+        {
+            "timestamp": datetime,
+            "user_id": str,
+            "session_id": str,
+            "event_type": str,   # "profile_update" | "calibration_applied" | "feedback_received"
+            "profile_snapshot": dict,
+            "query": str,
+            "response_length": int,
+            "jargon_count": int,
+            "engagement_signal": str | None,
+        }
+    """
+    collection = _get_analytics_collection()
+    event.setdefault("timestamp", datetime.now(timezone.utc))
+    result = collection.insert_one(event)
+    return str(result.inserted_id)
+
+
+def ensure_profile_indexes():
+    """
+    Create recommended indexes on the user_profiles collection.
+    Safe to call repeatedly (indexes are idempotent).
+    """
+    collection = _get_profiles_collection()
+    collection.create_index(
+        [("user_id", 1), ("session_id", 1)],
+        unique=True,
+        name="user_session_unique",
+    )
+    collection.create_index("user_id", name="user_id_lookup")
+    collection.create_index("updated_at", name="updated_at_sort")
+    print("[fcat_db] user_profiles indexes ensured")

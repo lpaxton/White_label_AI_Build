@@ -10,6 +10,7 @@ import json
 import tempfile
 import shutil
 import time
+from datetime import datetime
 from typing import List, Dict, Optional
 from pathlib import Path
 from flask import Flask, request, jsonify, send_from_directory
@@ -36,6 +37,22 @@ try:
 except ImportError as e:
     FCAT_AVAILABLE = False
     print(f"Warning: FCAT modules not available ({e}). /api/save-to-fcat endpoint disabled.")
+
+# Import Adaptive-Explainer profiling modules
+try:
+    from profiling_service import (
+        initialize_user_profile,
+        update_profile_from_message,
+        update_profile_from_feedback,
+        build_calibrated_system_prompt,
+        get_calibration_level,
+        extract_vocabulary_signals,
+    )
+    from jargon_detector import detect_jargon_in_response
+    PROFILING_AVAILABLE = True
+except ImportError as e:
+    PROFILING_AVAILABLE = False
+    print(f"Warning: Profiling modules not available ({e}). Adaptive-Explainer disabled.")
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for web interface
@@ -78,6 +95,8 @@ def index():
             'POST /api/save-to-fcat': 'Save processed article to MongoDB Atlas (FCAT)',
             'GET /api/fcat/status': 'FCAT MongoDB connection status',
             'POST /api/chat': 'Ask questions answered solely from the FCAT article database',
+            'POST /api/rag-search': 'Adaptive RAG search with user profiling (Money Buddy)',
+            'POST /api/profile-feedback': 'Submit user feedback to refine adaptive profiling',
         }
     })
 
@@ -886,6 +905,311 @@ def vector_index_info():
     })
 
 
+# ============================================================
+# ADAPTIVE-EXPLAINER ENDPOINTS (Money Buddy profiling)
+# ============================================================
+
+@app.post("/api/rag-search")
+def rag_search():
+    """
+    Enhanced RAG search with adaptive profiling for Money Buddy.
+
+    Request body:
+        - query: str (required) — the user's question
+        - user_id: str (required) — unique user identifier
+        - session_id: str (required) — current conversation session
+        - persona_tags: [str] (optional) — e.g. ["military", "first_gen_investor"]
+        - max_results: int (optional, default 5)
+        - message_type: str (optional) — "initial_query" or "followup"
+
+    Response:
+        - response: str — calibrated Money Buddy answer
+        - sources: [dict] — articles used
+        - profile: dict — updated user profile snapshot
+        - calibration_level: str — for debugging/analytics
+    """
+    if not FCAT_AVAILABLE:
+        return jsonify({'error': 'FCAT modules not available'}), 503
+
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No JSON data provided'}), 400
+
+        query = data.get('query', '').strip()
+        user_id = data.get('user_id', '').strip()
+        session_id = data.get('session_id', '').strip()
+
+        if not query:
+            return jsonify({'error': 'query is required'}), 400
+        if not user_id:
+            return jsonify({'error': 'user_id is required'}), 400
+        if not session_id:
+            return jsonify({'error': 'session_id is required'}), 400
+
+        persona_tags = data.get('persona_tags', [])
+        max_results = int(data.get('max_results', 5))
+        message_type = data.get('message_type', 'initial_query')
+
+        # ── 1. Get or initialise user profile ─────────────────────────
+        profile = None
+        if PROFILING_AVAILABLE:
+            profile = fcat_db.get_user_profile(user_id, session_id)
+            if profile is None:
+                profile = initialize_user_profile(user_id, session_id, persona_tags)
+            elif persona_tags:
+                # Merge new persona tags into existing profile
+                existing_tags = set(profile.get('persona_tags', []))
+                existing_tags.update(persona_tags)
+                profile['persona_tags'] = list(existing_tags)
+
+            # ── 2. Update profile from incoming query ─────────────────
+            profile = update_profile_from_message(
+                profile, query,
+                message_type="user_query" if message_type == "initial_query" else "user_response",
+            )
+
+        # ── 3. Perform RAG search on FCAT ─────────────────────────────
+        articles = []
+        query_vector = generate_embedding(query)
+        if query_vector:
+            try:
+                articles = fcat_db.vector_search_articles(query_vector, limit=max_results)
+                print(f"[rag-search] Vector search -> {len(articles)} candidates")
+            except Exception as vec_err:
+                print(f"[rag-search] Vector search unavailable ({vec_err}), falling back to text search")
+
+        if not articles:
+            articles = fcat_db.search_articles(query, limit=max_results)
+
+        if not articles:
+            # Still persist the profile even when no articles match
+            if PROFILING_AVAILABLE and profile:
+                fcat_db.upsert_user_profile(profile)
+            return jsonify({
+                'response': "I don't have any articles in my knowledge base that match your question yet. Please check back once more content has been added!",
+                'sources': [],
+                'profile': _sanitize_profile(profile),
+                'calibration_level': get_calibration_level(profile) if PROFILING_AVAILABLE and profile else 'unknown',
+            })
+
+        # ── 4. Build calibrated system prompt ─────────────────────────
+        if PROFILING_AVAILABLE and profile:
+            system_prompt = build_calibrated_system_prompt(profile, articles)
+            calibration_level = get_calibration_level(profile)
+        else:
+            # Fallback: use the standard grounding prompt without profiling
+            system_prompt = _default_grounded_system_prompt()
+            calibration_level = 'none'
+
+        # ── 5. Call LLM with calibrated prompt + context ──────────────
+        from anthropic import Anthropic
+
+        api_key = os.environ.get('ANTHROPIC_API_KEY')
+        if not api_key:
+            return jsonify({'error': 'ANTHROPIC_API_KEY is not configured on the server'}), 503
+
+        client = Anthropic(api_key=api_key)
+
+        # Build the user message with context
+        context_parts = []
+        sources = []
+        for i, article in enumerate(articles, 1):
+            plain_text = (article.get('content') or {}).get('plain_text', '').strip()
+            if not plain_text:
+                continue
+            if len(plain_text) > 4000:
+                plain_text = plain_text[:4000] + ' [...]'
+            context_parts.append(f'=== ARTICLE {i} ===\n{plain_text}')
+            display_url = article.get('origin_url') or article.get('source_url', '')
+            sources.append({
+                'id': article.get('_id', ''),
+                'source_url': display_url,
+                'topics': (article.get('taxonomy') or {}).get('topics', []),
+            })
+
+        if not context_parts:
+            if PROFILING_AVAILABLE and profile:
+                fcat_db.upsert_user_profile(profile)
+            return jsonify({
+                'response': "I found some articles but they didn't contain readable text. Please try rephrasing your question.",
+                'sources': [],
+                'profile': _sanitize_profile(profile),
+                'calibration_level': calibration_level,
+            })
+
+        grounded_context = "\n\n".join(context_parts)
+        user_message = (
+            f"Below are the relevant articles retrieved from the knowledge base:\n\n"
+            f"{grounded_context}\n\n---\n\n"
+            f"Using ONLY the article content above, please answer the following question:\n\n"
+            f"{query}"
+        )
+
+        response = client.messages.create(
+            model='claude-sonnet-4-20250514',
+            max_tokens=1024,
+            system=system_prompt,
+            messages=[{'role': 'user', 'content': user_message}],
+        )
+        answer = response.content[0].text
+
+        # ── 6. Post-process: jargon check ─────────────────────────────
+        jargon_info = {}
+        if PROFILING_AVAILABLE and profile:
+            jargon_info = detect_jargon_in_response(answer, profile)
+
+        # ── 7. Persist profile & log analytics ────────────────────────
+        if PROFILING_AVAILABLE and profile:
+            # Update last topics discussed
+            vocab_signals = extract_vocabulary_signals(query)
+            if vocab_signals['terms_used']:
+                last_topics = profile.get('last_topics', [])
+                last_topics.extend(vocab_signals['terms_used'])
+                profile['last_topics'] = last_topics[-10:]
+
+            fcat_db.upsert_user_profile(profile)
+
+            # Log analytics event
+            try:
+                fcat_db.log_profile_analytics({
+                    'user_id': user_id,
+                    'session_id': session_id,
+                    'event_type': 'calibration_applied',
+                    'profile_snapshot': _sanitize_profile(profile),
+                    'query': query,
+                    'response_length': len(answer),
+                    'jargon_count': len(jargon_info.get('flagged_terms', [])),
+                    'calibration_level': calibration_level,
+                })
+            except Exception as log_err:
+                print(f"[rag-search] Analytics logging failed: {log_err}")
+
+        print(f"[rag-search] Answered using {len(context_parts)} article(s), calibration={calibration_level}")
+
+        return jsonify({
+            'response': answer,
+            'sources': sources,
+            'articles_used': len(context_parts),
+            'profile': _sanitize_profile(profile),
+            'calibration_level': calibration_level,
+            'jargon_flags': jargon_info.get('suggestions', ''),
+        })
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': f'RAG search failed: {str(e)}'}), 500
+
+
+@app.post("/api/profile-feedback")
+def profile_feedback():
+    """
+    Capture explicit user feedback to refine adaptive profiling.
+    Part of the HEARTBEAT feedback loop.
+
+    Request body:
+        - user_id: str (required)
+        - session_id: str (required)
+        - feedback_type: str (required) — "confused" | "clear" | "too_simple" | "too_complex"
+        - message_context: str (optional) — the response that triggered feedback
+    """
+    if not FCAT_AVAILABLE or not PROFILING_AVAILABLE:
+        return jsonify({'error': 'Profiling modules not available'}), 503
+
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No JSON data provided'}), 400
+
+        user_id = data.get('user_id', '').strip()
+        session_id = data.get('session_id', '').strip()
+        feedback_type = data.get('feedback_type', '').strip()
+
+        if not user_id:
+            return jsonify({'error': 'user_id is required'}), 400
+        if not session_id:
+            return jsonify({'error': 'session_id is required'}), 400
+        if feedback_type not in ('confused', 'clear', 'too_simple', 'too_complex'):
+            return jsonify({
+                'error': 'feedback_type must be one of: confused, clear, too_simple, too_complex'
+            }), 400
+
+        # Get existing profile
+        profile = fcat_db.get_user_profile(user_id, session_id)
+        if profile is None:
+            return jsonify({'error': 'No profile found for this user/session'}), 404
+
+        # Apply feedback
+        profile = update_profile_from_feedback(profile, feedback_type)
+        fcat_db.upsert_user_profile(profile)
+
+        # Log analytics
+        try:
+            fcat_db.log_profile_analytics({
+                'user_id': user_id,
+                'session_id': session_id,
+                'event_type': 'feedback_received',
+                'profile_snapshot': _sanitize_profile(profile),
+                'query': data.get('message_context', ''),
+                'engagement_signal': feedback_type,
+                'response_length': 0,
+                'jargon_count': 0,
+            })
+        except Exception as log_err:
+            print(f"[profile-feedback] Analytics logging failed: {log_err}")
+
+        return jsonify({
+            'success': True,
+            'profile': _sanitize_profile(profile),
+            'calibration_level': get_calibration_level(profile),
+            'message': f'Profile updated based on "{feedback_type}" feedback',
+        })
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': f'Profile feedback failed: {str(e)}'}), 500
+
+
+def _sanitize_profile(profile: dict | None) -> dict:
+    """
+    Return a JSON-safe copy of the profile suitable for API responses.
+    Removes MongoDB _id (ObjectId) and converts datetimes to ISO strings.
+    """
+    if profile is None:
+        return {}
+    safe = {}
+    for k, v in profile.items():
+        if k == '_id':
+            safe[k] = str(v)
+        elif isinstance(v, datetime):
+            safe[k] = v.isoformat()
+        else:
+            safe[k] = v
+    return safe
+
+
+def _default_grounded_system_prompt() -> str:
+    """Fallback system prompt when profiling is unavailable."""
+    return """\
+You are Money Buddy, a supportive financial education companion for aRCHi (Life on Easy).
+
+YOU MAY ONLY USE THE ARTICLE CONTENT PROVIDED IN EACH MESSAGE TO ANSWER QUESTIONS.
+
+MANDATORY RULES — NO EXCEPTIONS:
+1. Base every answer exclusively on the article excerpts provided.
+   Do NOT use your training data, general knowledge, or any information
+   not explicitly present in the provided articles.
+2. If the provided articles do not contain sufficient information to answer
+   the question, respond with exactly:
+   "The available articles don't contain enough information to answer that question."
+3. Do NOT speculate, infer beyond what is written, or fill gaps with outside knowledge.
+4. Do NOT introduce any facts, statistics, or guidance not found in the articles.
+5. Keep your tone clear, helpful, and professional.
+6. Where relevant, indicate which article your answer draws from.
+
+This is a regulatory requirement. Violating these rules is not acceptable under any circumstances."""
+
+
 @app.errorhandler(413)
 def too_large(e):
     """Handle file too large error"""
@@ -923,6 +1247,14 @@ if __name__ == '__main__':
         print("  Status: FCAT modules loaded")
     else:
         print("  Status: FCAT modules not available (install pymongo, openai, python-dotenv)")
+    print("")
+    print("Adaptive-Explainer (Money Buddy profiling):")
+    print("  POST /api/rag-search - Adaptive RAG search with user profiling")
+    print("  POST /api/profile-feedback - Submit feedback to refine profiling")
+    if PROFILING_AVAILABLE:
+        print("  Status: Profiling modules loaded")
+    else:
+        print("  Status: Profiling modules not available")
     print("\nStarting server on http://localhost:5000")
 
     ensure_upload_dir()
