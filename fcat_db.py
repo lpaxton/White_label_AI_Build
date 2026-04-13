@@ -233,3 +233,88 @@ def get_all_articles_for_chat(limit: int = 50) -> list:
         results.append(doc)
     print(f"[fcat_db] get_all_articles_for_chat -> {len(results)} articles")
     return results
+
+
+def vector_search_articles(query_vector: list, limit: int = 10) -> list:
+    """
+    Search articles using MongoDB Atlas Vector Search (semantic similarity).
+    Requires an Atlas Vector Search index named 'vector_index' on embedding.vector
+    with 1536 dimensions and cosine similarity.
+    Returns a list of document dicts sorted by descending similarity score.
+    """
+    collection = _get_collection()
+    pipeline = [
+        {
+            "$vectorSearch": {
+                "index": "vector_index",
+                "path": "embedding.vector",
+                "queryVector": query_vector,
+                # numCandidates should be >= 10x limit for good recall
+                "numCandidates": min(limit * 15, 500),
+                "limit": limit,
+            }
+        },
+        {
+            "$project": {
+                "content.plain_text": 1,
+                "source_url": 1,
+                "origin_url": 1,
+                "taxonomy": 1,
+                "ereview_id": 1,
+                "_id": 1,
+                "score": {"$meta": "vectorSearchScore"},
+            }
+        },
+    ]
+    results = []
+    for doc in collection.aggregate(pipeline):
+        doc["_id"] = str(doc["_id"])
+        results.append(doc)
+    print(f"[fcat_db] vector_search_articles -> {len(results)} results")
+    return results
+
+
+def backfill_embeddings(batch_size: int = 50) -> dict:
+    """
+    Generate and store embeddings for articles that are missing them.
+    Safe to call repeatedly — only processes articles without an embedding.vector.
+    Returns a summary dict: {updated, failed, still_missing}.
+    """
+    from embedding_service import generate_embedding, build_embedding_metadata
+
+    collection = _get_collection()
+
+    # Find articles with no embedding vector yet
+    cursor = collection.find(
+        {"embedding.vector": {"$exists": False}},
+        {"content.plain_text": 1, "_id": 1}
+    ).limit(batch_size)
+
+    docs = list(cursor)
+    updated = 0
+    failed = 0
+
+    for doc in docs:
+        plain_text = (doc.get("content") or {}).get("plain_text", "").strip()
+        if not plain_text:
+            failed += 1
+            continue
+
+        vector = generate_embedding(plain_text)
+        if vector is None:
+            failed += 1
+            continue
+
+        embedding_doc = build_embedding_metadata(vector)
+        collection.update_one(
+            {"_id": doc["_id"]},
+            {"$set": {
+                "embedding": embedding_doc,
+                "updated_at": datetime.now(timezone.utc),
+            }}
+        )
+        updated += 1
+
+    still_missing = collection.count_documents({"embedding.vector": {"$exists": False}})
+    print(f"[fcat_db] backfill_embeddings -> updated={updated}, failed={failed}, still_missing={still_missing}")
+    return {"updated": updated, "failed": failed, "still_missing": still_missing}

@@ -700,7 +700,18 @@ def chat():
         history = data.get('history', [])
 
         # ── Retrieve relevant articles from the database ───────────────────
-        articles = fcat_db.search_articles(user_message, limit=5)
+        # Try Atlas Vector Search first (semantic), fall back to keyword search
+        articles = []
+        query_vector = generate_embedding(user_message) if FCAT_AVAILABLE else None
+        if query_vector:
+            try:
+                articles = fcat_db.vector_search_articles(query_vector, limit=10)
+                print(f"[chat] Using vector search -> {len(articles)} candidates")
+            except Exception as vec_err:
+                print(f"[chat] Vector search unavailable ({vec_err}), falling back to text search")
+
+        if not articles:
+            articles = fcat_db.search_articles(user_message, limit=10)
 
         if not articles:
             return jsonify({
@@ -820,6 +831,59 @@ def fcat_status():
         })
     except Exception as e:
         return jsonify({'status': 'error', 'error': str(e)}), 500
+
+
+@app.route('/api/fcat/backfill-embeddings', methods=['POST'])
+def backfill_embeddings():
+    """
+    Generate embeddings for any articles in the DB that are missing them.
+    Safe to call repeatedly. Processes up to `batch_size` articles per call
+    (default 50) so it can be run incrementally without timing out.
+
+    POST body (JSON, optional):
+        { "batch_size": 50 }
+    """
+    if not FCAT_AVAILABLE:
+        return jsonify({'error': 'FCAT modules not available'}), 503
+
+    data = request.get_json(silent=True) or {}
+    batch_size = int(data.get('batch_size', 50))
+    if batch_size < 1 or batch_size > 500:
+        return jsonify({'error': 'batch_size must be between 1 and 500'}), 400
+
+    try:
+        result = fcat_db.backfill_embeddings(batch_size=batch_size)
+        return jsonify({'success': True, **result})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': f'Backfill failed: {str(e)}'}), 500
+
+
+@app.route('/api/fcat/vector-index-info', methods=['GET'])
+def vector_index_info():
+    """
+    Returns the Atlas Vector Search index definition you need to create
+    in the MongoDB Atlas UI to enable semantic search.
+    """
+    return jsonify({
+        'instructions': (
+            'Create a Vector Search index in MongoDB Atlas UI: '
+            'Atlas → Your Cluster → Search → Create Search Index → JSON Editor'
+        ),
+        'index_name': 'vector_index',
+        'database': 'fcat',
+        'collection': 'articles',
+        'index_definition': {
+            'fields': [
+                {
+                    'type': 'vector',
+                    'path': 'embedding.vector',
+                    'numDimensions': 1536,
+                    'similarity': 'cosine',
+                }
+            ]
+        },
+    })
 
 
 @app.errorhandler(413)
