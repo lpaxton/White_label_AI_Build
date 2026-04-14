@@ -1,0 +1,1666 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Article Rewriter - Brand Neutralization</title>
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            border: none;
+            padding: 25px;
+        }
+
+        .panel h2 {
+            font-size: 20px;
+            color: var(--text);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-panel {
+
+        }
+
+        .output-panel {
+            min-height: 600px;
+            overflow-y: auto;
+            background: #fff;
+            color: var(--text);
+            border-radius: var(--radius);
+        }
+
+        /* select extends the shared form-group input rule */
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            font-size: 14px;
+            font-family: inherit;
+            background: var(--surface);
+            color: var(--text);
+            border-radius: var(--radius-sm);
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+        }
+
+        .form-group select:focus {
+            outline: none;
+            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light), 0 0 0 2px var(--accent);
+        }
+
+        .form-group textarea {
+            min-height: 200px;
+            resize: vertical;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+        }
+
+        /* Full-width stacked buttons in the input panel */
+        .button {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 12px 24px;
+            font-size: 14px;
+        }
+
+        .options-section {
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+            border: none;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .options-section h4 {
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        .options-section-title {
+            color: var(--text-muted);
+            border-top: 1px solid var(--shadow-dark);
+            margin: 20px 0px;
+            font-size: 11px;
+            padding-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        .options-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            margin-bottom: 0;
+        }
+
+        .options-toggle:hover h4 {
+            opacity: 0.9;
+        }
+
+        .options-toggle .toggle-icon {
+            font-size: 16px;
+            opacity: 0.5;
+            line-height: 1;
+            transition: transform 0.2s;
+        }
+
+        .options-toggle.open .toggle-icon {
+            transform: rotate(45deg);
+        }
+
+        .options-body {
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.3s ease, margin-top 0.25s ease;
+            margin-top: 0;
+        }
+
+        .options-body.open {
+            max-height: 600px;
+            margin-top: 10px;
+        }
+
+        .options-body .options-section {
+            margin-bottom: 16px;
+        }
+
+        .options-body .options-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .radio-item input[type="radio"] {
+            width: auto;
+            accent-color: var(--accent);
+        }
+
+        .radio-item label {
+            font-weight: normal;
+            font-size: 14px;
+            margin-bottom: 0;
+            color: var(--text);
+        }
+
+        .content-meta {
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            border: none;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .content-meta h3 {
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+
+        .content-meta .stat {
+            display: inline-block;
+            border: none;
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            border-radius: 20px;
+            color: var(--text);
+            background: var(--surface);
+            padding: 4px 8px;
+            font-size: 12px;
+            margin-right: 10px;
+            margin-bottom: 5px;
+        }
+
+        .article-id-display {
+            background: var(--surface);
+            color: var(--text);
+            border-radius: var(--radius-sm);
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+            border: none;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .article-id-display .label {
+            font-size: 12px;
+            opacity: 0.6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .article-id-display .value {
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            background: rgba(0,0,0,0.05);
+            border-radius: 4px;
+            padding: 4px 8px;
+        }
+
+        .stats-box {
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            border: none;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stats-box h3 {
+            margin-bottom: 10px;
+            color: var(--text);
+            font-size: 16px;
+        }
+
+        .replacement-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: none;
+            border-radius: var(--radius-sm);
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+            margin-top: 15px;
+        }
+
+        .replacement-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--shadow-dark);
+        }
+
+        .replacement-item:last-child {
+            border-bottom: none;
+        }
+
+        .replacement-item .original {
+            color: var(--text-muted);
+            border: none;
+            background: rgba(0,0,0,0.04);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 13px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .replacement-item .rewritten {
+            color: var(--text);
+            border: none;
+            background: rgba(0,0,0,0.06);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 13px;
+            display: block;
+        }
+
+        /* fidelity-highlight override: border-bottom only (no bg fill) */
+        .fidelity-highlight {
+            border-bottom: 2px solid var(--accent);
+            background: transparent;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: none;
+            padding-bottom: 10px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-radius: var(--radius-sm);
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+        }
+
+        .tab.active {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: inset 3px 3px 6px rgba(0,0,0,0.15);
+        }
+
+        .tab:hover:not(.active) {
+            box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .api-key-input {
+            position: relative;
+        }
+
+        .api-key-input input {
+            padding-right: 100px;
+        }
+
+        .api-key-input .toggle-visibility {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--surface);
+            border: none;
+            color: var(--text-muted);
+            border-radius: var(--radius-xs);
+            box-shadow: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light);
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+        }
+
+        .api-key-input .toggle-visibility:hover {
+            box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+        }
+
+        .brand-highlight {
+            border-bottom: 2px solid var(--shadow-dark);
+            background: transparent;
+            padding: 2px 4px;
+            font-weight: 600;
+        }
+
+        .file-upload-area {
+            border: 2px dashed var(--shadow-dark);
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.15s;
+            margin-bottom: 20px;
+            color: var(--text-muted);
+            border-radius: var(--radius-sm);
+        }
+
+        .file-upload-area:hover {
+            background: rgba(0,0,0,0.03);
+        }
+
+        .file-upload-area.dragover {
+            background: rgba(0,0,0,0.05);
+            border-color: var(--accent);
+        }
+
+        .file-upload-area input {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="site-header">
+        <h1><span style="color: var(--accent-red);">a</span>RCH<span style="color: var(--accent-red);">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
+        <p>Content &amp; Learning Tools</p>
+    </div>
+    <button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>
+
+    <div class="container">
+        <div class="header">
+            <h1>Article Rewriter - Brand Neutralization</h1>
+            <p>Transform brand-specific content into generic, white-label alternatives using AI</p>
+            <div class="breadcrumb">
+                <span class="breadcrumb-step done">Step 1: Article Extractor</span>
+                <span class="breadcrumb-arrow">→</span>
+                <span class="breadcrumb-step active">Step 2: Brand Neutralizer</span>
+                <span class="breadcrumb-arrow">→</span>
+                <span class="breadcrumb-step">Step 3: Diff Tool</span>
+                <span class="breadcrumb-arrow">→</span>
+                <span class="breadcrumb-step">Step 4: Word Editor</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="panel input-panel">
+                <h2>Input Content</h2>
+                <p style="padding-bottom: 20px;">Content Extracted from previous step:</p>
+                <div id="successMessage" class="success-message"></div>
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
+                <button id="backToExtractorButton" class="button secondary" onclick="window.location.href='article-extractor.html'" style="display: none; margin-bottom: 16px;">Back to Article Extractor</button>
+                <div class="tabs" style="display: none;">
+                    <button class="tab active" data-tab="paste">Paste HTML</button>
+                    <button class="tab" data-tab="upload">Upload File</button>
+                    <button class="tab" data-tab="url">From URL</button>
+                </div>
+
+                <div id="pasteTab" class="tab-content active" style="display: none;">
+                    <div class="form-group">
+                        <label for="htmlInput">HTML Content (with data-ai-rewrite markers):</label>
+                        <textarea id="htmlInput" placeholder="Paste your HTML content here. Content marked with data-ai-rewrite='true' will be processed.Example:<p><span data-ai-rewrite='true'>Fidelity offers great investment options.</span></p>"></textarea>
+                    </div>
+                </div>
+
+                <div id="uploadTab" class="tab-content">
+                    <div class="file-upload-area" id="fileUploadArea">
+                        <input type="file" id="fileInput" accept=".html,.htm,.txt">
+                        <p>Drag and drop an HTML file here</p>
+                        <p style="font-size: 12px; color: #fff; opacity: 0.6; margin-top: 10px;">or click to browse</p>
+                    </div>
+                    <div id="fileInfo" style="display: none; margin-bottom: 20px;">
+                        <p><strong>Selected file:</strong> <span id="fileName"></span></p>
+                    </div>
+                </div>
+
+                <div id="urlTab" class="tab-content">
+                    <div class="form-group">
+                        <label for="urlInput">Article URL:</label>
+                        <input type="url" id="urlInput" placeholder="https://example.com/article">
+                    </div>
+                    <button id="fetchUrlButton" class="button secondary">Fetch Article Content</button>
+                </div>
+
+                <div class="options-section">
+                    <div class="options-toggle" id="optionsToggle">
+                        <h4 style="margin-bottom:0;">Rewrite Options</h4>
+                        <span class="toggle-icon">+</span>
+                    </div>
+                    <div class="options-body" id="optionsBody">
+
+                        <div class="options-section-title">
+                            <h4>Processing Options</h4>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="useAI" checked>
+                                    <label for="useAI">Use AI for intelligent rewriting</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="removeTrademarks" checked>
+                                    <label for="removeTrademarks">Remove trademark symbols</label>
+                                </div>
+                                <div class="checkbox-item" style="display: none;">
+                                    <input type="checkbox" id="removeParentheses" unchecked>
+                                    <label for="removeParentheses">Remove parenthetical content</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="removeFootnotes" checked>
+                                    <label for="removeFootnotes">Remove footnotes</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="checkHyperlinks" checked>
+                                    <label for="checkHyperlinks">Flag unmarked product hyperlinks</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="checkPossessives" checked>
+                                    <label for="checkPossessives">Flag possessive references (our/we/us)</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="options-section-title">
+                            <h4>Brand to Neutralize</h4>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <select id="brandSelect">
+                                    <option value="Fidelity">Fidelity</option>
+                                    <option value="custom">Custom (enter below)</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="customBrandGroup"
+                                style="display: none; margin-top: 10px; margin-bottom: 0;">
+                                <input type="text" id="customBrand" placeholder="Enter brand name">
+                            </div>
+                        </div>
+
+                        <div class="options-section-title">
+                            <h4>AI Provider</h4>
+                            <div class="radio-group" style="margin-top: 10px;">
+                                <div class="radio-item">
+                                    <input type="radio" id="providerClaude" name="aiProvider" value="claude" checked>
+                                    <label for="providerClaude">Claude</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="providerOllama" name="aiProvider" value="ollama">
+                                    <label for="providerOllama">Ollama (Local)</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="claudeConfig" class="options-section-title">
+                            <h4>Claude API Key</h4>
+                            <div class="form-group api-key-input" style="margin-bottom: 0;">
+                                <input type="password" id="apiKey" placeholder="sk-ant-api...">
+                                <button class="toggle-visibility" onclick="toggleApiKeyVisibility()">Show</button>
+                            </div>
+                            <p style="font-size: 12px; color: #fff; opacity: 0.6; margin-top: 8px;">Your API key is
+                                stored locally and never sent to our servers.</p>
+                        </div>
+
+                        <div id="ollamaConfig" class="options-section-title" style="display: none;">
+                            <h4>Ollama Settings</h4>
+                            <div class="form-group" style="margin-bottom: 8px;">
+                                <label style="font-size:12px; opacity:0.7; margin-bottom: 4px; display:block;">Model</label>
+                                <input type="text" id="ollamaModel" value="llama3.2" placeholder="llama3.2">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-size:12px; opacity:0.7; margin-bottom: 4px; display:block;">Ollama URL</label>
+                                <input type="text" id="ollamaUrl" value="http://localhost:11434" placeholder="http://localhost:11434">
+                            </div>
+                        </div>
+
+                    </div><!-- /options-body -->
+                </div>
+
+                <button id="rewriteButton" class="button  CTA">Rewrite with AI</button>
+
+                <div id="rewrite-animation" style="margin: 28px 0px; display: flex; justify-content: center;">
+                    <svg width="300" height="300" viewBox="0 0 100 100" fill="none" stroke="#308bff" xmlns="http://www.w3.org/2000/svg" style="stroke-width: 0.330033px;"></svg>
+                </div>
+                
+                <div id="leftPanelActions" style="display: none; position: sticky; top: 83%;">
+                    <button id="sendToDiffButton" class="button CTA" style="width: 100%;">Article Diff View</button>
+                    <button id="copyButton" class="button secondary" style="width: 100%; margin-bottom: 10px;">Copy to Clipboard</button>
+                    <button id="downloadButton" class="button orange" style="width: 100%; margin-bottom: 10px;">Download HTML File</button>
+                    
+                </div>
+            </div>
+
+            <div class="panel output-panel">
+                <h2>Rewritten Content</h2>
+
+                <div id="welcomeMessage" class="welcome-message">
+                    <h3>Welcome to Article Rewriter</h3>
+                    <p>This tool uses AI to intelligently neutralize brand-specific content.</p>
+                    <div style="margin: 20px 0; text-align: left;">
+                        <h4>How it works:</h4>
+                        <ol style=" opacity: 0.6; margin: 10px 0; padding-left: 20px;">
+                            <li> The extracted content is displayed in the yellow box. If the content was not loaded or the page was refreshed you will be presented with a "Back to article extractor" button. (Restart step one)</li>
+                            <li>Review Rewrite Options for Processing. Add AI API Key if box is empty.</li>
+                            <li>Click "Rewrite with AI"</li>
+                            <li> After the rewritten content is displayed Click "Article Diff View" to compare the original extracted article to the AI updated article. Or save as a text or HTML file if needed. </li>
+                        </ol>
+                    </div>
+                    <p style=" opacity: 0.6; font-size: 14px; display: none;">
+                        <strong>Perfect for:</strong> White-label content distribution, brand neutralization, content
+                        repurposing
+                    </p>
+                </div>
+
+                <div id="loadingMessage" class="loading">
+                    <div class="spinner"></div>
+                    <p>Claude is rewriting your content...</p>
+                    <p style="font-size: 12px; margin-top: 5px;">This may take a moment for longer articles</p>
+                </div>
+
+                <div id="resultsContainer" style="display: none;">
+                    <div id="statsBox" class="stats-box">
+                        <h3>Processing Results</h3>
+                        <div id="statsContent"></div>
+                    </div>
+
+                    <div id="warningsBox" class="warning-message" style="display: none;">
+                        <h4>Warnings</h4>
+                        <ul id="warningsList"></ul>
+                    </div>
+
+                    <div id="metadataBar" class="content-meta" style="display:none;"></div>
+
+                    <div id="outputHtml" class="content-display"
+                        style="min-height: 300px; overflow-y: auto; padding: 20px; border: 1px solid rgba(0,0,0,0.15); margin-bottom: 20px; background: #fff; color: #000;">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isProcessing = false;
+        let lastResult = null;
+        let eReviewId = null; // Store eReview ID globally
+        let topics = [];   // Store topic tags globally
+        let originalContent = null; // Store original HTML before rewriting
+
+        // Check for content from article extractor on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedContent = sessionStorage.getItem('rewriter_content');
+            const sourceUrl = sessionStorage.getItem('rewriter_source_url');
+            const title = sessionStorage.getItem('rewriter_title');
+            const savedEReviewId = sessionStorage.getItem('rewriter_ereview_id');
+            const savedTopics = sessionStorage.getItem('rewriter_topics');
+
+            if (savedContent) {
+                // Populate the textarea with the content
+                document.getElementById('htmlInput').value = savedContent;
+
+                // Store eReview ID — fall back to persistent key if step key is empty
+                eReviewId = savedEReviewId || sessionStorage.getItem('article_ereview_id') || null;
+                // Re-save persistent key so it stays available downstream
+                if (eReviewId) sessionStorage.setItem('article_ereview_id', eReviewId);
+
+                // Store topics — fall back to persistent key
+                if (savedTopics) {
+                    try { topics = JSON.parse(savedTopics); } catch(e) { topics = []; }
+                }
+                if (!topics.length) {
+                    try { topics = JSON.parse(sessionStorage.getItem('article_topics') || '[]'); } catch(e) { topics = []; }
+                }
+                if (topics.length) sessionStorage.setItem('article_topics', JSON.stringify(topics));
+
+                // Show metadata bar if we have eReview or topics
+                updateMetadataBar();
+
+                // Show a notification
+                showSuccess(`Loaded content from Article Extractor${title ? ': ' + title : ''}${eReviewId ? ' (eReview: ' + eReviewId + ')' : ''}`);
+
+                // Clear sessionStorage
+                sessionStorage.removeItem('rewriter_content');
+                sessionStorage.removeItem('rewriter_source_url');
+                sessionStorage.removeItem('rewriter_title');
+                sessionStorage.removeItem('rewriter_ereview_id');
+                sessionStorage.removeItem('rewriter_topics');
+
+                // Scroll to the textarea
+                document.getElementById('htmlInput').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                // No content loaded from Article Extractor — show the back button
+                document.getElementById('backToExtractorButton').style.display = 'block';
+            }
+
+            // Load saved API key
+            const savedApiKey = localStorage.getItem('claude_api_key');
+            if (savedApiKey) {
+                document.getElementById('apiKey').value = savedApiKey;
+            }
+        });
+
+        function updateMetadataBar() {
+            const bar = document.getElementById('metadataBar');
+            if (!eReviewId && (!topics || topics.length === 0)) { bar.style.display = 'none'; return; }
+            let html = '';
+            if (eReviewId) {
+                html += `<div class="article-id-display">
+                    <span class="label">eReview ID:</span>
+                    <span class="value">${eReviewId}</span>
+                </div>`;
+            }
+            if (topics && topics.length > 0) {
+                html += `<div style="margin-bottom:12px;">
+                    <span class="label" style="display:block; margin-bottom:6px;">Topic Tags:</span>
+                    <div>${topics.map(t => `<span style="display:inline-block; border:1px solid rgba(255,255,255,0.4); color:#fff; font-size:11px; padding:3px 8px; margin:2px 4px 2px 0; letter-spacing:0.05em;">${t}</span>`).join('')}</div>
+                </div>`;
+            }
+            bar.innerHTML = html;
+            bar.style.display = 'block';
+        }
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab + 'Tab').classList.add('active');
+            });
+        });
+
+        // Custom brand toggle
+        document.getElementById('brandSelect').addEventListener('change', (e) => {
+            const customGroup = document.getElementById('customBrandGroup');
+            customGroup.style.display = e.target.value === 'custom' ? 'block' : 'none';
+        });
+
+        // File upload handling
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        fileUploadArea.addEventListener('click', () => fileInput.click());
+
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.add('dragover');
+        });
+
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.classList.remove('dragover');
+        });
+
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('htmlInput').value = e.target.result;
+                document.getElementById('fileInfo').style.display = 'block';
+                document.getElementById('fileName').textContent = file.name;
+                // Switch to paste tab to show content
+                document.querySelectorAll('.tab')[0].click();
+            };
+            reader.readAsText(file);
+        }
+
+        // Fetch URL content
+        document.getElementById('fetchUrlButton').addEventListener('click', async () => {
+            const url = document.getElementById('urlInput').value.trim();
+            if (!url) {
+                showError('Please enter a URL');
+                return;
+            }
+
+            showLoading();
+            try {
+                // Use CORS proxy to fetch content
+                const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
+
+                document.getElementById('htmlInput').value = data.contents;
+                document.querySelectorAll('.tab')[0].click();
+                hideLoading();
+                showSuccess('Content fetched successfully!');
+            } catch (error) {
+                hideLoading();
+                showError('Failed to fetch URL: ' + error.message);
+            }
+        });
+
+        // Toggle API key visibility
+        function toggleApiKeyVisibility() {
+            const input = document.getElementById('apiKey');
+            const button = document.querySelector('.toggle-visibility');
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.textContent = 'Hide';
+            } else {
+                input.type = 'password';
+                button.textContent = 'Show';
+            }
+        }
+
+        // Save/load API key from localStorage
+        const savedApiKey = localStorage.getItem('claude_api_key');
+        if (savedApiKey) {
+            document.getElementById('apiKey').value = savedApiKey;
+        }
+
+        document.getElementById('apiKey').addEventListener('change', (e) => {
+            localStorage.setItem('claude_api_key', e.target.value);
+        });
+
+        // AI Provider toggle
+        document.querySelectorAll('input[name="aiProvider"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const isOllama = e.target.value === 'ollama';
+                document.getElementById('claudeConfig').style.display = isOllama ? 'none' : '';
+                document.getElementById('ollamaConfig').style.display = isOllama ? '' : 'none';
+            });
+        });
+
+        // Main rewrite function
+        document.getElementById('rewriteButton').addEventListener('click', async () => {
+            if (isProcessing) return;
+
+            const htmlContent = document.getElementById('htmlInput').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const useAI = document.getElementById('useAI').checked;
+            const aiProvider = document.querySelector('input[name="aiProvider"]:checked')?.value || 'claude';
+
+            if (!htmlContent) {
+                showError('Please go to Article Extractor');
+                document.getElementById('backToExtractorButton').style.display = 'block';
+                return;
+            }
+
+            if (useAI && aiProvider === 'claude' && !apiKey) {
+                showError('Please enter your Claude API key');
+                return;
+            }
+
+            const brandSelect = document.getElementById('brandSelect').value;
+            const brand = brandSelect === 'custom'
+                ? document.getElementById('customBrand').value.trim()
+                : brandSelect;
+
+            if (!brand) {
+                showError('Please specify a brand to neutralize');
+                return;
+            }
+
+            const options = {
+                use_ai: useAI,
+                brand: brand,
+                ai_provider: aiProvider,
+                ollama_model: document.getElementById('ollamaModel')?.value.trim() || 'llama3.2',
+                ollama_url: document.getElementById('ollamaUrl')?.value.trim() || 'http://localhost:11434',
+                remove_trademark_symbols: document.getElementById('removeTrademarks').checked,
+                remove_parenthetical_content: false,
+                remove_footnotes: document.getElementById('removeFootnotes').checked,
+                check_hyperlinks: document.getElementById('checkHyperlinks').checked,
+                check_possessive_references: document.getElementById('checkPossessives').checked
+            };
+
+            isProcessing = true;
+            showLoading();
+            hideError();
+            hideSuccess();
+
+            try {
+                originalContent = htmlContent; // Save original before rewriting
+                const result = await rewriteContent(htmlContent, apiKey, options);
+                lastResult = result;
+                displayResults(result);
+                showSuccess('Content rewritten successfully!');
+            } catch (error) {
+                console.error('Rewrite error:', error);
+                if (error.noMarkers) {
+                    showNothingToNeutralizeError();
+                } else {
+                    showError('Rewrite failed: ' + error.message);
+                }
+            } finally {
+                isProcessing = false;
+                hideLoading();
+            }
+        });
+
+        async function rewriteContent(htmlContent, apiKey, options) {
+            // Try local API server first
+            try {
+                const response = await fetch('/api/rewrite', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        html: htmlContent,
+                        api_key: apiKey,
+                        ...options
+                    })
+                });
+
+                if (response.ok) {
+                    return await response.json();
+                }
+            } catch (e) {
+                console.log('Local API not available, using client-side processing');
+            }
+
+            // Fallback to client-side processing with Claude API directly
+            return await rewriteWithClaudeDirectly(htmlContent, apiKey, options);
+        }
+
+        async function rewriteWithClaudeDirectly(htmlContent, apiKey, options) {
+            // Find all spans with data-ai-rewrite="true"
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlContent, 'text/html');
+            const spans = doc.querySelectorAll('[data-ai-rewrite="true"]');
+
+            if (spans.length === 0) {
+                const err = new Error('NO_MARKERS');
+                err.noMarkers = true;
+                throw err;
+            }
+
+            const replacements = [];
+            let processedHtml = htmlContent;
+
+            for (const span of spans) {
+                const originalText = span.innerHTML;
+
+                // Call the selected AI provider
+                const rewrittenText = options.ai_provider === 'ollama'
+                    ? await callOllamaAPI(originalText, options.brand, options.ollama_model, options.ollama_url)
+                    : await callClaudeAPI(originalText, apiKey, options.brand);
+
+                if (rewrittenText !== originalText) {
+                    replacements.push({
+                        original: originalText.substring(0, 200),
+                        rewritten: rewrittenText.substring(0, 200)
+                    });
+
+                    // Wrap rewritten text with a visual marker
+                    // Remove the data-ai-rewrite attribute and add rewritten-content class
+                    const newSpan = document.createElement('span');
+                    newSpan.className = 'rewritten-content';
+                    newSpan.innerHTML = rewrittenText;
+
+                    // Replace in the HTML
+                    const spanOuterHtml = span.outerHTML;
+                    const newSpanHtml = newSpan.outerHTML;
+                    processedHtml = processedHtml.replace(spanOuterHtml, newSpanHtml);
+                }
+            }
+
+            // Apply post-processing
+            if (options.remove_trademark_symbols) {
+                processedHtml = processedHtml.replace(/[®™℠]/g, '');
+                processedHtml = processedHtml.replace(/<sup>[®™℠]<\/sup>/gi, '');
+                processedHtml = processedHtml.replace(/<sup>SM<\/sup>/gi, '');
+            }
+
+            // Fix any double spaces that may have been created
+            processedHtml = processedHtml.replace(/\s{2,}/g, ' ');
+
+            // Fix spacing issues around common punctuation
+            processedHtml = processedHtml.replace(/\s+\./g, '.');
+            processedHtml = processedHtml.replace(/\s+,/g, ',');
+            processedHtml = processedHtml.replace(/\s+;/g, ';');
+            processedHtml = processedHtml.replace(/\s+:/g, ':');
+
+            // Check for warnings
+            const warnings = [];
+            const unmarkedLinks = [];
+            const possessiveRefs = [];
+
+            if (options.check_hyperlinks) {
+                const linkPattern = /<a\s+[^>]*>.*?(Fidelity|our tools|our calculator)[^<]*<\/a>/gi;
+                let match;
+                while ((match = linkPattern.exec(htmlContent)) !== null) {
+                    unmarkedLinks.push({ link_text: match[0].substring(0, 100) });
+                }
+                if (unmarkedLinks.length > 0) {
+                    warnings.push(`Found ${unmarkedLinks.length} unmarked hyperlinks that may reference brand products`);
+                }
+            }
+
+            if (options.check_possessive_references) {
+                const possessivePatterns = [
+                    /our\s+[\w\s]{1,30}(?:tool|calculator|planner|guide|glossary)/gi,
+                    /we offer/gi, /we provide/gi, /we suggest/gi, /we recommend/gi,
+                    /contact us/gi, /our company/gi, /our firm/gi, /our website/gi
+                ];
+
+                for (const pattern of possessivePatterns) {
+                    let match;
+                    while ((match = pattern.exec(htmlContent)) !== null) {
+                        possessiveRefs.push({ text: match[0] });
+                    }
+                }
+                if (possessiveRefs.length > 0) {
+                    warnings.push(`Found ${possessiveRefs.length} possessive references (our/we/us) that may imply brand authorship`);
+                }
+            }
+
+            return {
+                html: processedHtml,
+                spans_found: spans.length,
+                spans_processed: replacements.length,
+                replacements_count: replacements.length,
+                replacements: replacements,
+                unmarked_links: unmarkedLinks,
+                possessive_references: possessiveRefs,
+                warnings: warnings,
+                method: options.ai_provider === 'ollama' ? 'ollama_direct' : 'ai_direct'
+            };
+        }
+
+        function removeAllParentheses(htmlContent) {
+            // Parse the HTML content for DOM-based cleaning
+            // NOTE: We NEVER apply the parentheses regex to raw HTML strings because it
+            // matches across tag boundaries and destroys CSS rgb() values in style attributes.
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlContent, 'text/html');
+
+            // Recursively process all text nodes to remove any remaining parentheses
+            // NOTE: This ONLY modifies text content - all HTML tags like <em>, <ul>, <li>, etc. are preserved
+            function processNode(node) {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    const text = node.textContent;
+
+                    // Remove content in parentheses including the parentheses
+                    // This catches any that might have been missed
+                    let cleanedText = text.replace(/\s*\([^)]*\)\s*/g, ' ');
+                    // Normalize whitespace - replace multiple spaces with single space
+                    cleanedText = cleanedText.replace(/\s{2,}/g, ' ');
+                    // Trim leading/trailing spaces from the text node
+                    if (cleanedText !== text) {
+                        node.textContent = cleanedText;
+                    }
+                } else if (node.nodeType === Node.ELEMENT_NODE &&
+                    node.nodeName !== 'SCRIPT' &&
+                    node.nodeName !== 'STYLE') {
+                    // Process child nodes - preserving all HTML structure
+                    const children = Array.from(node.childNodes);
+                    children.forEach(child => processNode(child));
+                }
+            }
+
+            // Process the entire document body
+            processNode(doc.body);
+
+            // Get the cleaned HTML
+            let result = doc.body.innerHTML;
+
+            // Normalize multiple spaces only (no raw regex on HTML - that corrupts style attributes)
+            result = result.replace(/\s{2,}/g, ' ');
+
+            console.log('Parentheses removal complete - all HTML tags preserved');
+            return result;
+        }
+
+        async function callOllamaAPI(text, brand, model, ollamaUrl) {
+            const systemPrompt = `You are a professional content editor specializing in brand neutralization. Your task is to rewrite brand-specific content to make it generic and suitable for white-label distribution.
+
+CRITICAL RULES:
+1. ONLY modify the text content - preserve ALL HTML structure, attributes, and tags exactly
+2. MUST preserve all HTML tags including: <em>, <strong>, <ul>, <ol>, <li>, <p>, <div>, <span>, <a>, etc.
+3. Replace brand names (like "${brand}") with generic alternatives
+4. When you encounter specific product names (like "${brand} Go", etc.), REMOVE them and adjust the sentence naturally
+5. Remove trademark symbols (\u00ae, \u2122, \u2120)
+6. Keep the same tone and informational content
+7. DO NOT add new information or fix grammar - only neutralize brand references
+8. PRESERVE all existing parenthetical content exactly as written
+
+Return ONLY the rewritten text with no explanations or additional commentary.`;
+
+            const response = await fetch(`${ollamaUrl}/api/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: model,
+                    stream: false,
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        {
+                            role: 'user',
+                            content: `Rewrite the following text to remove all references to "${brand}" and make it brand-neutral. When you see specific product names, REMOVE them completely. PRESERVE any existing parenthetical content. Return ONLY the rewritten text:\n\n${text}`
+                        }
+                    ]
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Ollama API request failed: ${response.status} ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            return (data.message?.content || '').trim();
+        }
+
+        async function callClaudeAPI(text, apiKey, brand) {
+            const systemPrompt = `You are a professional content editor specializing in brand neutralization. Your task is to rewrite brand-specific content to make it generic and suitable for white-label distribution.
+
+CRITICAL RULES:
+1. ONLY modify the text content - preserve ALL HTML structure, attributes, and tags exactly
+2. MUST preserve all HTML tags including: <em>, <strong>, <ul>, <ol>, <li>, <p>, <div>, <span>, <a>, etc.
+3. When you encounter brand names (like "${brand}"), replace them with generic alternatives ONLY when they are the main subject of the sentence
+4. When you encounter specific product names (like "Fidelity Go", "Automated Portfolio", "Fidelity IRA", etc.), REMOVE them completely and adjust the sentence to flow naturally without them
+5. Examples of proper removal:
+   - "robo advisors like Fidelity Go can offer" → "robo advisors can offer"
+   - "use Automated Portfolio to manage" → "use automated portfolio management to manage"
+   - "with Fidelity IRA you can" → "with an IRA you can"
+   - "services like Fidelity Wealth Management provide" → "wealth management services provide"
+6. DO NOT create new generic product names or replacements - simply remove the specific branded product name
+7. Remove trademark symbols (®, ™, ℠)
+8. Keep the same tone, style, and informational content
+9. DO NOT add new information or change the meaning
+10. DO NOT fix grammar, spelling, or improve the writing - only neutralize brand references
+11. Maintain the same sentence structure when possible
+12. Preserve all list formatting (<ul>, <li>), emphasis tags (<em>, <strong>), and other HTML elements exactly as they appear
+13. PRESERVE all existing parenthetical content exactly as written - do not remove parentheses or their contents
+
+Return ONLY the rewritten text with no explanations or additional commentary.`;
+
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': apiKey,
+                    'anthropic-version': '2023-06-01',
+                    'anthropic-dangerous-direct-browser-access': 'true'
+                },
+                body: JSON.stringify({
+                    model: 'claude-sonnet-4-20250514',
+                    max_tokens: 2048,
+                    system: systemPrompt,
+                    messages: [
+                        {
+                            role: 'user',
+                            content: `Rewrite the following text to remove all references to "${brand}" and make it brand-neutral. 
+
+IMPORTANT: When you see specific product names, REMOVE them completely - do NOT replace them with generic alternatives. For example:
+- "robo advisors like Fidelity Go can" should become "robo advisors can"
+- NOT "robo advisors like Automated Portfolio can"
+
+PRESERVE any existing parenthetical content exactly as written - do not remove or alter text inside parentheses.
+
+Text to rewrite:
+${text}
+
+Return ONLY the rewritten text, nothing else.`
+                        }
+                    ]
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error?.message || 'Claude API request failed');
+            }
+
+            const data = await response.json();
+            return data.content[0].text.trim();
+        }
+
+        function displayResults(result) {
+            document.getElementById('welcomeMessage').style.display = 'none';
+            document.getElementById('resultsContainer').style.display = 'block';
+            document.getElementById('leftPanelActions').style.display = 'block';
+            updateMetadataBar();
+
+            // Stats
+            const statsHtml = `
+                <span class="stat success">Spans found: ${result.spans_found}</span>
+                <span class="stat success">Spans processed: ${result.spans_processed}</span>
+                <span class="stat info">Method: ${result.method}</span>
+                ${result.processing_time ? `<span class="stat">Time: ${result.processing_time}</span>` : ''}
+            `;
+            document.getElementById('statsContent').innerHTML = statsHtml;
+
+            // Warnings
+            if (result.warnings && result.warnings.length > 0) {
+                document.getElementById('warningsBox').style.display = 'block';
+                document.getElementById('warningsList').innerHTML = result.warnings.map(w => `<li>${w}</li>`).join('');
+            } else {
+                document.getElementById('warningsBox').style.display = 'none';
+            }
+
+            // Output HTML — render visually
+            document.getElementById('outputHtml').innerHTML = result.html;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Copy to clipboard
+        document.getElementById('copyButton').addEventListener('click', () => {
+            if (!lastResult) return;
+            if (navigator.clipboard && window.ClipboardItem) {
+                const blob = new Blob([lastResult.html], { type: 'text/html' });
+                const item = new ClipboardItem({ 'text/html': blob });
+                navigator.clipboard.write([item])
+                    .then(() => showSuccess('Copied to clipboard!'))
+                    .catch(() => {
+                        navigator.clipboard.writeText(lastResult.html).then(() => showSuccess('Copied to clipboard!'));
+                    });
+            } else {
+                navigator.clipboard.writeText(lastResult.html).then(() => showSuccess('Copied to clipboard!'));
+            }
+        });
+
+        // Download HTML file
+        document.getElementById('downloadButton').addEventListener('click', () => {
+            if (!lastResult) return;
+
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            const filename = `rewritten-article-${timestamp}.html`;
+
+            // Fix relative image URLs by prepending Fidelity base URL
+            let styledContent = lastResult.html;
+            styledContent = styledContent.replace(/src="\/([^"]+)"/g, 'src="https://www.fidelity.com/$1"');
+            styledContent = styledContent.replace(/src='\/([^']+)'/g, "src='https://www.fidelity.com/$1'");
+
+            // Build eReview ID section if available
+            let eReviewSection = '';
+            if (eReviewId) {
+                eReviewSection = `
+        <div style="background: #000; color: #fff; border: 1px solid #fff; border-radius: 0; padding: 15px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-weight: 600;">
+            <span style="font-size: 12px; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.5px;">eReview ID:</span>
+            <span style="font-size: 18px; font-family: 'Courier New', monospace; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 0;">${eReviewId}</span>
+        </div>`;
+            }
+
+            // Build topics section if available
+            let topicsSection = '';
+            if (topics && topics.length > 0) {
+                const tagSpans = topics.map(t =>
+                    `<span style="display:inline-block; border:1px solid rgba(255,255,255,0.4); color:#fff; font-size:11px; padding:3px 8px; margin:2px 4px 2px 0; letter-spacing:0.05em;">${t}</span>`
+                ).join('');
+                topicsSection = `
+        <div style="background: #000; color: #fff; border: 1px solid #fff; padding: 12px 20px; margin-bottom: 20px;">
+            <div style="font-size: 11px; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 8px;">Topic Tags</div>
+            <div>${tagSpans}</div>
+        </div>`;
+            }
+
+            // Create a complete HTML document with embedded styles for centered column layout
+            const htmlDocument = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brand Neutralized Article</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background: #000;
+            line-height: 1.6;
+            color: #fff;
+            padding: 20px;
+        }
+        
+        .header {
+            border-bottom: 1px solid #fff;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #fff;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        .meta {
+            color: #fff;
+            opacity: 0.6;
+            font-size: 14px;
+        }
+        .content {
+            color: #fff;
+        }
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            margin: 24px 0 12px 0;
+            color: #fff;
+            line-height: 1.3;
+        }
+        .content h1 { font-size: 28px; }
+        .content h2 { font-size: 24px; }
+        .content h3 { font-size: 20px; }
+        .content h4 { font-size: 18px; }
+        .content p {
+            margin-bottom: 16px;
+            line-height: 1.7;
+        }
+        .content ul, .content ol {
+            margin-bottom: 16px;
+            padding-left: 28px;
+        }
+        .content li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+        .content em {
+            font-style: italic;
+            color: #fff;
+        }
+        .content strong {
+            font-weight: 600;
+            color: #fff;
+        }
+        .content blockquote {
+            border-left: 4px solid rgba(255,255,255,0.4);
+            padding-left: 20px;
+            margin: 20px 0;
+            font-style: italic;
+            color: #fff;
+            opacity: 0.6;
+        }
+        .content img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 24px auto;
+            border-radius: 0;
+        }
+        .content figure {
+            margin: 24px 0;
+        }
+        .content figure img {
+            margin: 0 auto 12px;
+        }
+        .content figcaption {
+            text-align: center;
+            font-size: 14px;
+            color: #fff;
+            opacity: 0.6;
+            font-style: italic;
+        }
+        .content a {
+            color: #fff;
+            text-decoration: underline;
+        }
+        .content a:hover {
+            opacity: 0.7;
+        }
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .content table th,
+        .content table td {
+            padding: 12px;
+            border: 1px solid #fff;
+            text-align: left;
+        }
+        .content table th {
+            background: #111;
+            font-weight: 600;
+        }
+        .content pre {
+            background: #111;
+            border: 1px solid #fff;
+            padding: 16px;
+            border-radius: 0;
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+        .content code {
+            background: #111;
+            padding: 2px 6px;
+            border-radius: 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #fff;
+            text-align: center;
+            color: #fff;
+            opacity: 0.6;
+            font-size: 14px;
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 20px;
+            }
+            .content h1 { font-size: 24px; }
+            .content h2 { font-size: 20px; }
+            .content h3 { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Brand Neutralized Article</h1>
+            <div class="meta">
+                <p><strong>Processed:</strong> ${new Date().toLocaleString()}</p>
+                <p><strong>Replacements Made:</strong> ${lastResult.replacements_count || 0}</p>
+            </div>
+        </div>
+        
+        ${eReviewSection}
+        ${topicsSection}
+        
+        <div class="content">
+            ${styledContent}
+        </div>
+        
+        <div class="footer">
+            <p>This article has been processed for brand neutralization</p>
+            <p>Generated by aRCHi Brand Neutralizer</p>
+            ${eReviewId ? `<p style="margin-top: 10px;"><strong>eReview ID:</strong> ${eReviewId}</p>` : ''}
+            ${topics && topics.length > 0 ? `<p style="margin-top: 10px; color:"#fff"; opacity: 0.6;><strong>Topic Tags:</strong> ${topics.join(', ')}</p>` : ''}
+        </div>
+    </div>
+</body>
+</html>`;
+
+            const blob = new Blob([htmlDocument], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showSuccess(`Downloaded ${filename}`);
+        });
+
+        // Send to Diff Tool
+        document.getElementById('sendToDiffButton').addEventListener('click', () => {
+            if (!lastResult || !originalContent) return;
+            sessionStorage.setItem('diff_original', originalContent);
+            sessionStorage.setItem('diff_neutralized', lastResult.html);
+            sessionStorage.setItem('diff_title', eReviewId ? `eReview: ${eReviewId}` : 'Article Comparison');
+            sessionStorage.setItem('diff_ereview_id', eReviewId || sessionStorage.getItem('article_ereview_id') || '');
+            sessionStorage.setItem('diff_topics', JSON.stringify(topics.length ? topics : JSON.parse(sessionStorage.getItem('article_topics') || '[]')));
+            window.location.href = 'article-diff.html';
+        });
+
+        // Utility functions
+        function showLoading() {
+            document.getElementById('welcomeMessage').style.display = 'none';
+            document.getElementById('resultsContainer').style.display = 'none';
+            document.getElementById('leftPanelActions').style.display = 'none';
+            document.getElementById('loadingMessage').style.display = 'block';
+            _ra.startLoop();
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingMessage').style.display = 'none';
+            _ra.stopLoop();
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function showNothingToNeutralizeError() {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.innerHTML = `
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;">
+                    <span style="font-size:15px; font-weight:600;">aRCHi did not find anything to Neutralize!</span>
+                    <button
+                        onclick="skipToEditor()"
+                        style="
+                            cursor:pointer;
+                            border:none;
+                            padding:10px 22px;
+                            border-radius:30px;
+                            font-size:11px;
+                            font-weight:700;
+                            letter-spacing:0.14em;
+                            text-transform:uppercase;
+                            background:var(--surface);
+                            color:var(--text);
+                            box-shadow:4px 4px 8px var(--shadow-dark),-4px -4px 8px var(--shadow-light);
+                            white-space:nowrap;
+                        ">
+                        Skip to Step 4 &rarr; Word Editor
+                    </button>
+                </div>
+            `;
+            errorDiv.style.display = 'block';
+        }
+
+        function skipToEditor() {
+            // Write the current article HTML into editor_content so the
+            // Word Editor shows this article, not a stale previous one.
+            const html = document.getElementById('htmlInput').value.trim();
+            if (html) {
+                sessionStorage.setItem('editor_content', html);
+            }
+            // Carry eReview + topics forward
+            const erId = eReviewId || sessionStorage.getItem('article_ereview_id') || '';
+            if (erId) sessionStorage.setItem('editor_ereview_id', erId);
+            const tp = topics.length ? topics : JSON.parse(sessionStorage.getItem('article_topics') || '[]');
+            if (tp.length) sessionStorage.setItem('editor_topics', JSON.stringify(tp));
+            window.location.href = 'article-editor.html';
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+        }
+
+        function hideSuccess() {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.style.display = 'none';
+        }
+
+        // Update button state
+        setInterval(() => {
+            const button = document.getElementById('rewriteButton');
+            button.disabled = isProcessing;
+            if (isProcessing) {
+                button.textContent = 'Rewriting...';
+            } else {
+                button.textContent = 'Rewrite with AI';
+            }
+        }, 100);
+
+        // ── Rewrite animation (23 circles fanning out) ──
+        const _ra = (function () {
+            const svgns        = 'http://www.w3.org/2000/svg';
+            const svg          = document.querySelector('#rewrite-animation svg');
+            const DURATION     = 1900;
+            const CYCLE_DELAY  = 400;
+
+            function mix(a, b, t) { return a + (b - a) * t; }
+            function easeInOutCubic(t) {
+                return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+            }
+
+            const circles = [];
+            for (let i = 0; i < 23; i++) {
+                const a  = i / 22;
+                const el = document.createElementNS(svgns, 'circle');
+                el.setAttribute('cx', 50);
+                el.setAttribute('cy', 50);
+                el.setAttribute('r', 48);
+                svg.appendChild(el);
+                circles.push({
+                    el,
+                    final: { cx: 50 + i * 1.2 - 2.4 * Math.max(0, i - 14), r: mix(48, 15, a) },
+                    alt:   { cx: 50 - i * 1.2 + 2.4 * Math.max(0, i - 14), r: mix(48, 15, a) },
+                    cx: 50, r: 48, dir: true,
+                    timerId: null, rafId: null,
+                });
+            }
+            circles.reverse();
+
+            let _looping   = false;
+            let _stopNext  = false;
+            // track how many circles are mid-animation so we know when a full sweep ends
+            let _active    = 0;
+            let _onSweepDone = null;
+
+            function runCircle(c) {
+                const fromCx = c.cx, fromR = c.r;
+                const target = c.dir ? c.final : c.alt;
+                const t0     = performance.now();
+                _active++;
+                function frame(now) {
+                    const t    = Math.min((now - t0) / DURATION, 1);
+                    const ease = easeInOutCubic(t);
+                    c.cx = fromCx + (target.cx - fromCx) * ease;
+                    c.r  = fromR  + (target.r  - fromR)  * ease;
+                    c.el.setAttribute('cx', c.cx.toFixed(4));
+                    c.el.setAttribute('r',  c.r.toFixed(4));
+                    if (t < 1) {
+                        c.rafId = requestAnimationFrame(frame);
+                    } else {
+                        _active--;
+                        c.dir = !c.dir;
+                        if (_active === 0 && _onSweepDone) {
+                            _onSweepDone();
+                        }
+                    }
+                }
+                c.rafId = requestAnimationFrame(frame);
+            }
+
+            function startSweep(onDone) {
+                _onSweepDone = onDone;
+                _active = 0;
+                circles.forEach((c, i) => {
+                    c.timerId = setTimeout(() => runCircle(c), i * 30);
+                });
+            }
+
+            function reset() {
+                circles.forEach(c => {
+                    if (c.timerId)  clearTimeout(c.timerId);
+                    if (c.rafId)    cancelAnimationFrame(c.rafId);
+                    c.cx = 50; c.r = 48; c.dir = true;
+                    c.el.setAttribute('cx', 50);
+                    c.el.setAttribute('r', 48);
+                });
+                _active = 0;
+                _onSweepDone = null;
+            }
+
+            function pulseOnce() {
+                reset();
+                _looping  = false;
+                _stopNext = false;
+                // sweep right then left (2 half-cycles), then stop
+                startSweep(() => {
+                    setTimeout(() => {
+                        startSweep(() => { /* done — stay at rest */ });
+                    }, CYCLE_DELAY);
+                });
+            }
+
+            function startLoop() {
+                reset();
+                _looping  = true;
+                _stopNext = false;
+                function sweep() {
+                    startSweep(() => {
+                        if (!_looping) return;
+                        setTimeout(sweep, CYCLE_DELAY);
+                    });
+                }
+                sweep();
+            }
+
+            function stopLoop() {
+                _looping = false;
+            }
+
+            // page-load pulse
+            pulseOnce();
+
+            return { pulseOnce, startLoop, stopLoop };
+        })();
+
+        // ── Rewrite options toggle ──
+        document.getElementById('optionsToggle').addEventListener('click', () => {
+            const toggle = document.getElementById('optionsToggle');
+            const body = document.getElementById('optionsBody');
+            const isOpen = body.classList.toggle('open');
+            toggle.classList.toggle('open', isOpen);
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,20 @@
+# HTTP & scraping
+requests
+beautifulsoup4
+lxml
+
+# AI / LLM
+anthropic>=0.40.0
+
+# Vector database (article generator)
+chromadb>=0.5.0
+
+# API server
+flask
+flask-cors
+werkzeug
+
+# FCAT pipeline (MongoDB Atlas + embeddings)
+pymongo[srv]
+openai
+python-dotenv

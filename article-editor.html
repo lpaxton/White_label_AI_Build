@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Editor - Step 5</title>
+    <link rel="stylesheet" href="shared.css">
+    <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        /* header size override */
+        .header { padding: 24px 30px; margin-bottom: 20px; }
+        .header h1 { font-size: 28px; margin-bottom: 6px; }
+        .header p  { font-size: 15px; }
+        /* Editor card */
+        .editor-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            border: none;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        /* Toolbar */
+        .toolbar {
+            background: var(--bg-dark);
+            border-bottom: none;
+            border-radius: var(--radius) var(--radius) 0 0;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+        .toolbar-group {
+            display: flex;
+            gap: 2px;
+            padding-right: 10px;
+            margin-right: 6px;
+            border-right: 1px solid var(--shadow-dark);
+        }
+        .toolbar-group:last-child { border-right: none; }
+        .tb-btn {
+            padding: 6px 10px;
+            border: 1px solid transparent;
+            background: transparent;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            transition: all 0.15s;
+            min-width: 32px;
+            text-align: center;
+        }
+        .tb-btn:hover  { background: rgba(0,0,0,0.06); border-color: var(--shadow-dark); }
+        .tb-btn.active { background: var(--accent); color: #fff; border-radius: var(--radius-xs); }
+        .tb-select {
+            padding: 5px 8px;
+            border: none;
+            background: var(--surface);
+            font-size: 12px;
+            color: var(--text);
+            border-radius: var(--radius-xs);
+            box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+            cursor: pointer;
+        }
+        .tb-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--shadow-dark);
+            margin: 0 4px;
+        }
+        /* Word count bar */
+        .word-count-bar {
+            background: var(--bg-dark);
+            border-bottom: none;
+            padding: 6px 20px;
+            display: flex;
+            gap: 16px;
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+        .word-count-bar span strong { color: var(--text); opacity: 1; }
+        /* Editable content area */
+        .editor-content {
+            min-height: 500px;
+            max-height: calc(100vh - 360px);
+            overflow-y: auto;
+            padding: 30px 40px;
+            outline: none;
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 16px;
+            line-height: 1.8;
+            color: #000;
+            background: #fff;
+            border-radius: 0 0 var(--radius) var(--radius);
+        }
+        .editor-content:focus { outline: none; }
+        /* Strip AI marker labels inside editor */
+        .editor-content [data-ai-rewrite],
+        .editor-content .rewritten-content {
+            background: transparent;
+            border: none;
+            padding: 0;
+            display: inline;
+        }
+        .editor-content [data-ai-rewrite]::before,
+        .editor-content .rewritten-content::before {
+            display: none;
+        }
+        /* Placeholder */
+        .editor-content:empty::before {
+            content: 'Start typing or load content from Step 2 (Brand Neutralizer)...';
+            color: #999;
+            pointer-events: none;
+        }
+        /* Headings inside editor */
+        .editor-content h1, .editor-content h2, .editor-content h3,
+        .editor-content h4, .editor-content h5, .editor-content h6 {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            margin: 20px 0 10px;
+            color: #000;
+        }
+        .editor-content h1 { font-size: 28px; }
+        .editor-content h2 { font-size: 24px; }
+        .editor-content h3 { font-size: 20px; }
+        .editor-content p  { margin-bottom: 14px; }
+        .editor-content ul, .editor-content ol { padding-left: 28px; margin-bottom: 14px; }
+        .editor-content li { margin-bottom: 6px; }
+        .editor-content blockquote {
+            border-left: 3px solid var(--accent);
+            padding-left: 16px;
+            margin: 16px 0;
+            color: #000;
+            opacity: 0.7;
+            font-style: italic;
+        }
+        /* Action bar */
+        .action-bar {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            border: none;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .action-bar-left { display: flex; gap: 10px; flex-wrap: wrap; }
+        /* button size override */
+        .button { padding: 10px 20px; font-size: 11px; letter-spacing: 0.12em; }
+        @media (max-width: 768px) {
+            .editor-content { padding: 20px; }
+        }
+        /* Save-to-FCAT modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--surface);
+            border: none;
+            border-radius: var(--radius);
+            box-shadow: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
+            padding: 36px 40px;
+            max-width: 480px;
+            width: 90%;
+            text-align: center;
+        }
+        .modal h2 { font-size: 20px; margin-bottom: 12px; color: var(--text); }
+        .modal p { font-size: 14px; color: var(--text-muted); margin-bottom: 28px; line-height: 1.6; }
+        .modal-actions { display: flex; gap: 12px; justify-content: center; }
+    </style>
+</head>
+<body>
+    <div class="site-header">
+        <h1><span style="color: var(--accent-red);">a</span>RCH<span style="color: var(--accent-red);">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
+        <p>Content &amp; Learning Tools</p>
+    </div>
+    <button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>
+
+    <div class="container">
+        <div class="header">
+            <h1>Word Editor</h1>
+            <p>Review and refine your brand-neutralized article before final export</p>
+           
+            <div class="breadcrumb">
+                <span class="breadcrumb-step done">Step 1: Article Extractor</span>
+                <span class="breadcrumb-arrow">&#8594;</span>
+                <span class="breadcrumb-step done">Step 2: Brand Neutralizer</span>
+                <span class="breadcrumb-arrow">&#8594;</span>
+                <span class="breadcrumb-step done">Step 3: Diff Tool</span>
+                <span class="breadcrumb-arrow">&#8594;</span>
+                <span class="breadcrumb-step active">Step 4: Word Editor</span>
+            </div>
+        </div>
+        <div id="editorMetadataBar" style="margin:12px 0px; padding:12px 16px; border:1px solid rgba(255,255,255,0.3); background:rgba(255,255,255,0.04); display:flex; align-items:center; flex-wrap:wrap; gap:14px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:11px; opacity:0.6; text-transform:uppercase; letter-spacing:0.12em; white-space:nowrap;">eReview ID:</span>
+                <input id="eReviewInput" type="text" placeholder="Enter eReview ID" style="background:transparent; border:none; border-bottom:1px solid rgba(255,255,255,0.4); color:#fff; font-family:'Courier New',monospace; font-size:14px; padding:2px 4px; width:160px; outline:none;" oninput="eReviewId=this.value.trim()||null">
+            </div>
+            <div id="topicTagsBar" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;"></div>
+        </div>
+        <div class="editor-card">
+            <div class="toolbar">
+                <!-- Text style -->
+                <div class="toolbar-group">
+                    <select class="tb-select" id="headingSelect" onchange="applyHeading(this.value)" title="Heading">
+                        <option value="div">Paragraph</option>
+                        <option value="h1">Heading 1</option>
+                        <option value="h2">Heading 2</option>
+                        <option value="h3">Heading 3</option>
+                        <option value="h4">Heading 4</option>
+                    </select>
+                </div>
+                <!-- Formatting -->
+                <div class="toolbar-group">
+                    <button class="tb-btn" onclick="execCmd('bold')" title="Bold (Ctrl+B)"><strong>B</strong></button>
+                    <button class="tb-btn" onclick="execCmd('italic')" title="Italic (Ctrl+I)"><em>I</em></button>
+                    <button class="tb-btn" onclick="execCmd('underline')" title="Underline (Ctrl+U)" style="text-decoration:underline;">U</button>
+                    <button class="tb-btn" onclick="execCmd('strikeThrough')" title="Strikethrough" style="text-decoration:line-through;">S</button>
+                </div>
+                <!-- Alignment -->
+                <div class="toolbar-group">
+                    <button class="tb-btn" onclick="execCmd('justifyLeft')" title="Align Left">&#8676;</button>
+                    <button class="tb-btn" onclick="execCmd('justifyCenter')" title="Center">&#8677;</button>
+                    <button class="tb-btn" onclick="execCmd('justifyRight')" title="Align Right">&#8678;</button>
+                </div>
+                <!-- Lists -->
+                <div class="toolbar-group">
+                    <button class="tb-btn" onclick="execCmd('insertUnorderedList')" title="Bullet List">&#8226; List</button>
+                    <button class="tb-btn" onclick="execCmd('insertOrderedList')" title="Numbered List">1. List</button>
+                </div>
+                <!-- Indent -->
+                <div class="toolbar-group">
+                    <button class="tb-btn" onclick="execCmd('indent')" title="Indent">&#8677;</button>
+                    <button class="tb-btn" onclick="execCmd('outdent')" title="Outdent">&#8676;</button>
+                </div>
+                <!-- Undo/Redo -->
+                <div class="toolbar-group">
+                    <button class="tb-btn" onclick="execCmd('undo')" title="Undo (Ctrl+Z)">&#8630;</button>
+                    <button class="tb-btn" onclick="execCmd('redo')" title="Redo (Ctrl+Y)">&#8631;</button>
+                </div>
+                <!-- Clear markers -->
+                <div class="toolbar-group">
+                    <button class="tb-btn" onclick="clearAIMarkers()" title="Remove AI highlighting markers" style="font-size:12px;">Clear Markers</button>
+                </div>
+            </div>
+
+            <div class="word-count-bar">
+                <span>Words: <strong id="wordCount">0</strong></span>
+                <span>Characters: <strong id="charCount">0</strong></span>
+                <span>Paragraphs: <strong id="paraCount">0</strong></span>
+            </div>
+
+            <div
+                class="editor-content"
+                id="editorContent"
+                contenteditable="true"
+                spellcheck="true"
+            ></div>
+        </div>
+
+        <div class="action-bar">
+            <div class="action-bar-left">
+                <button class="button primary" onclick="copyToClipboard()">Copy to Clipboard</button>
+                <button class="button orange" onclick="downloadHtml()">Download HTML</button>
+                <button class="button secondary" onclick="downloadText()">Download Text</button>
+                <button class="button" style="border-color:#4f8ef7;color:#4f8ef7;" onclick="downloadWord()">Download Word</button>
+                <button class="button" style="border-color:#e05252;color:#e05252;" onclick="downloadPdf()">Download PDF</button>
+            </div>
+            <div style="display:flex;gap:10px;">
+                <button class="button" style="border-color:#22c55e;color:#22c55e;" onclick="saveToFcat()" id="saveFcatBtn">Save to FCAT</button>
+                <button class="button green" onclick="clearAIMarkers()">Finalize (Remove Markers)</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast hidden" id="toast"></div>
+
+    <!-- Save to FCAT confirmation modal -->
+    <div class="modal-overlay" id="fcatModal" onclick="if(event.target===this)closeFcatModal()">
+        <div class="modal">
+            <h2>Save to Database?</h2>
+            <p>Markers have been removed. Would you like to save this finalized article to the FCAT database?</p>
+            <div class="modal-actions">
+                <button class="button green" onclick="confirmSaveToFcat()">Yes, Save</button>
+                <button class="button secondary" onclick="closeFcatModal()">No, Skip</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const editor = document.getElementById('editorContent');
+        let eReviewId = null;
+        let topics = [];
+
+        // Load content from sessionStorage
+        window.addEventListener('DOMContentLoaded', () => {
+            const content = sessionStorage.getItem('editor_content') || '';
+            eReviewId = sessionStorage.getItem('editor_ereview_id') || sessionStorage.getItem('article_ereview_id') || null;
+            try { topics = JSON.parse(sessionStorage.getItem('editor_topics') || '[]'); } catch(e) { topics = []; }
+            if (!topics.length) { try { topics = JSON.parse(sessionStorage.getItem('article_topics') || '[]'); } catch(e) { topics = []; } }
+
+            if (content) {
+                const cleaned = cleanForEditor(content);
+                editor.innerHTML = cleaned;
+            }
+            updateWordCount();
+            renderMetadataBar();
+        });
+
+        function renderMetadataBar() {
+            // Populate eReview input from sessionStorage
+            const input = document.getElementById('eReviewInput');
+            if (input && eReviewId) input.value = eReviewId;
+
+            // Populate topic tags
+            const tagsBar = document.getElementById('topicTagsBar');
+            if (tagsBar && topics && topics.length > 0) {
+                tagsBar.innerHTML = `<span style="font-size:11px; opacity:0.6; text-transform:uppercase; letter-spacing:0.12em;">Topics:</span>` +
+                    topics.map(t => `<span style="display:inline-block; border:1px solid rgba(255,255,255,0.4); font-size:11px; padding:2px 7px;">${t}</span>`).join('');
+            }
+        }
+
+        function cleanForEditor(html) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            // Remove script tags
+            doc.querySelectorAll('script').forEach(el => el.remove());
+
+            // Make images responsive
+            doc.querySelectorAll('img').forEach(el => {
+                el.style.maxWidth = '100%';
+                el.setAttribute('loading', 'lazy');
+            });
+
+            return doc.body ? doc.body.innerHTML : html;
+        }
+
+        function clearAIMarkers() {
+            // Unwrap all data-ai-rewrite and rewritten-content spans, keeping their text content
+            const spans = editor.querySelectorAll('[data-ai-rewrite], .rewritten-content');
+            spans.forEach(span => {
+                const parent = span.parentNode;
+                while (span.firstChild) {
+                    parent.insertBefore(span.firstChild, span);
+                }
+                parent.removeChild(span);
+            });
+            showToast('AI markers removed', 'success');
+            updateWordCount();
+            // Show save-to-FCAT prompt
+            document.getElementById('fcatModal').classList.add('active');
+        }
+
+        function closeFcatModal() {
+            document.getElementById('fcatModal').classList.remove('active');
+        }
+
+        async function confirmSaveToFcat() {
+            closeFcatModal();
+            await saveToFcat();
+        }
+
+        function execCmd(command, value = null) {
+            editor.focus();
+            document.execCommand(command, false, value);
+            updateWordCount();
+        }
+
+        function applyHeading(tag) {
+            editor.focus();
+            document.execCommand('formatBlock', false, tag);
+        }
+
+        function updateWordCount() {
+            const text = editor.innerText || '';
+            const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+            const chars = text.length;
+            const paras = editor.querySelectorAll('p, h1, h2, h3, h4, h5, h6').length || 1;
+
+            document.getElementById('wordCount').textContent = words.toLocaleString();
+            document.getElementById('charCount').textContent = chars.toLocaleString();
+            document.getElementById('paraCount').textContent = paras.toLocaleString();
+        }
+
+        editor.addEventListener('input', updateWordCount);
+        editor.addEventListener('keyup', updateWordCount);
+
+        // Keyboard shortcut support (browser execCommand handles Ctrl+B/I/U natively,
+        // this handles any extras)
+        editor.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                document.execCommand('insertHTML', false, '&nbsp;&nbsp;&nbsp;&nbsp;');
+            }
+        });
+
+        function copyToClipboard() {
+            const html = editor.innerHTML;
+            if (navigator.clipboard && window.ClipboardItem) {
+                const blob = new Blob([html], { type: 'text/html' });
+                const item = new ClipboardItem({ 'text/html': blob });
+                navigator.clipboard.write([item])
+                    .then(() => showToast('Copied rich text to clipboard!', 'success'))
+                    .catch(() => fallbackCopy());
+            } else {
+                fallbackCopy();
+            }
+        }
+
+        function fallbackCopy() {
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(editor);
+            selection.removeAllRanges();
+            selection.addRange(range);
+            document.execCommand('copy');
+            selection.removeAllRanges();
+            showToast('Content copied to clipboard', 'success');
+        }
+
+        function buildMetaBlockHtml() {
+            const id = eReviewId || 'N/A';
+            let block = `<div style="background:#000;color:#fff;border:1px solid #fff;padding:12px 15px;margin-bottom:8px;display:flex;align-items:center;gap:10px;"><span style="font-size:11px;opacity:0.6;text-transform:uppercase;letter-spacing:0.15em;">eReview ID:</span><span style="font-family:'Courier New',monospace;font-size:15px;font-weight:600;">${id}</span></div>`;
+            const tags = (topics && topics.length > 0)
+                ? topics.map(t=>`<span style="display:inline-block;border:1px solid rgba(255,255,255,0.5);color:#fff;font-size:11px;padding:3px 8px;margin:2px 4px 2px 0;">${t}</span>`).join('')
+                : '<span style="font-size:12px;opacity:0.5;">None</span>';
+            block += `<div style="background:#000;color:#fff;border:1px solid #fff;border-top:none;padding:12px 15px;margin-bottom:20px;"><div style="font-size:11px;opacity:0.6;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:8px;">Topic Tags</div><div>${tags}</div></div>`;
+            return block;
+        }
+
+        function downloadHtml() {
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            const filename = `edited-article-${timestamp}.html`;
+            const metaBlock = buildMetaBlockHtml();
+            const htmlDoc = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edited Article</title>
+    <style>
+        body {
+            font-family: Georgia, 'Times New Roman', serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            font-size: 16px;
+            line-height: 1.8;
+            color: #1e293b;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 24px 0 12px;
+            color: #1e293b;
+        }
+        p { margin-bottom: 14px; }
+        ul, ol { padding-left: 28px; margin-bottom: 14px; }
+        li { margin-bottom: 6px; }
+        blockquote {
+            border-left: 4px solid #3b82f6;
+            padding-left: 16px;
+            margin: 16px 0;
+            color: #64748b;
+            font-style: italic;
+        }
+        img { max-width: 100%; }
+    </style>
+</head>
+<body>
+${metaBlock}
+${editor.innerHTML}
+</body>
+</html>`;
+            downloadFile(htmlDoc, filename, 'text/html');
+            showToast(`Downloaded ${filename}`, 'success');
+        }
+
+        function downloadText() {
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            const filename = `edited-article-${timestamp}.txt`;
+            const id = eReviewId || 'N/A';
+            const tagList = (topics && topics.length > 0) ? topics.join(', ') : 'None';
+            const header = `eReview ID: ${id}\nTopic Tags: ${tagList}\n\n`;
+            const text = header + (editor.innerText || '');
+            downloadFile(text, filename, 'text/plain');
+            showToast(`Downloaded ${filename}`, 'success');
+        }
+
+        function downloadPdf() {
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            const filename = `edited-article-${timestamp}.pdf`;
+            const id = eReviewId || 'N/A';
+            const tagList = (topics && topics.length > 0) ? topics.join(', ') : 'None';
+
+            // Clone editor and apply inline highlights for AI markers
+            const clone = editor.cloneNode(true);
+            clone.querySelectorAll('[data-ai-rewrite], .rewritten-content').forEach(el => {
+                el.style.backgroundColor = '#fff59d';
+                el.style.padding = '0 2px';
+            });
+
+            const metaHtml = `
+                <div style="font-family:monospace;font-size:12px;border:1px solid #000;padding:10px 14px;margin-bottom:6px;">
+                    <strong>eReview ID:</strong> ${id}
+                </div>
+                <div style="font-family:sans-serif;font-size:12px;border:1px solid #000;border-top:none;padding:10px 14px;margin-bottom:24px;">
+                    <strong>Topic Tags:</strong> ${tagList}
+                </div>`;
+
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'font-family:Georgia,serif;font-size:14px;line-height:1.8;color:#000;padding:20px;';
+            wrapper.innerHTML = metaHtml + clone.innerHTML;
+
+            const opt = {
+                margin: [15, 15, 15, 15],
+                filename,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            showToast('Generating PDF…', 'success');
+            html2pdf().set(opt).from(wrapper).save().then(() => {
+                showToast(`Downloaded ${filename}`, 'success');
+            });
+        }
+
+        async function saveToFcat() {
+            const btn = document.getElementById('saveFcatBtn');
+            const neutralizedHtml = editor.innerHTML;
+            if (!neutralizedHtml.trim()) {
+                showToast('No content to save', 'error');
+                return;
+            }
+            const sourceUrl = sessionStorage.getItem('article_source_url') || '';
+            const originalHtml = sessionStorage.getItem('diff_original') || '';
+
+            btn.disabled = true;
+            btn.textContent = 'Saving…';
+            showToast('Saving to FCAT database…', 'success');
+
+            try {
+                const res = await fetch('http://127.0.0.1:5000/api/save-to-fcat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        neutralized_html: neutralizedHtml,
+                        original_html: originalHtml,
+                        source_url: sourceUrl || `manual-entry-${Date.now()}`,
+                        origin_url: sourceUrl || null,
+                        source: 'fidelity_cms',
+                        ereview_id: eReviewId || null,
+                        topics: topics || [],
+                    })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    showToast(`Saved to FCAT! ID: ${data.article_id}`, 'success');
+                    btn.textContent = 'Saved ✓';
+                    btn.style.borderColor = '#86efac';
+                    btn.style.color = '#86efac';
+                } else if (res.status === 409) {
+                    showToast('Article already exists in FCAT (duplicate URL)', 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Save to FCAT';
+                } else {
+                    showToast(`FCAT error: ${data.error || 'Unknown error'}`, 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Save to FCAT';
+                }
+            } catch (err) {
+                showToast('Could not reach API server. Is it running?', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Save to FCAT';
+            }
+        }
+
+        function downloadWord() {
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            const filename = `edited-article-${timestamp}.docx`;
+            const id = eReviewId || 'N/A';
+            const tagList = (topics && topics.length > 0) ? topics.join(', ') : 'None';
+            const metaBlock = `<p><strong>eReview ID:</strong> ${id}</p><p><strong>Topic Tags:</strong> ${tagList}</p><hr/>`;
+
+            // Clone the editor and apply inline highlight styles to AI marker spans
+            // so Word preserves the highlights (CSS classes don't carry over to .docx)
+            const clone = editor.cloneNode(true);
+            clone.querySelectorAll('[data-ai-rewrite], .rewritten-content').forEach(el => {
+                el.style.backgroundColor = '#fff59d';
+                el.style.borderRadius = '2px';
+                el.style.padding = '0 2px';
+            });
+
+            const htmlContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>${metaBlock}${clone.innerHTML}</body></html>`;
+            if (typeof htmlDocx === 'undefined') {
+                showToast('Word library not loaded. Check your internet connection.', 'error');
+                return;
+            }
+            const docxBlob = htmlDocx.asBlob(htmlContent);
+            saveAs(docxBlob, filename);
+            showToast(`Downloaded ${filename}`, 'success');
+        }
+
+        function downloadFile(content, filename, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            clearTimeout(toast._timer);
+            toast._timer = setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

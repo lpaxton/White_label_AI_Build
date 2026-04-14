@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Diff - Step 3</title>
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        /* header size override (smaller than shared default) */
+        .header { padding: 24px 30px; margin-bottom: 20px; }
+        .header h1 { font-size: 28px; margin-bottom: 6px; }
+        .header p  { font-size: 15px; }
+        /* Controls bar */
+        .controls-bar {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            border: none;
+            padding: 14px 20px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .controls-left {
+            display: block;
+            align-items: center;
+            gap: 10px;
+        }
+        .mode-toggle {
+            display: flex;
+            border-radius: var(--radius-sm);
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+            border: none;
+            overflow: hidden;
+        }
+        .mode-btn {
+            padding: 7px 16px;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            background: transparent;
+            transition: all 0.2s;
+        }
+        .mode-btn:last-child { border-right: none; }
+        .mode-btn.active { background: var(--accent); color: #fff; box-shadow: inset 2px 2px 4px rgba(0,0,0,0.15); }
+        .sync-scroll-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            opacity: 0.7;
+            cursor: pointer;
+        }
+        .sync-scroll-toggle input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--accent);
+        }
+        .controls-right { display: flex; gap: 10px; align-items: center; }
+        /* button size override for this page */
+        .button { padding: 9px 20px; font-size: 12px; }
+        .button.back {
+            position: fixed;
+            top: 60px;
+            right: 60px;
+            left: auto;
+            z-index: 100;
+            font-size: 11px;
+            border-radius: var(--radius-sm);
+        }
+        /* Diff panels */
+        .diff-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .diff-panel {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            border: none;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 14px 20px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: none;
+            background: var(--bg-dark);
+            color: var(--text);
+        }
+        .panel-body {
+            flex: 1;
+            overflow-y: auto;
+            height: calc(100vh - 260px);
+            min-height: 400px;
+            padding: 20px;
+            font-size: 15px;
+            line-height: 1.7;
+            background: #fff;
+            color: #000;
+            border-radius: 0 0 var(--radius) var(--radius);
+        }
+        /* Override shared [data-ai-rewrite] label: diff left panel = "ORIGINAL" */
+        .panel-body [data-ai-rewrite="true"]::before {
+            content: "ORIGINAL";
+            top: -16px;
+            padding: 1px 4px;
+        }
+        /* rewritten-content in panel-body gets slight background tint */
+        .panel-body .rewritten-content {
+            background: rgb(170 197 220 / 59%);
+            border-left: 3px solid rgb(3 165 248 / 58%);
+        }
+        .panel-body .rewritten-content::before {
+            top: -16px;
+            padding: 1px 4px;
+        }
+        /* Word-level diff */
+        .diff-removed {
+            background-color: rgba(0,0,0,0.08);
+            color: #000;
+            text-decoration: line-through;
+            opacity: 0.5;
+            padding: 1px 2px;
+        }
+        .diff-added {
+            background-color: rgba(0,0,0,0.08);
+            color: #000;
+            padding: 1px 2px;
+        }
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+        .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+        .empty-state h3    { font-size: 20px; margin-bottom: 8px; }
+        /* Legend */
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+        .legend-dot { width: 14px; height: 14px; border: 1px solid var(--shadow-dark); border-radius: 3px; }
+        /* Stats bar */
+        .stats-bar {
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            border: none;
+            padding: 12px 20px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+        .stat-item strong { color: var(--text); opacity: 1; }
+        @media (max-width: 900px) {
+            .diff-wrapper { grid-template-columns: 1fr; }
+        }
+        .article-id-display {
+            background: var(--surface);
+            color: var(--text);
+            border-radius: var(--radius-sm);
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+            border: none;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+        .article-id-display .label {
+            font-size: 12px;
+            opacity: 0.6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .article-id-display .value {
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            background: rgba(0,0,0,0.05);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="site-header">
+        <h1><span style="color: var(--accent-red);">a</span>RCH<span style="color: var(--accent-red);">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
+        <p>Content &amp; Learning Tools</p>
+    </div>
+    <button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>
+
+    <div class="container">
+        <div class="header">
+            <h1>Content Diff Tool</h1>
+            <p>Compare original article content with brand-neutralized output side by side</p>
+            <div class="breadcrumb">
+                <span class="breadcrumb-step done">Step 1: Article Extractor</span>
+                <span class="breadcrumb-arrow">&#8594;</span>
+                <span class="breadcrumb-step done">Step 2: Brand Neutralizer</span>
+                <span class="breadcrumb-arrow">&#8594;</span>
+                <span class="breadcrumb-step active">Step 3: Diff Tool</span>
+                <span class="breadcrumb-arrow">&#8594;</span>
+                <span class="breadcrumb-step">Step 4: Word Editor</span>
+            </div>
+        </div>
+
+        <div class="controls-bar">
+            <div class="controls-left">
+                <div class="mode-toggle">
+                    <button class="mode-btn active" id="renderedModeBtn" onclick="setMode('rendered')">Rendered View</button>
+                    <button class="mode-btn" id="diffModeBtn" onclick="setMode('diff')">Word Diff</button>
+                </div>
+                <label class="sync-scroll-toggle" style="display: none;">
+                    <input type="checkbox" id="syncScrollToggle" checked>
+                    Sync Scroll
+                </label>
+                <div style="padding-top: 10px;"><div class="stat-item">Left: <strong id="statLeftWords">864</strong> words</div>
+            <div class="stat-item">Right: <strong id="statRightWords">865</strong> words</div>
+            <div class="stat-item">Changed sections: <strong id="statChanges">1</strong></div></div>
+            </div>
+            <div class="legend" id="legend" style="display: none;">
+                <span class="legend-item">
+                    <span class="legend-dot" style="border-bottom:2px solid rgba(0,0,0,0.4);"></span>
+                    Original marked text
+                </span>
+                <span class="legend-item" >
+                    <span class="legend-dot" style="background:rgba(0,0,0,0.04);border-bottom:2px solid rgba(0,0,0,0.4);"></span>
+                    AI-rewritten text
+                </span>
+            </div>
+            <div class="controls-right">
+                <button class="button CTA" onclick="goToEditor()">Next Edit in Word Editor</button>
+            </div>
+        </div>
+
+        <div id="diffMetadataBar" class="content-meta" style="display:none;"></div>
+
+        <div class="diff-wrapper">
+            <div class="diff-panel">
+                <div class="panel-header original">
+                    
+                    <span>Original Article (Extractor Output)</span>
+                </div>
+                <div class="panel-body" id="leftPanel">
+                    <div class="empty-state">
+                        <div class="icon">&#128196;</div>
+                        <h3>No content loaded</h3>
+                        <p>Run the workflow from Step 1 &#8594; Step 2 &#8594; Step 3</p>
+                    </div>
+                </div>
+            </div>
+            <div class="diff-panel">
+                <div class="panel-header neutralized">
+                    
+                    <span>Brand Neutralized (AI Output)</span>
+                </div>
+                <div class="panel-body" id="rightPanel">
+                    <div class="empty-state">
+                        <div class="icon">&#10024;</div>
+                        <h3>No content loaded</h3>
+                        <p>Run the workflow from Step 1 &#8594; Step 2 &#8594; Step 3</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="controls-bar">
+            
+            <div class="legend" id="legend" style="display: none;">
+                    <span class="legend-item" style="display:none;"><span class="legend-dot" style="border-bottom:2px solid rgba(0,0,0,0.4);"></span>Original marked text</span>
+                    <span class="legend-item" style="display:none;"><span class="legend-dot" style="background:rgba(0,0,0,0.04);border-bottom:2px solid rgba(0,0,0,0.4);"></span>AI-rewritten text</span>
+                </div>
+            <div class="controls-right" style="margin: auto;">
+                <button class="button CTA" onclick="goToEditor()">Next Edit in Word Editor</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let originalHtml = '';
+        let neutralizedHtml = '';
+        let currentMode = 'rendered';
+        let isSyncing = false;
+        let eReviewId = null;
+        let topics = [];
+
+        // Load content from sessionStorage
+        window.addEventListener('DOMContentLoaded', () => {
+            originalHtml = sessionStorage.getItem('diff_original') || '';
+            neutralizedHtml = sessionStorage.getItem('diff_neutralized') || '';
+            eReviewId = sessionStorage.getItem('diff_ereview_id') || sessionStorage.getItem('article_ereview_id') || null;
+            if (eReviewId) sessionStorage.setItem('article_ereview_id', eReviewId);
+            try { topics = JSON.parse(sessionStorage.getItem('diff_topics') || '[]'); } catch(e) { topics = []; }
+            if (!topics.length) { try { topics = JSON.parse(sessionStorage.getItem('article_topics') || '[]'); } catch(e) { topics = []; } }
+            if (topics.length) sessionStorage.setItem('article_topics', JSON.stringify(topics));
+
+            if (originalHtml || neutralizedHtml) {
+                renderPanels();
+                showStats();
+            }
+
+            // Render metadata bar
+            renderMetadataBar();
+
+            setupSyncScroll();
+        });
+
+        function renderMetadataBar() {
+            const bar = document.getElementById('diffMetadataBar');
+            if (!bar) return;
+            console.log('[Diff] renderMetadataBar — eReviewId:', eReviewId, '| topics:', topics);
+            if (!eReviewId && (!topics || topics.length === 0)) { bar.style.display = 'none'; return; }
+            let html = '';
+            if (eReviewId) {
+                html += `<div class="article-id-display">
+                    <span class="label">eReview ID:</span>
+                    <span class="value">${eReviewId}</span>
+                </div>`;
+            }
+            if (topics && topics.length > 0) {
+                html += `<div style="margin-bottom:12px;">
+                    <span class="label" style="display:block; margin-bottom:6px; font-size:12px; opacity:0.6; text-transform:uppercase; letter-spacing:0.5px;">Topic Tags:</span>
+                    <div>${topics.map(t => `<span style="display:inline-block; border:1px solid rgba(255,255,255,0.4); color:#fff; font-size:11px; padding:3px 8px; margin:2px 4px 2px 0; letter-spacing:0.05em;">${t}</span>`).join('')}</div>
+                </div>`;
+            }
+            bar.innerHTML = html;
+            bar.style.display = 'block';
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('renderedModeBtn').classList.toggle('active', mode === 'rendered');
+            document.getElementById('diffModeBtn').classList.toggle('active', mode === 'diff');
+
+            // Update legend for diff mode
+            const legend = document.getElementById('legend');
+            if (mode === 'diff') {
+                legend.innerHTML = `
+                    <span class="legend-item" style="display:none;"><span class="legend-dot" style="background:rgba(0,0,0,0.08);opacity:0.5; "></span>Removed words</span>
+                    <span class="legend-item" style="display:none;"><span class="legend-dot" style="background:rgba(0,0,0,0.08);"></span>Added words</span>
+                `;
+            } else {
+                legend.innerHTML = `
+                    <span class="legend-item" style="display:none;"><span class="legend-dot" style="border-bottom:2px solid rgba(0,0,0,0.4);"></span>Original marked text</span>
+                    <span class="legend-item" style="display:none;"><span class="legend-dot" style="background:rgba(0,0,0,0.04);border-bottom:2px solid rgba(0,0,0,0.4);"></span>AI-rewritten text</span>
+                `;
+            }
+
+            renderPanels();
+        }
+
+        function renderPanels() {
+            if (currentMode === 'rendered') {
+                renderRenderedView();
+            } else {
+                renderDiffView();
+            }
+        }
+
+        function renderRenderedView() {
+            const leftPanel = document.getElementById('leftPanel');
+            const rightPanel = document.getElementById('rightPanel');
+
+            if (originalHtml) {
+                leftPanel.innerHTML = sanitizeForDisplay(originalHtml);
+            }
+            if (neutralizedHtml) {
+                rightPanel.innerHTML = sanitizeForDisplay(neutralizedHtml);
+            }
+        }
+
+        function sanitizeForDisplay(html) {
+            // Parse the HTML and extract the body content for display
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            // Remove script tags for safety
+            doc.querySelectorAll('script').forEach(el => el.remove());
+            // Remove external links/images that might cause issues
+            doc.querySelectorAll('img').forEach(el => {
+                el.setAttribute('loading', 'lazy');
+                el.style.maxWidth = '100%';
+            });
+
+            return doc.body ? doc.body.innerHTML : html;
+        }
+
+        function extractPlainText(html) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            doc.querySelectorAll('script, style').forEach(el => el.remove());
+            return doc.body ? doc.body.textContent : '';
+        }
+
+        function renderDiffView() {
+            const leftPanel = document.getElementById('leftPanel');
+            const rightPanel = document.getElementById('rightPanel');
+
+            if (!originalHtml && !neutralizedHtml) return;
+
+            const leftText = extractPlainText(originalHtml);
+            const rightText = extractPlainText(neutralizedHtml);
+
+            const diff = computeWordDiff(leftText, rightText);
+
+            let leftHtml = '';
+            let rightHtml = '';
+
+            diff.forEach(part => {
+                const escaped = escapeHtml(part.word + ' ');
+                if (part.type === 'equal') {
+                    leftHtml += escaped;
+                    rightHtml += escaped;
+                } else if (part.type === 'removed') {
+                    leftHtml += `<span class="diff-removed">${escaped}</span>`;
+                } else if (part.type === 'added') {
+                    rightHtml += `<span class="diff-added">${escaped}</span>`;
+                }
+            });
+
+            leftPanel.innerHTML = `<div style="line-height:1.8; white-space:pre-wrap; font-family:inherit;">${leftHtml}</div>`;
+            rightPanel.innerHTML = `<div style="line-height:1.8; white-space:pre-wrap; font-family:inherit;">${rightHtml}</div>`;
+        }
+
+        // Word-level diff using LCS
+        function computeWordDiff(oldText, newText) {
+            const oldWords = tokenize(oldText);
+            const newWords = tokenize(newText);
+
+            const m = oldWords.length;
+            const n = newWords.length;
+
+            // For very large texts, do a sentence-level diff first for performance
+            if (m * n > 800000) {
+                return sentenceLevelDiff(oldText, newText);
+            }
+
+            // LCS dp table
+            const dp = [];
+            for (let i = 0; i <= m; i++) {
+                dp[i] = new Uint16Array(n + 1);
+            }
+
+            for (let i = 1; i <= m; i++) {
+                for (let j = 1; j <= n; j++) {
+                    if (oldWords[i - 1] === newWords[j - 1]) {
+                        dp[i][j] = dp[i - 1][j - 1] + 1;
+                    } else {
+                        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                    }
+                }
+            }
+
+            // Backtrack
+            const result = [];
+            let i = m, j = n;
+            while (i > 0 || j > 0) {
+                if (i > 0 && j > 0 && oldWords[i - 1] === newWords[j - 1]) {
+                    result.unshift({ type: 'equal', word: oldWords[i - 1] });
+                    i--; j--;
+                } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+                    result.unshift({ type: 'added', word: newWords[j - 1] });
+                    j--;
+                } else {
+                    result.unshift({ type: 'removed', word: oldWords[i - 1] });
+                    i--;
+                }
+            }
+
+            return result;
+        }
+
+        function tokenize(text) {
+            return text.trim().split(/\s+/).filter(w => w.length > 0);
+        }
+
+        // Fallback for very large texts: sentence-level diff
+        function sentenceLevelDiff(oldText, newText) {
+            const oldSentences = oldText.match(/[^.!?\n]+[.!?\n]*/g) || [oldText];
+            const newSentences = newText.match(/[^.!?\n]+[.!?\n]*/g) || [newText];
+            const result = [];
+
+            const maxLen = Math.max(oldSentences.length, newSentences.length);
+            for (let i = 0; i < maxLen; i++) {
+                if (i < oldSentences.length && i < newSentences.length) {
+                    if (oldSentences[i].trim() === newSentences[i].trim()) {
+                        result.push({ type: 'equal', word: oldSentences[i] });
+                    } else {
+                        result.push({ type: 'removed', word: oldSentences[i] });
+                        result.push({ type: 'added', word: newSentences[i] });
+                    }
+                } else if (i < oldSentences.length) {
+                    result.push({ type: 'removed', word: oldSentences[i] });
+                } else {
+                    result.push({ type: 'added', word: newSentences[i] });
+                }
+            }
+            return result;
+        }
+
+        function showStats() {
+            const leftText = extractPlainText(originalHtml);
+            const rightText = extractPlainText(neutralizedHtml);
+            const leftWords = tokenize(leftText).length;
+            const rightWords = tokenize(rightText).length;
+
+            // Count changed spans
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(neutralizedHtml, 'text/html');
+            const changedCount = doc.querySelectorAll('.rewritten-content').length;
+
+            document.getElementById('statLeftWords').textContent = leftWords.toLocaleString();
+            document.getElementById('statRightWords').textContent = rightWords.toLocaleString();
+            document.getElementById('statChanges').textContent = changedCount;
+            document.getElementById('statsBar').style.display = 'flex';
+        }
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        // Sync scroll between panels
+        function setupSyncScroll() {
+            const leftPanel = document.getElementById('leftPanel');
+            const rightPanel = document.getElementById('rightPanel');
+            const toggle = document.getElementById('syncScrollToggle');
+
+            leftPanel.addEventListener('scroll', () => {
+                if (!toggle.checked || isSyncing) return;
+                isSyncing = true;
+                const ratio = leftPanel.scrollTop / (leftPanel.scrollHeight - leftPanel.clientHeight);
+                rightPanel.scrollTop = ratio * (rightPanel.scrollHeight - rightPanel.clientHeight);
+                isSyncing = false;
+            });
+
+            rightPanel.addEventListener('scroll', () => {
+                if (!toggle.checked || isSyncing) return;
+                isSyncing = true;
+                const ratio = rightPanel.scrollTop / (rightPanel.scrollHeight - rightPanel.clientHeight);
+                leftPanel.scrollTop = ratio * (leftPanel.scrollHeight - leftPanel.clientHeight);
+                isSyncing = false;
+            });
+        }
+
+        function goToEditor() {
+            if (!neutralizedHtml) {
+                alert('No neutralized content available. Please complete Step 2 first.');
+                return;
+            }
+            sessionStorage.setItem('editor_content', neutralizedHtml);
+            sessionStorage.setItem('editor_ereview_id', eReviewId || sessionStorage.getItem('article_ereview_id') || '');
+            sessionStorage.setItem('editor_topics', JSON.stringify(topics.length ? topics : JSON.parse(sessionStorage.getItem('article_topics') || '[]')));
+            window.location.href = 'article-editor.html';
+        }
+    </script>
+</body>
+</html>

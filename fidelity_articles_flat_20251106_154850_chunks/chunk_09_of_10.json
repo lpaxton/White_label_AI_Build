@@ -1,0 +1,1133 @@
+[
+  {
+    "title": "In-depth options training for beginners",
+    "url": "https://www.fidelity.com/learning-center/events/options-classroom",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options-for-beginners"
+  },
+  {
+    "title": "Level up your trading know-how",
+    "url": "https://www.fidelity.com/learning-center/events/coaching-sessions",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options-for-beginners"
+  },
+  {
+    "title": "Put your skills into practice",
+    "url": "https://digital.fidelity.com/ftgw/digital/options-research/option-strategy-builder",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options-for-beginners"
+  },
+  {
+    "title": "What is a cash-secured put?",
+    "url": "https://www.fidelity.com/learning-center/smart-money/cash-secured-put",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Selling options for income",
+    "url": "https://www.fidelity.com/viewpoints/active-investor/selling-options",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "In the Money®: Weekly trade ideas and options strategies",
+    "url": "https://www.fidelity.com/learning-center/investment-products/options/in-the-money",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Here is how to buy call options",
+    "url": "https://www.fidelity.com/learning-center/investment-products/options/buying-option-calls-video",
+    "description": "A call option lets you to control the same amount of stock with less money.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/tile/generic-video-tile-images/Default_image_48_1355791436_Large_600x200.png",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Beyond generating income: Using covered calls for other investment strategies",
+    "url": "https://www.fidelity.com/learning-center/investment-products/options/beyondgenerating-income-covered-calls",
+    "description": "The covered call strategy can help a variety of investors target their personal objectives.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/Beyond_generating_income_Using_covered_calls_for_other_investment_strategies_Banner_800x285.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Help protect your profits",
+    "url": "https://www.fidelity.com/viewpoints/active-investor/Protect-your-profits",
+    "description": "Learn how put options can help protect your gains.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/protect_profits_2018_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Put a collar on stocks",
+    "url": "https://www.fidelity.com/viewpoints/active-investor/put-a-collar",
+    "description": "This advanced options strategy is designed to limit losses and protect gains.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/collar_market_2018_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Understanding the bull call spread",
+    "url": "https://www.fidelity.com/viewpoints/active-investor/bull-call-spread",
+    "description": "An options strategy designed to take advantage of price gains while potentially limiting risk.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/bull_call_spread_2019_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Options strategy: the bull put spread",
+    "url": "https://www.fidelity.com/viewpoints/active-investor/bull-put-spread",
+    "description": "Take advantage of potential profits from a rising stock while putting a limit on potential losses.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/bull_put_spread_2019_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "What is a cash-secured put?",
+    "url": "https://www.fidelity.com/learning-center/smart-money/cash-secured-put",
+    "description": "An option to potentially buy stocks at lower prices.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/what-is-a-cash-secured-put_614776721_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Trading volatility with options",
+    "url": "https://www.fidelity.com/viewpoints/active-investor/strangle-options-strategy",
+    "description": "The long strangle is a strategy designed to profit when you expect a big move.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/options_volatility_2018_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Straddling the market for opportunities",
+    "url": "https://www.fidelity.com/viewpoints/active-investor/straddling-the-market",
+    "description": "Here's an options strategy designed to profit when you expect a big move.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/article/content_10/straddling_opportunities_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "The calendar spread options strategy",
+    "url": "https://www.fidelity.com/viewpoints/active-investor/calendar-spreads",
+    "description": "Here is one way to capture opportunities created by volatility.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/calendaroptions727x285.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "The iron condor",
+    "url": "https://www.fidelity.com/viewpoints/active-investor/iron-condor-strategy",
+    "description": "Discover this low volatility, advanced options strategy.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/iron_condor_2019_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Keys to the butterfly spread",
+    "url": "https://www.fidelity.com/viewpoints/active-investor/trade-like-butterfly",
+    "description": "A butterfly spread is a limited-risk, limited-reward, low volatility advanced option strategy.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/trade_butterfly_2018_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Bear put spread options strategy",
+    "url": "https://www.fidelity.com/viewpoints/active-investor/bear-put-spread",
+    "description": "The bear put spread can help to minimize risk and it involves less capital than simply buying a put.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/bear_put_spread_2018_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Bear call spread",
+    "url": "https://www.fidelity.com/learning-center/investment-products/options/options-strategy-guide/bear-call-spread",
+    "description": "A bear call spread consists of one short call with a lower strike price and one long call with a higher strike price.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/article/content_01/options-strategy-guide_913219882_thumbnail.png",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Long put - speculative",
+    "url": "https://www.fidelity.com/learning-center/investment-products/options/options-strategy-guide/longput-speculative",
+    "description": "In return for paying a premium, the buyer of a put gets the right (not the obligation) to sell the underlying instrument at the strike price at any time until the expiration date.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/article/content_01/options-strategy-guide_913219882_thumbnail.png",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "What is a long put?",
+    "url": "https://www.fidelity.com/learning-center/smart-money/long-put",
+    "description": "Bearish outlook? Consider this option strategy.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/long-puts_609154989_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Managing an options trade",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/trading/managing-options-trade",
+    "description": "Have a plan, monitor your position, and know how you can adjust it.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/article/content_07/Manage-Open-OptionsLarge.png",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "The importance of managing and monitoring option strategies around expiration",
+    "url": "https://www.fidelity.com/learning-center/investment-products/options/manage-monitor-options-expirations",
+    "description": "Learn how to manage and monitor option strategies around expiration.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/The_importance_of_managing_and_monitoring_option_strategies_Banner_800x285.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Options contract adjustments: What you should know",
+    "url": "https://www.fidelity.com/learning-center/investment-products/options/contract-adjustments",
+    "description": "Get familiar with certain events that could trigger an adjustment in your option contracts.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/Option_contract_adjustments_What_you_need_to_know_Banner_800x285.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "How dividends can increase options assignment risk",
+    "url": "https://www.fidelity.com/learning-center/investment-products/options/dividends-options-assignment-risk",
+    "description": "Learn how dividends can increase options assignment risk.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/how_dividends_can_increase_options_assignment_risk_Banner_800x285.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "The power of delta",
+    "url": "https://www.fidelity.com/viewpoints/active-investor/power-of-delta",
+    "description": "Learn how this greek can help you assess the probability of making a profit.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/power_of_delta_2019_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Get to know the Greeks",
+    "url": "https://www.fidelity.com/viewpoints/active-investor/know-the-Greeks",
+    "description": "Use these tools to help assess risk and enhance your options trading proficiency.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/article/content_10/know-the-greeks_large_2018.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Getting started with options analysis on Fidelity.com",
+    "url": "https://www.fidelity.com/learning-center/tools-demos/research-tools/options-analysis-tool-video",
+    "description": "The Options Research on Fidelity.com provides information to better understand the overall options market sentiment and tools to generate trading ideas with intuitive integration points to execute trades.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/tile/generic-video-tile-images/Default_image_44_1349462518_Large_600x200.png",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Generating strategy ideas",
+    "url": "https://www.fidelity.com/learning-center/tools-demos/research-tools/generating-strategy-ideas-video",
+    "description": "Watch this video to learn how to get started with the Strategy ideas tool. You’ll see how to use its filters to narrow your criteria and turn your results into actionable trading ideas.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/tile/generic-video-tile-images/placing-a-trade_856424692_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Finding trading ideas with Argus options reports",
+    "url": "https://www.fidelity.com/learning-center/tools-demos/research-tools/options-report",
+    "description": "Discover real-time, actionable trading ideas that meet your investment objective.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/tile/generic-video-tile-images/Default_image_14_1138999558_Large_600x200.png",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Leveraging expert options analysis",
+    "url": "https://www.fidelity.com/learning-center/tools-demos/research-tools/leveraging-expert-options-analysis-video",
+    "description": "The expert third party options analysis on Fidelity.com provides a daily report of unique option trading analysis. Watch this video and become familiar with the type of information that can be found, how the analyst approaches his research, and a few navigational tips.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/tile/generic-video-tile-images/Default_image_18_1192218172_Large_600x200.png",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Creating market scans",
+    "url": "https://www.fidelity.com/learning-center/tools-demos/research-tools/creating-market-scans-video",
+    "description": "Scan the market to develop strategy ideas.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/tile/generic-video-tile-images/Default_image_38_1327128846_Large_600x200.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Options and earnings",
+    "url": "https://www.fidelity.com/viewpoints/active-investor/options-and-earnings",
+    "description": "If you trade options, know the impact that earnings can have on your position.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/options_earnings_2019_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "What are derivatives?",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/what-are-derivatives",
+    "description": "Discover the ins and outs of derivatives.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/what-are-derivatives_184564137_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Using the probability calculator",
+    "url": "https://www.fidelity.com/learning-center/tools-demos/research-tools/probability-calculator-video",
+    "description": "Watch this video to learn how to use the calculator and view information that may be used to refine your stock or option strategy.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/tile/generic-video-tile-images/Default_image_40_1330557488_Large_600x200.png",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Using the profit and loss calculator",
+    "url": "https://www.fidelity.com/learning-center/tools-demos/research-tools/using-profit-and-loss-calculator-video",
+    "description": "In this video, you will learn how to use the Profit and Loss calculator to model options strategies to see profit and loss potential, change assumptions such as underlying price, volatility, or days to expiration, as well as how to trade directly from the calculator.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/tile/generic-video-tile-images/Default_image_3_563654665_Large_600x200.png",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Analyzing volatility with the IV index",
+    "url": "https://www.fidelity.com/learning-center/tools-demos/research-tools/analyzing-volatility-iv-index-video",
+    "description": "Fidelity.com provides a comprehensive page with implied and historical volatility data for multiple time periods. This video will focus on the many ways this information can be used to better gauge the price movements in the options market.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/tile/generic-video-tile-images/Default_image_24_1214882650_Large_600x200.png",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Using the key statistics for options research",
+    "url": "https://www.fidelity.com/learning-center/tools-demos/research-tools/using-key-statistics-options-research-video",
+    "description": "Learn how to use the information available on the Key Statistics page to better understand and gauge the option’s market sentiment.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/tile/generic-video-tile-images/Default_image_51_1405835581_Large_600x200.png",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Options Strategy Guide",
+    "url": "https://www.fidelity.com/learning-center/investment-products/options/options-strategy-guide/overview",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "On-demand webinars",
+    "url": "https://www.fidelity.com/learning-center/events/investing-webinars",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "",
+    "url": "https://www.fidelity.com/learning-center/investment-products/options/in-the-money",
+    "source_page": "https://www.fidelity.com/learning-center/investment-products/options/options"
+  },
+  {
+    "title": "Pros and cons of dollar-cost averaging",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/dollar-cost-averaging",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "Extended-hours trading",
+    "url": "https://www.fidelity.com/viewpoints/active-investor/extended-hours-trading",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "Economic forecasting and financial markets",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/trading/economic-forecasting-financial-markets",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "5-step trading guide",
+    "url": "https://www.fidelity.com/viewpoints/active-investor/trading-guide-managing-investment-risks-and-opportunities",
+    "description": "How to get started, generate ideas, plan and place a trade, and monitor it.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/article/content_10/guide_to_trading_2018_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "Tax tips for traders",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/tax-trading-tips",
+    "description": "There are different rates and pitfalls to avoid if you actively trade.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/tax_tips_traders_dec2021_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "Save money on trades",
+    "url": "https://www.fidelity.com/learning-center/tools-demos/trading-tools/price-improvement",
+    "description": "Fidelity works to get a better price for buy and sell orders and we show you when you save.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/price_improvement_helping_save_Large_600x200.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "Extended-hours trading",
+    "url": "https://www.fidelity.com/viewpoints/active-investor/extended-hours-trading",
+    "description": "Here are the pros and cons of trading when the market is officially closed.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/article/content_10/extended-hourstrading_large_2017.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "Economic forecasting and financial markets",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/trading/economic-forecasting-financial-markets",
+    "description": "Economic forecasting and financial markets are closely intertwined as the results of one can significantly impact the other.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/economic_forecasting_and_financial_markets_Large_600x200.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "Using futures as an indicator",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/trading/using-futures-as-indicator",
+    "description": "Most people who pay attention to the financial markets realize that what happens in Asia and Europe may affect the US market.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/tile/generic-video-tile-images/Default_image_50_1393970528_Large_600x200.png",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "Trading earnings",
+    "url": "https://www.fidelity.com/viewpoints/active-investor/trading-earnings",
+    "description": "Here's a guide for active investors who are trading earnings.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/traders_guide_2020_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "Pros and cons of dollar-cost averaging",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/dollar-cost-averaging",
+    "description": "This strategy can help manage your risk, but it may also reduce your potential returns.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/at_dollar_cost_avg_2021_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "How to short stocks",
+    "url": "https://www.fidelity.com/viewpoints/active-investor/selling-short",
+    "description": "Shorting makes money when an investment decreases, but there are risks.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/article/content_10/short_stocks_2019_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "Momentum trading strategies",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/trading/momentum-trading-strategies",
+    "description": "Momentum traders and investors look to take advantage of upward trends or downward trends in a stock or ETF’s price.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/momentum_trading_strategies_Large_600x200.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "What are derivatives?",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/what-are-derivatives",
+    "description": "Discover the ins and outs of derivatives.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/what-are-derivatives_184564137_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "Pairs trading",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/trading/pairs-trading",
+    "description": "This investment strategy will entail buying the undervalued security while short-selling the overvalued security, all while maintaining market neutrality.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/pairs_trading_Large_600x200.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "Range trading",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/trading/range-trading",
+    "description": "Learn how range trading works plus some of its risks.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/range_trading_Large_600x200.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "Swing trading setups",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/trading/swing-trading-setups",
+    "description": "Swing trading refers to the practice of trying to profit from market swings of a minimum of one day and as long as several weeks.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/swing_trading_setups_Large_600x200.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "Day trading",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/trading/day-trading",
+    "description": "Here are the key things you should know about day trading.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/day_trading_Large_600x200.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "Trading penny stocks",
+    "url": "https://www.fidelity.com/viewpoints/active-investor/trading-penny-stocks",
+    "description": "Are you considering penny stocks? Here is what you need to know.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/penny_stocks_2019_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "Stocks and bankruptcy",
+    "url": "https://www.fidelity.com/viewpoints/active-investor/stocks-and-bankruptcy",
+    "description": "What you can do if a company that you own stock in declares bankruptcy.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/article/content_10/bankruptcy_nov_2021_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "What to know about exit strategies",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/trading/exit-strategies",
+    "description": "Exit strategies are among the most important, yet overlooked, parts of investing.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/What_you_need_to_know_about_exit_strategies_Large_600x200.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "Managing positions: When to cut and run, when to take profits",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/trading/managing-positions",
+    "description": "Remaining disciplined, unemotional, and mitigating risk are some of the keys to investment success.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/managing_positions_when_to_cut_and_run_Large_600x200.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "Reviewing your account balances on Fidelity.com",
+    "url": "https://www.fidelity.com/learning-center/tools-demos/trading-tools/nextgen-balances-video",
+    "description": "Watch this video to become familiar with the type of balance information provided on Fidelity.com and how this information may be used to manage your brokerage account.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/tile/generic-video-tile-images/Default_image_25_1215491112_Large_600x200.png",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "On-demand webinars",
+    "url": "https://www.fidelity.com/learning-center/events/investing-webinars",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "Using Fidelity Trader+™",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/trading-platforms/using-trader-plus",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/more-trading-strategies"
+  },
+  {
+    "title": "Setting up Fidelity Trader+™Desktop",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/trading-platforms/how-to-use-trader-plus-desktop-video",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/trading-platforms/using-trader-plus"
+  },
+  {
+    "title": "Setting up Fidelity Trader+™Desktop",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/trading-platforms/how-to-use-trader-plus-desktop-video",
+    "description": "Get familiar with powerful trading tools.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/Learn-Slider-Feature-600x280-Setting-Up.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/trading-platforms/using-trader-plus"
+  },
+  {
+    "title": "Placing and updating orders on Fidelity Trader+™Desktop",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/trading-platforms/how-to-trade-trader-plus-desktop-video",
+    "description": "Efficiently place, update, and manage your orders.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/Placing-and-updating-orders-on-Fidelity-Trader-Desktop-600x280.png",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/trading-platforms/using-trader-plus"
+  },
+  {
+    "title": "Introducing Fidelity Trader+TM",
+    "url": "https://www.fidelity.com/learning-center/tools-demos/trading-tools/introducing-fidelity-trader",
+    "description": "Join the Fidelity Product team as they introduce the next generation of advanced trading and demo the new Fidelity Trader+TMplatform.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/tile/generic-video-tile-images/Default_image_24_1214882650_Large_600x200.png",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/trading-platforms/using-trader-plus"
+  },
+  {
+    "title": "How to get started on Fidelity Trader+™Web",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/trading-platforms/how-to-use-trader-plus-web-video",
+    "description": "Start customizing your layout, chart, and settings.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/FT-W-Thumbnails-get-started-Learn-horizontal-override-600x280.png",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/trading-platforms/using-trader-plus"
+  },
+  {
+    "title": "How to trade options on Fidelity Trader+™Web",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/trading-platforms/how-to-trade-options-trader-plus-web-video",
+    "description": "Explore key steps for trading options.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/FT-W-Thumbnails-trade-options-Learn-horizontal-override-600x280.png",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/trading-platforms/using-trader-plus"
+  },
+  {
+    "title": "How to customize trading charts on Fidelity Trader+™Web",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/trading-platforms/how-to-customize-trading-charts-trader-plus-web-video",
+    "description": "Learn how to customize and trade from your chart.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/FT-W-Thumbnails-customize-charts-Learn-horizontal-override-600x280.png",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/trading-platforms/using-trader-plus"
+  },
+  {
+    "title": "How to use Fidelity Trader+™Web",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/trading-platforms/how-to-use-trader-plus-web",
+    "description": "Learn how to monitor, chart, and trade markets on one screen.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/how-to-use-trading-dashboard-403024103-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/trading-platforms/using-trader-plus"
+  },
+  {
+    "title": "How to trade options in Fidelity Trader+™Web",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/trading-platforms/how-to-trade-options-trader-plus-web",
+    "description": "Scan, analyze, and trade options on one screen.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/how-to-trade-options-in-trading-dashboard-359502458-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/trading-platforms/using-trader-plus"
+  },
+  {
+    "title": "How to customize charts in Fidelity Trader+™Web",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/trading-platforms/how-to-customize-charts-trader-plus-web",
+    "description": "Learn how to customize and trade with real-time charts.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/how-to-customize-charts-in-trading-dashboard-660224777-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/trading-platforms/using-trader-plus"
+  },
+  {
+    "title": "Trade seamlessly across all your devices—from anywhere",
+    "url": "https://www.fidelity.com/trading/trading-platforms",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/trading-platforms/using-trader-plus"
+  },
+  {
+    "title": "Questions about Fidelity Trader+™Desktop?",
+    "url": "https://www.fidelity.com/trading/trader-desktop-user-guide/introduction",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/trading-platforms/using-trader-plus"
+  },
+  {
+    "title": "Level up your trading know-how",
+    "url": "https://www.fidelity.com/learning-center/events/coaching-sessions",
+    "source_page": "https://www.fidelity.com/learning-center/trading-investing/trading-platforms/using-trader-plus"
+  },
+  {
+    "title": "How to invest tax-efficiently",
+    "url": "https://www.fidelity.com/viewpoints/investing-ideas/tax-strategy",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Some TIPS for investing in inflation",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/tips-and-inflation",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "5 moves to consider 5 years from retirement",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/5-moves-before-retirement",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Strategies for uncertain times",
+    "url": "https://www.fidelity.com/viewpoints/market-and-economic-insights/market-volatility-overview",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Are we in an AI bubble?",
+    "url": "https://www.fidelity.com/learning-center/live-pi?ccsource=Viewpointslearntile",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "5 major stock market risks",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/5-stock-market-risks",
+    "description": "And why you might remain bullish despite the risks.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/5-market-risks-298428194-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "The Fed cuts again",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/the-fed-meeting",
+    "description": "A lack of data is complicating the Fed’s job.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/federal-reserve-update_71377512_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "3 investing themes to watch now",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/qsiru",
+    "description": "A Fidelity strategist reveals top signals to watch.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/denise-chisholm-market-commentary_295222905_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "6 ways to earn tax-advantaged income",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/tax-advantaged-income-ideas",
+    "description": "Explore creating an income stream with tax benefits.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/6-tax-saving-investments_330213397_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "How to earn steady income with bonds",
+    "url": "https://www.fidelity.com/viewpoints/investing-ideas/bond-ladder-strategy",
+    "description": "Learn how to capture today's rates with a bond ladder.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/how-to-earn-steady-income-with-bonds-large.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Markets have soared–what's next?",
+    "url": "https://www.fidelity.com/viewpoints/market-and-economic-insights/quarterly-market-update",
+    "description": "What you need to know amid all-time highs, inflation, and tariffs.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/quarterly-market-update-q322-large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "7 ways to earn more on your cash",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/managing-cash",
+    "description": "Deciding what’s right for you depends on your needs and time horizon.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/what-to-do-with-cash-1617933100-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Why the bullish market may have years to run",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/why-the-bull-market-may-have-years-to-run",
+    "description": "These factors could support a continued uptrend.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/why-the-bullish-market-may-have-years-to-run-308639618-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Critical battery resource stocks",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/battery-stocks",
+    "description": "Lithium has become an integral geopolitical resource. Here's how investors can play it.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/critical-battery-resource-stocks-443543342-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "How to choose an ETF",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/choose-ETF",
+    "description": "It's all about knowing what to look for.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/how-do-you-choose-the-right-ETF-Banner-800x285.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Government shutdowns and investors",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/government-shutdown",
+    "description": "History suggests little impact on markets and the economy.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/government-shutdown-505027264-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "5 investment ideas when rates fall",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/investment-opportunities",
+    "description": "Why falling interest rates could open new doors for investors.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/5-investing-ideas-when-rates-are-falling-132332174-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "The Fed cuts again",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/the-fed-meeting",
+    "description": "A lack of data is complicating the Fed’s job.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/federal-reserve-update_71377512_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "What savvy investors are doing now",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/smart-investors-now",
+    "description": "Amid uncertainty, these moves stand out.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/what-smart-investors-are-doing-right-now-2213584736-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Why rate cuts could be bullish",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/market-insights",
+    "description": "Find out which stocks could see the biggest lift.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/stock-market-insights_173892784_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Looking to reduce risk?",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/reduce-risk-with-bonds",
+    "description": "Medium-term bonds may offer a less-volatile way to reach your goals.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/why-intermediate-bonds-now_208031909_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "A move to consider before rate cuts?",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/reinvestment-risk",
+    "description": "Sitting in cash may not feel so good if interest rates fall.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/surprising-danger-of-too-much-cash_272107504_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "M&A update",
+    "url": "https://www.fidelity.com/viewpoints/active-investor/mergers-and-acquisitions",
+    "description": "Dealmaking has sped up over the past year.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/mergers_acquisitions_2018_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "6 habits of successful investors",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/six-habits-successful-investors",
+    "description": "Sticking to a plan, even in challenging times, can help you now and in the future.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/article/content_22-lc/sunset boardwalk 727x285.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Another reason to go global",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/international-stocks-outlook",
+    "description": "The weaker dollar is another reason US investors should consider diversifying with international stocks.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/international-outlook-large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Stagflation: Not the 1970s",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/stagflation-todays-market",
+    "description": "Why inflation and growth may not be as bad as some fear.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/stagflation-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "7 biggest mistakes investors are making now",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/smart-investor",
+    "description": "Turn today's investing missteps into tomorrow's smart moves.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/7-biggest-mistakes-investors-are-making-now_138307207_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "A golden age for convertible bonds",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/income-investing-outlook",
+    "description": "Bonds that can convert into stocks are coming into their own.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/2025-income-investing-outlook_284485815_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Is buy and hold investing outdated?",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/buy-and-hold-investing",
+    "description": "You may be surprised by the answer.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/is-buy-and-hold-investing-outdated_523332302_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Fintech stocks making a splash",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/fintech-stocks",
+    "description": "These companies are creating waves among traditional financial services.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/fintech-stocks-making-a-splash-456465645-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Your first managed account",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/digital-managed-accounts",
+    "description": "If you're new to investing or want help with a specific piece of the puzzle, consider a digital managed account.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/your-first-managed-account_224372219_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Is a recession coming?",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/are-we-in-recession",
+    "description": "8 charts that explain the economy now.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/economy-800x285.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Are you missing out on industrial stocks?",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/industrial-stocks",
+    "description": "Here's why the best-performing sector year to date has a lot of momentum. Plus, industrial stock ideas.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/are-you-missing-the-industrials-wave_370132501_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "A master class on investing amid tariffs",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/blue-chip-growth",
+    "description": "A top Fidelity fund manager shares how he's navigating uncertainty.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/a-masterclass-on-investing-amid-tariffs_2418022169_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Are ghost taxes haunting you?",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/social-security-tax-torpedo-and-hidden-taxes",
+    "description": "These 5 taxes could be lurking in the shadows. Here’s how to tackle them.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/ghost-taxes_168519344_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "How much to save for an emergency",
+    "url": "https://www.fidelity.com/viewpoints/personal-finance/save-for-an-emergency",
+    "description": "Learn how big your emergency savings should be and where to consider keeping it.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/save-for-an-emergency_120696369_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "8 ways to help improve your credit score",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/improving-credit",
+    "description": "Improving your credit score can make it easier—and cheaper—to borrow.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/credit_score_2021_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Thinking of moving to another state?",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/moving-to-another-state-taxes",
+    "description": "Before you pack, understand how taxes could affect your finances.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/4-taxes-to-consider-before-you-move-2182934357-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "2025 and 2026 tax brackets and federal income tax rates",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/tax-brackets",
+    "description": "Understanding how your income falls into different tax brackets can help with tax planning.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/2023-and-2024-tax-brackets_669348152_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "10 ways to slash your health care spending",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/how-to-cut-medical-expenses",
+    "description": "Cut medical expenses now and save for the future.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/10-tips-to-cut-health-care-spending_1432556811_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "5 year-end tax-saving moves",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/yearend-tax-planning",
+    "description": "Planning now may lower your tax bill and help bolster your savings.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/5-tax-moves-to-consider-before-year-end-1219055575-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Can you spot these 3 common scams?",
+    "url": "https://www.fidelity.com/viewpoints/personal-finance/preventing-identity-theft",
+    "description": "Scams are getting harder to spot. Learn how to protect yourself.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/preventing-identity-theft_207793822_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "4 ways to stop identity thieves",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/family-financial-safety/4-ID-theft-protection-tips",
+    "description": "A few simple precautions can make all the difference.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/4-id-theft-protection-tips-1146790822-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "4 ways employer benefits can help you save money",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/employer-benefits",
+    "description": "Annual enrollment: Get the thrill of responsibility with the fun of free stuff.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/4-ways-employer-benefits-can-help-you-save_398547247_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "4 moves to consider when rates drop",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/4-moves-when-interest-rates-drop",
+    "description": "Lower rates could mean lower monthly costs.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/4-moves-to-consider-when-interest-rates-drop-175582157-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "5 surprising benefits of 529 plans",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/529-saving-benefits",
+    "description": "529 accounts offer tax benefits and can be used for qualified education expenses.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/5-surprising-benefits-of-529-plans-568053783-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "6 key Medicare questions",
+    "url": "https://www.fidelity.com/viewpoints/retirement/understanding-medicare-options",
+    "description": "Get answers to questions about eligibility, choices, costs, and when and how to sign up.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/medicare_questions_2019_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "3 ways to save smarter, not harder",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/save-for-retirement-smarter",
+    "description": "Turn retirement saving struggles into a simple strategy.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/3-hardest-parts-of-saving-for-retirement-2523849061-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "The 10 best states for taxes",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/best-states-for-taxes",
+    "description": "Where you live can have a dramatic impact on your cost of living.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/best-states-for-taxes-183706819-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "8 myths about HSAs",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/hsa-myths",
+    "description": "Don't miss these tax-advantaged accounts.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/7-hsa-myths_679569504_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Reduce taxes with investment losses",
+    "url": "https://www.fidelity.com/viewpoints/personal-finance/tax-loss-harvesting",
+    "description": "The silver lining to investment losses is potentially off-setting taxes from gains.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/how-to-cut-investment-taxes_529007705_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "3 keys to picking a 529 plan",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/comparing-529-plans",
+    "description": "Focus on in-state tax benefits, fees, and investment performance.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/3-keys-to-picking-a-529-plan_368807875_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "6 money myths debunked",
+    "url": "https://www.fidelity.com/viewpoints/personal-finance/6-money-myths",
+    "description": "Don't be bamboozled. Believing these myths could hurt your bottom line.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/6-money-myths_2162540144_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "The bigger SALT deduction and you",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/SALT-deduction-increase",
+    "description": "The $40,000 cap could make itemizing worth it.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/salt-deduction_534833243_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Stay vigilant against text scams",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/text-scams",
+    "description": "Pause before clicking on a link in an unexpected text.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/cybersecurity-fraud-article_386713332_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "7 types of \"free money\" you don’t want to miss",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/free-money",
+    "description": "Make the most of these often-overlooked savings sources.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/7-types-of-free-money-you-dont-want-to-miss-2171338812-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "How to balance debt, saving, and investing",
+    "url": "https://www.fidelity.com/viewpoints/personal-finance/how-to-pay-off-debt",
+    "description": "This step-by-step guide can help you decide what to tackle first.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/balance-debt-saving-investing-large.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Money quiz: Are you financially fit?",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/financial-literacy",
+    "description": "Try Fidelity's financial literacy pop quiz.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/quiz-banner-800x285.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Are you underinsured?",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/underinsured",
+    "description": "It's often easy and inexpensive to shore up lackluster coverage.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/youre-probably-underinsured-heres-what-to-do_1238034998_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "How to pick a Medicare Part D plan",
+    "url": "https://www.fidelity.com/viewpoints/retirement/picking-a-medicare-part-d-plan",
+    "description": "See tips to help you select a prescription drug plan—and learn what to avoid.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/article/content_04/medicare_D_plan_2019_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Get ready for next year's Social Security increase",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/social-security-cola-increase",
+    "description": "The COLA may require more tax planning for 2026.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/SS-increase-2022-large.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Making sense of RMDs",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/retirement/making-sense-rmds",
+    "description": "Get the answers to frequently asked questions about RMDs.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/making_sense_of_rmds_Large_600x200.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Medicare: Time to change plans?",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/retirement/medicare-enrollment-plans",
+    "description": "See practical tips on when it makes sense to make a switch in Medicare coverage.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/article/content_03/medicare_changes_2020_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Why convert to a Roth IRA now?",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/retirement/answers-to-roth-conversion-questions",
+    "description": "Tax-free income in retirement and no RMDs are among the pluses.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/why-consider-a-roth-conversion-now_93125147_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Take Social Security at 62?",
+    "url": "https://www.fidelity.com/viewpoints/retirement/social-security-at-62",
+    "description": "Wait a few years or longer to boost your benefits—and your spouse's.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/ss_62_20201_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "3 crucial reasons to check your Social Security statement",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/social-security-statement",
+    "description": "Help maximize benefits and estimate retirement income.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/social-security-statement-banner-800x285.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Retirement playbook: What to consider in your 60s",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/retire-better-60s",
+    "description": "Turn plans into action and retire with confidence.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/retire-better-what-to-do-in-your-60s-227953207-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Retirement playbook: What to consider in your 50s",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/retire-better-50s",
+    "description": "Maximize peak earning years and protect your wealth.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/retire-better-what-to-do-in-your-50s-2150324553-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Retirement playbook: What to consider in your 40s",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/retire-better-40s",
+    "description": "Build habits now for the freedom you want later.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/retire-better-what-to-do-in-your-40s-257389319-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Understanding annuities",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/retirement/what-is-an-annuity",
+    "description": "Learn how these investments can help retirement savers and income seekers.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/understanding-annuities_187653343_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "When can I retire?",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/longevity-risk-retirement",
+    "description": "You can claim Social Security as early as 62 but there may good reasons to wait to retire.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/5-reasons-to-try-to-work-5-more-years_542368953_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "6 ways to help maximize Social Security",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/maximize-social-security",
+    "description": "Certain rules and strategies could help boost your benefits.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/6-ways-to-help-maximize-social-security-275851008-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "How annuities can help retirees feel more confident about spending",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/annuities-retirement-income-spending",
+    "description": "Dependable income can help reduce stress about spending and create a more fulfilling retirement.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/how-annuities-can-help-retirees-313934321-banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Social Security tips for working retirees",
+    "url": "https://www.fidelity.com/viewpoints/retirement/working-in-retirement-part2",
+    "description": "If you work in retirement, know the impact to your Social Security and taxes.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/working_retirement_rulebook_2019_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Is Social Security still taxable?",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/is-social-security-taxed",
+    "description": "Here's what you need to know about the new tax law.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/social-security-update-800x285.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Social Security do-over: Claim, suspend, and restart",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/retirement/readjust-your-claiming-strategy",
+    "description": "Find out about a little-known do-over strategy to reset your claim and increase your monthly Social Security paycheck by up to 24%.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/migration/suspend_social_security_2021_large.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Estate plan pitfalls to avoid",
+    "url": "https://www.fidelity.com/viewpoints/wealth-management/estate-planning-common-pitfalls",
+    "description": "Review your estate plan regularly to ensure it meets your needs.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/10-estate-plan-pitfalls-to-avoid_306347029_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "How income annuities work",
+    "url": "https://www.fidelity.com/learning-center/personal-finance/how-income-annuities-work",
+    "description": "An income annuity is one way to give yourself a guaranteed monthly income in retirement.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/how-income-annuities-work_423988560_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/viewpoints"
+  },
+  {
+    "title": "Check out our latest newsletter",
+    "url": "https://www.fidelity.com/learning-center/smart-money/latest-newsletter",
+    "source_page": "https://www.fidelity.com/learning-center/smart-money"
+  },
+  {
+    "title": "Creating your investing game plan",
+    "url": "https://fidelityevents.com/InvestingGamePlan?ccsource=Learn",
+    "source_page": "https://www.fidelity.com/learning-center/smart-money"
+  },
+  {
+    "title": "15 ways to get your money on track in fall",
+    "url": "https://www.fidelity.com/learning-center/smart-money/fall-financial-checklist",
+    "source_page": "https://www.fidelity.com/learning-center/smart-money"
+  },
+  {
+    "title": "What is an expense ratio?",
+    "url": "https://www.fidelity.com/learning-center/smart-money/expense-ratio",
+    "description": "Learn the importance of a fund's expense ratio.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/what-is-an-expense-ratio_386445927_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/smart-money"
+  },
+  {
+    "title": "Short-term investment options for your cash",
+    "url": "https://www.fidelity.com/learning-center/money-unscripted/short-term-investment-option",
+    "description": "Help your money work harder for you.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/MU_Carousel_Cash_Invest_250903.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/smart-money"
+  },
+  {
+    "title": "How to invest in index funds",
+    "url": "https://www.fidelity.com/learning-center/smart-money/how-to-invest-in-index-funds",
+    "description": "They're easy to buy, and a fund manager manages them for you.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/how-to-invest-in-index-funds_745711718_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/smart-money"
+  },
+  {
+    "title": "7 ways to boost your investing confidence",
+    "url": "https://www.fidelity.com/learning-center/smart-money/how-to-become-an-investor",
+    "description": "Feel more self-assured as a new investor.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/7-ways-to-boost-confidence-with-investing_550046350_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/smart-money"
+  },
+  {
+    "title": "What's a robo advisor, and how does it work?",
+    "url": "https://www.fidelity.com/learning-center/smart-money/what-is-a-robo-advisor",
+    "description": "Learn about automated, low-cost investing.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/what-is-a-robo-advisor_1420486889_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/smart-money"
+  },
+  {
+    "title": "What is a dividend?",
+    "url": "https://www.fidelity.com/learning-center/smart-money/what-is-a-dividend",
+    "description": "These payments are like a \"thanks\" to investors.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/what-is-a-dividend_340007740_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/smart-money"
+  },
+  {
+    "title": "Benefits of ETFs",
+    "url": "https://www.fidelity.com/learning-center/smart-money/benefits-of-etfs",
+    "description": "Learn how ETFs can make investing easier.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/Benefits-of-ETFs-banner-800x285.jpg",
+    "source_page": "https://www.fidelity.com/learning-center/smart-money"
+  },
+  {
+    "title": "Open enrollment guide for 2025",
+    "url": "https://www.fidelity.com/learning-center/smart-money/open-enrollment",
+    "description": "Learn key dates to make health insurance changes.",
+    "image": "https://www.fidelity.com/bin-public/600_Fidelity_Com_English/images/learning-center/heros/open-enrollment-guide-for-2023_313108394_banner.png",
+    "source_page": "https://www.fidelity.com/learning-center/smart-money"
+  }
+]

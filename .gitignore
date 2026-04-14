@@ -1,0 +1,31 @@
+# Python virtual environment
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Data files (optional - comment out if you want to include them)
+# *.json
+# *.csv
+
+# Temporary files
+*.tmp
+*.temp
+
+# Environment variables (contains secrets — never commit)
+.env

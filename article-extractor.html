@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Article Extractor</title>
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .input-section {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            border: none;
+            padding: 25px;
+        }
+        .results-section {
+            background: #fff;
+            border-radius: var(--radius);
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            border: none;
+            padding: 25px;
+            min-height: 600px;
+            color: var(--text);
+        }
+        /* Full-width stacked buttons in the input panel */
+        .button {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 12px 24px;
+            font-size: 14px;
+        }
+        .extraction-options {
+            background: var(--surface);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: var(--radius-sm);
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+            border: none;
+        }
+        .extraction-options h4 {
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            opacity: 0.5;
+        }
+        .options-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            margin-bottom: 0;
+        }
+        .options-toggle:hover h4 { opacity: 0.9; }
+        .options-toggle .toggle-icon {
+            font-size: 16px;
+            opacity: 0.5;
+            line-height: 1;
+            transition: transform 0.2s;
+        }
+        .options-toggle.open .toggle-icon { transform: rotate(45deg); }
+        .options-body {
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.25s ease, margin-top 0.25s ease;
+            margin-top: 0;
+        }
+        .options-body.open {
+            max-height: 400px;
+            margin-top: 10px;
+        }
+        /* content-meta uses neumorphic styling */
+        .content-meta {
+            background: var(--surface);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: var(--radius-sm);
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            border: none;
+        }
+        .content-meta h3 {
+            margin-bottom: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-size: 11px;
+            opacity: 0.5;
+        }
+        .content-meta .stat {
+            display: inline-block;
+            background: transparent;
+            border: none;
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            border-radius: 20px;
+            color: var(--text);
+            padding: 4px 8px;
+            font-size: 12px;
+            margin-right: 10px;
+            margin-bottom: 5px;
+        }
+        .article-id-display {
+            background: var(--surface);
+            color: var(--text);
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border-radius: var(--radius-sm);
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+        .article-id-display .label {
+            font-size: 12px;
+            opacity: 0.6;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+        .article-id-display .value {
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            background: rgba(0,0,0,0.05);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="site-header">
+        <h1><span style="color: var(--accent-red);">a</span>RCH<span style="color: var(--accent-red);">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
+        <p>Content &amp; Learning Tools</p>
+    </div>
+    <button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>
+
+    <div class="container">
+        <div class="header">
+            <h1>Article Extractor</h1>
+            <p>Extract and clean article content from any URL for easy reading and review</p>
+            <div class="breadcrumb">
+                <span class="breadcrumb-step active">Step 1: Article Extractor</span>
+                <span class="breadcrumb-arrow">→</span>
+                <span class="breadcrumb-step">Step 2: Brand Neutralizer</span>
+                <span class="breadcrumb-arrow">→</span>
+                <span class="breadcrumb-step">Step 3: Diff Tool</span>
+                <span class="breadcrumb-arrow">→</span>
+                <span class="breadcrumb-step">Step 4: Word Editor</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <div class="form-group">
+                    <label for="urlInput">Article URL:</label>
+                    <input type="url" id="urlInput" placeholder="https://example.com/article" required>
+                </div>
+
+                <div class="extraction-options">
+                    <div class="options-toggle" id="optionsToggle">
+                        <h4 style="margin-bottom:0;">Cleaning Options</h4>
+                        <span class="toggle-icon">+</span>
+                    </div>
+                    <div class="options-body" id="optionsBody">
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="removeLinks" checked>
+                            <label for="removeLinks">Remove all &lt;a&gt; tags (links)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="removeCallouts" checked>
+                            <label for="removeCallouts">Remove call-outs, author info, and sidebar elements</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="removeViewpoints" checked>
+                            <label for="removeViewpoints">Remove "Read Viewpoints:" paragraphs</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="removeImages">
+                            <label for="removeImages">Remove images</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="preserveFormatting" checked>
+                            <label for="preserveFormatting">Preserve text formatting</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="markFidelitySentences" checked>
+                            <label for="markFidelitySentences">Mark sentences with "Fidelity" for rewriting (AI marker)</label>
+                        </div>
+                        <div class="checkbox-item" style="display: none;">
+                            <input type="checkbox" id="removeParentheses" unchecked>
+                            <label for="removeParentheses">Remove content in parentheses (including the parentheses)</label>
+                        </div>
+                        <div class="checkbox-item" style="display: none;">
+                            <input type="checkbox" id="removeFootnotes" checked>
+                            <label for="removeFootnotes">Remove footnotes and footnote markers</label>
+                        </div>
+                    </div>
+                    </div><!-- /options-body -->
+                </div>
+
+                <button id="extractButton" class="button CTA">Extract Article Content</button>
+
+                <div id="globe-animation" style="margin: 28px 0px; display: flex; justify-content: center;">
+                    <svg width="300" height="300" viewBox="0 0 100 100" fill="none" stroke="#308bff" xmlns="http://www.w3.org/2000/svg" style="stroke-width: 0.285714px;">
+                        <ellipse cx="50" cy="50" rx="48" ry="48"></ellipse>
+                        <ellipse cx="50" cy="50" rx="48" ry="48"></ellipse>
+                        <ellipse cx="50" cy="50" rx="48" ry="48"></ellipse>
+                        <ellipse cx="50" cy="50" rx="48" ry="48"></ellipse>
+                        <ellipse cx="50" cy="50" rx="48" ry="48"></ellipse>
+                        <ellipse cx="50" cy="50" rx="48" ry="48"></ellipse>
+                    </svg>
+                </div>
+
+                <div style="display: block; position: sticky; top: 82%;">
+                <button id="sendToRewriterButton" class="button CTA" style="display: none;">Send to Brand Neutralizer</button>
+                <button id="saveButton" class="button secondary" style="display: none;">Save as Text File</button>
+                <button id="saveHtmlButton" class="button secondary" style="display: none;">Save as HTML (with formatting)</button>
+                </div>
+
+               
+            </div>
+
+            <div class="results-section">
+                <div id="welcomeMessage" class="welcome-message">
+                    <h3>Welcome to Article Extractor!</h3>
+                    <p>This tool helps you extract clean, readable content from web articles.</p>
+                    <div style="margin: 20px 0; text-align: left;">
+                        <h4>How it works:</h4>
+                        <ol style=" opacity: 0.6; margin: 10px 0; padding-left: 20px;">
+                            <li>Enter the URL of an article you want to extract</li>
+                            <li>Choose your cleaning options (remove links, call-outs, etc.)</li>
+                            <li>Click "Extract Article Content"</li>
+                            <li>Review the clean, formatted content</li>
+                            <li>Click the "Send to Brand Neutralizer" button or save as a text or HTML file if needed.</li>
+                        </ol>
+                    </div>
+                    <p style="opacity: 0.6; font-size: 14px;">
+                        <strong>Perfect for:</strong> Content analysis, research, cleaning up articles for better readability
+                    </p>
+                </div>
+
+                <div id="loadingMessage" class="loading">
+                    <div class="spinner"></div>
+                    <p>Extracting article content...</p>
+                    <p style="font-size: 12px; margin-top: 5px;">This may take a moment</p>
+                </div>
+
+                <div id="errorMessage" class="error-message"></div>
+                <div id="successMessage" class="success-message"></div>
+
+                <div id="contentContainer" style="display: none;">
+                    <div id="contentMeta" class="content-meta"></div>
+                    <div id="contentDisplay" class="content-display"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let extractedContent = null;
+        let isProcessing = false;
+
+        // Extract button handler
+        document.getElementById('extractButton').addEventListener('click', async () => {
+            if (isProcessing) return;
+
+            const url = document.getElementById('urlInput').value.trim();
+
+            if (!url) {
+                showError('Please enter a valid URL.');
+                return;
+            }
+
+            if (!isValidUrl(url)) {
+                showError('Please enter a valid URL starting with http:// or https://');
+                return;
+            }
+
+            isProcessing = true;
+            showLoading();
+            hideError();
+            hideSuccess();
+
+            try {
+                const options = {
+                    removeLinks: document.getElementById('removeLinks').checked,
+                    removeCallouts: document.getElementById('removeCallouts').checked,
+                    removeViewpoints: document.getElementById('removeViewpoints').checked,
+                    removeImages: document.getElementById('removeImages').checked,
+                    preserveFormatting: document.getElementById('preserveFormatting').checked,
+                    markFidelitySentences: document.getElementById('markFidelitySentences').checked,
+                    removeParentheses: false,
+                    removeFootnotes: document.getElementById('removeFootnotes').checked
+                };
+
+                const result = await extractArticleContent(url, options);
+
+                if (result.success) {
+                    extractedContent = result;
+                    displayContent(result);
+                    showSuccess('Article content extracted successfully!');
+                    document.getElementById('saveButton').style.display = 'block';
+                    document.getElementById('saveHtmlButton').style.display = 'block';
+                    document.getElementById('sendToRewriterButton').style.display = 'block';
+                } else {
+                    showError(`Failed to extract content: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Extraction error:', error);
+                showError(`Extraction failed: ${error.message}`);
+            } finally {
+                isProcessing = false;
+                hideLoading();
+            }
+        });
+
+        // Save button handler
+        document.getElementById('saveButton').addEventListener('click', () => {
+            if (!extractedContent) return;
+
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            const filename = `article-content-${timestamp}.txt`;
+
+            let topicsLine = '';
+            if (extractedContent.topics && extractedContent.topics.length > 0) {
+                topicsLine = `\nTopic Tags: ${extractedContent.topics.join(', ')}\n`;
+            }
+            const content = `Article Content Extracted from: ${extractedContent.url}\nExtracted at: ${new Date().toLocaleString()}${topicsLine}\n\n${extractedContent.cleanText}`;
+
+            downloadTextFile(content, filename);
+            showSuccess(`Content saved as ${filename}`);
+        });
+
+        // Save HTML button handler
+        document.getElementById('saveHtmlButton').addEventListener('click', () => {
+            if (!extractedContent) return;
+
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            const filename = `article-content-${timestamp}.html`;
+
+            // Get the current displayed content with all formatting and highlights
+            const contentDiv = document.getElementById('contentDisplay');
+            let styledContent = contentDiv.innerHTML;
+
+            // Fix relative image URLs by prepending Fidelity base URL
+            styledContent = styledContent.replace(/src="\/([^"]+)"/g, 'src="https://www.fidelity.com/$1"');
+            styledContent = styledContent.replace(/src='\/([^']+)'/g, "src='https://www.fidelity.com/$1'");
+
+            // Build eReview section if available
+            let eReviewSection = '';
+            if (extractedContent.eReviewId) {
+                eReviewSection = `
+                    <div style="background: #000; color: #fff; border: 1px solid #fff; padding: 12px 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; font-weight: 600;">
+                        <span style="font-size: 12px; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.15em;">eReview ID:</span>
+                        <span style="font-size: 16px; font-family: 'Courier New', monospace; background: rgba(255,255,255,0.1); padding: 4px 8px;">${extractedContent.eReviewId}</span>
+                    </div>
+                `;
+            }
+
+            // Build topics section if available
+            let topicsSection = '';
+            if (extractedContent.topics && extractedContent.topics.length > 0) {
+                const topicTags = extractedContent.topics.map(t =>
+                    `<span style="display:inline-block; border: 1px solid rgba(255,255,255,0.5); color:#fff; font-size:11px; padding:3px 8px; margin:2px 4px 2px 0; letter-spacing:0.05em;">${t}</span>`
+                ).join('');
+                topicsSection = `
+                    <div style="background: #000; color: #fff; border: 1px solid #fff; padding: 12px 15px; margin-bottom: 15px;">
+                        <div style="font-size: 11px; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 8px;">Topic Tags</div>
+                        <div>${topicTags}</div>
+                    </div>
+                `;
+            }
+
+            // Create a complete HTML document with embedded styles
+            const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${extractedContent.title || 'Article Content'}</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #fff;
+            background: #000;
+        }
+        .header {
+            background: #000;
+            border: 1px solid #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0 0 10px 0;
+            color: #fff;
+        }
+        .meta {
+            color: #fff;
+            opacity: 0.6;
+            font-size: 14px;
+        }
+        .meta a {
+            color: #fff;
+        }
+        .content {
+            background: #000;
+            border: 1px solid #fff;
+            padding: 30px;
+        }
+        .content h1, .content h2, .content h3 {
+            margin: 20px 0 10px 0;
+            color: #fff;
+        }
+        .content p {
+            margin-bottom: 15px;
+        }
+        .content ul, .content ol {
+            margin-bottom: 15px;
+            padding-left: 20px;
+        }
+        .content li {
+            margin-bottom: 5px;
+        }
+        .content em {
+            font-style: italic;
+            color: #fff;
+        }
+        .content strong {
+            font-weight: 600;
+            color: #fff;
+        }
+        .content blockquote {
+            border-left: 1px solid #fff;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #fff;
+            opacity: 0.6;
+        }
+        .content img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px 0;
+        }
+        .content figure {
+            margin: 20px 0;
+        }
+        .content figure img {
+            margin: 0 0 10px 0;
+        }
+        .fidelity-highlight {
+            background-color: rgba(0,0,0,0.06);
+            padding: 2px 4px;
+            font-weight: 600;
+            border: 1px solid rgba(0,0,0,0.25);
+        }
+        .stats {
+            background: #000;
+            border: 1px solid #fff;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .stats h3 {
+            margin-bottom: 10px;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-size: 11px;
+            opacity: 0.5;
+        }
+        .stat {
+            display: inline-block;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.4);
+            color: #fff;
+            padding: 4px 8px;
+            font-size: 12px;
+            margin-right: 10px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>${extractedContent.title || 'Article Content'}</h1>
+        <div class="meta">
+            <p><strong>Source:</strong> <a href="${extractedContent.url}" target="_blank">${extractedContent.url}</a></p>
+            <p><strong>Extracted with aRCHi:</strong> ${new Date(extractedContent.extractedAt).toLocaleString()}</p>
+        </div>
+    </div>
+
+    <div class="content">
+        ${eReviewSection}
+        ${topicsSection}
+        <div class="stats">
+            <h3>Content Statistics</h3>
+            <span class="stat">${extractedContent.wordCount} words</span>
+            <span class="stat">${extractedContent.charCount} characters</span>
+            <span class="stat">${extractedContent.readingTime} min read</span>
+        </div>
+
+        ${styledContent}
+    </div>
+</body>
+</html>`;
+
+            downloadHtmlFile(htmlContent, filename);
+            showSuccess(`Content saved as ${filename}`);
+        });
+
+        // Send to Rewriter button handler
+        document.getElementById('sendToRewriterButton').addEventListener('click', () => {
+            if (!extractedContent) return;
+
+            // Get the displayed HTML content with markers
+            const contentDiv = document.getElementById('contentDisplay');
+            const htmlContent = contentDiv.innerHTML;
+
+            // Store in sessionStorage for the rewriter page
+            sessionStorage.setItem('rewriter_content', htmlContent);
+            sessionStorage.setItem('rewriter_source_url', extractedContent.url);
+            sessionStorage.setItem('rewriter_title', extractedContent.title || 'Article Content');
+            sessionStorage.setItem('rewriter_ereview_id', extractedContent.eReviewId || '');
+            sessionStorage.setItem('rewriter_topics', JSON.stringify(extractedContent.topics || []));
+            // Persistent keys — survive across all steps and never get wiped
+            if (extractedContent.eReviewId) sessionStorage.setItem('article_ereview_id', extractedContent.eReviewId);
+            if (extractedContent.topics && extractedContent.topics.length) sessionStorage.setItem('article_topics', JSON.stringify(extractedContent.topics));
+            if (extractedContent.url) sessionStorage.setItem('article_source_url', extractedContent.url);
+
+            // Navigate to the rewriter page
+            window.location.href = 'article-rewriter.html';
+        });
+
+        async function extractArticleContent(url, options) {
+            // Try to use our server proxy first, then fallback to direct CORS proxy
+            const endpoints = [
+                '/api/extract-article', // Our local server
+                'https://api.allorigins.win/get?url=' + encodeURIComponent(url) // CORS proxy fallback
+            ];
+
+            for (const endpoint of endpoints) {
+                try {
+                    let response, data;
+
+                    if (endpoint.startsWith('/api/')) {
+                        // Use our local server — returns raw HTML which we parse client-side
+                        response = await fetch(endpoint, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ url, options })
+                        });
+
+                        if (response.ok) {
+                            data = await response.json();
+                            if (data.html) {
+                                // Server returned raw HTML — parse it the same way the CORS proxy does
+                                console.log('[extract] Using server-side fetched HTML for', url);
+                                return parseArticleContent(data.html, url, options);
+                            }
+                            // Legacy: server already parsed — return as-is
+                            return data;
+                        }
+                        continue; // Try next endpoint
+                    } else {
+                        // Use CORS proxy
+                        response = await fetch(endpoint);
+                        if (!response.ok) continue;
+
+                        const proxyData = await response.json();
+                        const html = proxyData.contents;
+
+                        // Parse and extract article content client-side
+                        return parseArticleContent(html, url, options);
+                    }
+                } catch (error) {
+                    console.error(`Error with endpoint ${endpoint}:`, error);
+                    continue;
+                }
+            }
+
+            throw new Error('Unable to fetch article content. Please check the URL and try again.');
+        }
+
+        function markSentencesWithFidelity(element) {
+            // Comprehensive list of Fidelity products to detect and mark
+            const fidelityProducts = [
+                // Brand name
+                'Fidelity',
+                // Managed Services
+                'Fidelity Go', 'Fidelity Managed FidFolios', 'Fidelity Basket Portfolios',
+                'Fidelity Basket Portfolios for Teens', 'Fidelity Wealth Services',
+                'Fidelity Strategic Disciplines', 'Fidelity Wealth Management',
+                'Fidelity Private Wealth Management', 'Personalized Portfolios',
+                'Portfolio Advisory Services',
+                // Retirement Accounts
+                'Fidelity IRA', 'Fidelity Roth IRA', 'Fidelity Traditional IRA',
+                'Fidelity Rollover IRA', 'Fidelity SEP IRA', 'Fidelity SIMPLE IRA',
+                'Fidelity Inherited IRA', 'Fidelity 401\\(k\\)', 'Fidelity 403\\(b\\)',
+                // Brokerage Accounts
+                'Fidelity Brokerage Account', 'Fidelity Cash Management Account',
+                'Fidelity Youth Account', 'Fidelity Custodial Account',
+                // Specialized Accounts
+                'Fidelity Health Savings Account', 'Fidelity HSA', 'Fidelity 529',
+                'Fidelity Trust Account',
+                // Funds
+                'Fidelity Funds', 'Fidelity Flex Funds', 'Fidelity Zero Funds',
+                'Fidelity Freedom Funds', 'Fidelity Freedom Retirement Fund',
+                'Fidelity Index Funds', 'Fidelity Sector Funds',
+                'Fidelity International Funds', 'Fidelity ETFs',
+                'Fidelity Money Market Funds',
+                // Crypto & Digital
+                'Fidelity Crypto', 'Fidelity Digital Assets',
+                'Fidelity Digital Asset Services', 'Fidelity Digital Dollar',
+                // Tools & Platforms
+                'Fidelity Account Selector', 'Fidelity Planning Tool',
+                'Fidelity Retirement Calculator', 'Fidelity Investment Calculator',
+                'Fidelity Retirement Planner', 'Fidelity Active Trader Pro',
+                'Fidelity Mobile App', 'Fidelity Planning & Guidance Center',
+                'Fidelity Screeners', 'Fidelity Watchlists',
+                // Other Services
+                'Fidelity Charitable', 'Fidelity Rewards Visa',
+                'Fidelity Stock Plan Services', 'Fidelity Life Insurance',
+                'Fidelity Annuities'
+            ];
+
+            // Build regex pattern - sort by length (longest first) to match specific products before generic "Fidelity"
+            const sortedProducts = fidelityProducts.sort((a, b) => b.length - a.length);
+            const productPattern = sortedProducts.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+            const productRegex = new RegExp(`\\b(?:${productPattern})\\b[®™℠]?`, 'i');
+
+            // Operate at block-element level to capture full sentences that span multiple text nodes
+            // (e.g. "invest in <strong>Fidelity Flex</strong> funds" splits into 3 text nodes —
+            //  reading innerText of the block crosses those boundaries and sees the whole sentence)
+            const sentenceRegex = /[^.!?]+[.!?]+|[^.!?]+$/g;
+            const blockSelector = 'p, li, td, th, h1, h2, h3, h4, h5, h6, blockquote, figcaption';
+            const blockElements = Array.from(element.querySelectorAll(blockSelector));
+
+            // Also consider the container itself if it is a block element
+            const blockTagNames = new Set(['P', 'LI', 'TD', 'TH', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'FIGCAPTION']);
+            if (blockTagNames.has(element.nodeName)) {
+                blockElements.unshift(element);
+            }
+
+            blockElements.forEach(blockEl => {
+                // innerText crosses text-node boundaries and gives the full visible text of the block
+                const fullText = blockEl.innerText || blockEl.textContent || '';
+
+                if (!productRegex.test(fullText)) {
+                    return; // No Fidelity mention in this block
+                }
+
+                // Sentence-split the full text to confirm at least one sentence-level match
+                const sentences = fullText.match(sentenceRegex) || [fullText];
+                if (!sentences.some(s => productRegex.test(s))) {
+                    return;
+                }
+
+                // Wrap the entire block's innerHTML in a span so the full sentence is always captured
+                const marker = document.createElement('span');
+                marker.setAttribute('data-ai-rewrite', 'true');
+                marker.innerHTML = blockEl.innerHTML;
+                blockEl.innerHTML = '';
+                blockEl.appendChild(marker);
+
+                // Fix any spacing around inline elements that may have been disturbed
+                normalizeInlineSpacing(blockEl);
+            });
+        }
+
+        function normalizeInlineSpacing(container) {
+            const inlineTags = ['STRONG', 'EM', 'B', 'I', 'A', 'SPAN'];
+            container.querySelectorAll(inlineTags.join(',')).forEach(el => {
+                // Skip spans that are themselves AI-rewrite markers
+                if (el.hasAttribute('data-ai-rewrite')) return;
+
+                // Ensure a space exists AFTER the inline element
+                const next = el.nextSibling;
+                if (next && next.nodeType === Node.TEXT_NODE) {
+                    if (next.textContent && !/^[\s.,;:!?)]/.test(next.textContent)) {
+                        next.textContent = ' ' + next.textContent;
+                    }
+                } else if (next && inlineTags.includes(next.nodeName)) {
+                    // Two inline elements back-to-back — insert a space node between them
+                    el.parentNode.insertBefore(document.createTextNode(' '), next);
+                }
+
+                // Ensure a space exists BEFORE the inline element
+                const prev = el.previousSibling;
+                if (prev && prev.nodeType === Node.TEXT_NODE) {
+                    if (prev.textContent && !/[\s(]$/.test(prev.textContent)) {
+                        prev.textContent = prev.textContent + ' ';
+                    }
+                }
+            });
+        }
+
+        function removeParentheticalContent(element) {
+            // Recursively process text nodes and remove content in parentheses
+            // NOTE: This ONLY modifies text content - all HTML tags like <em>, <ul>, <li>, etc. are preserved
+            const processNode = (node) => {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    const text = node.textContent;
+
+                    // Remove content in parentheses including the parentheses
+                    // Handle multiple occurrences and clean up spacing
+                    let cleanedText = text.replace(/\s*\([^)]*\)\s*/g, ' ');
+                    cleanedText = cleanedText.replace(/\s+/g, ' ').trim();
+
+                    // Only update if text changed
+                    if (cleanedText !== text) {
+                        node.textContent = cleanedText;
+                    }
+                } else if (node.nodeType === Node.ELEMENT_NODE &&
+                          node.nodeName !== 'SCRIPT' &&
+                          node.nodeName !== 'STYLE') {
+                    // Process child nodes - preserving all HTML structure
+                    const children = Array.from(node.childNodes);
+                    children.forEach(child => processNode(child));
+                }
+            };
+
+            processNode(element);
+        }
+
+        function removeFootnotes(element) {
+            // Remove footnote markers from text nodes
+            // NOTE: This ONLY modifies text content - all HTML tags like <em>, <ul>, <li>, etc. are preserved
+            const processNode = (node) => {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    const text = node.textContent;
+
+                    // Remove footnote markers: [1], [2], etc.
+                    let cleanedText = text.replace(/\[\d+\]/g, '');
+                    // Remove superscript footnote markers
+                    cleanedText = cleanedText.replace(/[\u00B9\u00B2\u00B3\u2070-\u209F]/g, '');
+
+                    if (cleanedText !== text) {
+                        node.textContent = cleanedText;
+                    }
+                } else if (node.nodeType === Node.ELEMENT_NODE &&
+                          node.nodeName !== 'SCRIPT' &&
+                          node.nodeName !== 'STYLE') {
+                    // Process child nodes - preserving all HTML structure
+                    const children = Array.from(node.childNodes);
+                    children.forEach(child => processNode(child));
+                }
+            };
+
+            processNode(element);
+
+            // Remove common footnote sections
+            const footnoteSelectors = [
+                'div.footnotes',
+                'div.footnote',
+                'section.footnotes',
+                'div[role="doc-endnotes"]',
+                'div[role="doc-footnote"]',
+                'aside.footnotes',
+                'div#footnotes',
+                'div.endnotes',
+                'footer.footnotes'
+            ];
+
+            footnoteSelectors.forEach(selector => {
+                const footnotes = element.querySelectorAll(selector);
+                footnotes.forEach(fn => fn.remove());
+            });
+
+            // Remove <sup> tags that often contain footnote references
+            const sups = element.querySelectorAll('sup');
+            sups.forEach(sup => {
+                // Check if it's a footnote reference (contains numbers or links)
+                const text = sup.textContent.trim();
+                if (sup.querySelector('a') || /^\d+$/.test(text)) {
+                    sup.remove();
+                }
+            });
+        }
+
+        // Match eReview IDs like 763565.14.0 or 1049825.3.0 (5–8 digits, then 1–3 dot-separated segments)
+        const EREVIEW_PATTERN = /\b(\d{5,8}\.\d{1,3}\.\d{1,3})\b/;
+
+        function parseArticleContent(html, url, options) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            // Try to find article content
+            let articleElement = doc.querySelector('article');
+
+            if (!articleElement) {
+                // Fallback selectors
+                const fallbacks = [
+                    'main article',
+                    '.article-content',
+                    '.post-content',
+                    '.entry-content',
+                    'main',
+                    '.content'
+                ];
+
+                for (const selector of fallbacks) {
+                    articleElement = doc.querySelector(selector);
+                    if (articleElement) break;
+                }
+            }
+
+            if (!articleElement) {
+                throw new Error('No article content found. The page may not have an &lt;article&gt; tag or standard content structure.');
+            }
+
+            // Clone the element to avoid modifying the original
+            const content = articleElement.cloneNode(true);
+
+            // Apply cleaning options
+            if (options.removeLinks) {
+                const links = content.querySelectorAll('a');
+                links.forEach(link => {
+                    const text = document.createTextNode(link.textContent);
+                    link.parentNode.replaceChild(text, link);
+                });
+            }
+
+            if (options.removeCallouts) {
+                const callouts = content.querySelectorAll('div.Call-Out-Part, .call-out-part, .callout, div.article-head-container--author');
+                callouts.forEach(callout => callout.remove());
+            }
+
+            if (options.removeViewpoints) {
+                // Remove paragraphs that start with "Read Viewpoints:" or "Read <em>Viewpoints:</em>"
+                const paragraphs = content.querySelectorAll('p');
+                paragraphs.forEach(p => {
+                    const text = p.textContent.trim();
+                    if (text.startsWith('Read Viewpoints:') ||
+                        text.startsWith('Read ') && text.includes('Viewpoints:')) {
+                        p.remove();
+                    }
+                });
+            }
+
+            if (options.removeImages) {
+                const images = content.querySelectorAll('img, figure, picture');
+                images.forEach(img => img.remove());
+            }
+
+            // Remove script and style tags
+            const scripts = content.querySelectorAll('script, style, noscript');
+            scripts.forEach(script => script.remove());
+
+            // Extract eReview ID from s-assigned-wrapper tag in the disclosures section
+            // This tag is located in <div role="complementary" aria-label="disclosures">
+            let eReviewId = null;
+
+            console.log('Searching for eReview ID...');
+
+            // ── Pass 0: search the raw HTML string directly (most reliable —
+            //    catches the number even when the element is in a shadow DOM
+            //    or an unusual location, and avoids DOMParser encoding quirks)
+            const rawHtmlMatch = html.match(EREVIEW_PATTERN);
+            if (rawHtmlMatch) {
+                eReviewId = rawHtmlMatch[1];
+                console.log('Found eReview ID in raw HTML string:', eReviewId);
+            }
+
+            if (!eReviewId) {
+
+            // Try multiple selector variations for the disclosures section
+            const disclosuresSelectors = [
+                'div[role="complementary"][aria-label="disclosures"]',
+                'div[aria-label="disclosures"]',
+                '[role="complementary"]'
+            ];
+
+            for (const selector of disclosuresSelectors) {
+                const disclosuresDiv = doc.querySelector(selector);
+                if (disclosuresDiv) {
+                    console.log('Found disclosures div with selector:', selector);
+                    const sAssignedWrapper = disclosuresDiv.querySelector('s-assigned-wrapper');
+                    if (sAssignedWrapper) {
+                        eReviewId = sAssignedWrapper.textContent.trim();
+                        console.log('Found eReview ID in disclosures:', eReviewId);
+                        break;
+                    }
+                }
+            }
+
+            // Fallback: check anywhere in the document
+            if (!eReviewId) {
+                console.log('Trying fallback: searching entire document');
+                const sAssignedWrapper = doc.querySelector('s-assigned-wrapper');
+                if (sAssignedWrapper) {
+                    eReviewId = sAssignedWrapper.textContent.trim();
+                    console.log('Found eReview ID in document:', eReviewId);
+                }
+            }
+
+            // Additional fallback: search all text content for eReview pattern
+            if (!eReviewId) {
+                console.log('Trying DOM text pattern match fallback');
+                const bodyText = doc.body.textContent;
+                const match = bodyText.match(EREVIEW_PATTERN);
+                if (match) {
+                    eReviewId = match[1];
+                    console.log('Found eReview ID via DOM text pattern match:', eReviewId);
+                }
+            }
+
+            } // end if (!eReviewId) from raw HTML check
+
+            if (!eReviewId) {
+                console.log('eReview ID not found in any source');
+            }
+
+            // Remove any s-assigned-wrapper from the article content display
+            const wrapperInContent = content.querySelector('s-assigned-wrapper');
+            if (wrapperInContent) {
+                wrapperInContent.remove();
+            }
+
+            // Mark sentences containing "Fidelity" if option is enabled
+            if (options.markFidelitySentences) {
+                markSentencesWithFidelity(content);
+            }
+
+            // Remove parenthetical content if option is enabled
+            if (options.removeParentheses) {
+                removeParentheticalContent(content);
+            }
+
+            // Remove footnotes if option is enabled
+            if (options.removeFootnotes) {
+                removeFootnotes(content);
+            }
+
+            // Get clean text and HTML
+            const cleanText = content.textContent.trim().replace(/\s+/g, ' ').replace(/\n\s*\n/g, '\n\n');
+            const cleanHTML = options.preserveFormatting ? content.innerHTML : cleanText;
+
+            // Calculate stats
+            const wordCount = cleanText.split(/\s+/).filter(word => word.length > 0).length;
+            const charCount = cleanText.length;
+            const readingTime = Math.ceil(wordCount / 200); // ~200 words per minute
+
+            return {
+                success: true,
+                url: url,
+                title: doc.title || 'Unknown Title',
+                cleanText: cleanText,
+                cleanHTML: cleanHTML,
+                wordCount: wordCount,
+                charCount: charCount,
+                readingTime: readingTime,
+                eReviewId: eReviewId,
+                extractedAt: new Date().toISOString()
+            };
+        }
+
+        function displayContent(result) {
+            const container = document.getElementById('contentContainer');
+            const metaDiv = document.getElementById('contentMeta');
+            const contentDiv = document.getElementById('contentDisplay');
+
+            // Build eReview ID display if available
+            let eReviewHTML = '';
+            if (result.eReviewId) {
+                eReviewHTML = `
+                    <div class="article-id-display">
+                        <span class="label">eReview ID:</span>
+                        <span class="value">${result.eReviewId}</span>
+                    </div>
+                `;
+            }
+
+            // Build topics display if available
+            let topicsHTML = '';
+            if (result.topics && result.topics.length > 0) {
+                const tagSpans = result.topics.map(t =>
+                    `<span style="display:inline-block; border:1px solid rgba(0,0,0,0.5); color:#000; font-size:11px; padding:3px 8px; margin:2px 4px 2px 0; letter-spacing:0.05em;">${t}</span>`
+                ).join('');
+                topicsHTML = `
+                    <div style="margin-bottom: 12px;">
+                        <span class="label" style="display:block; margin-bottom:6px;">Topic Tags:</span>
+                        <div>${tagSpans}</div>
+                    </div>
+                `;
+            }
+
+            // Update meta information
+            metaDiv.innerHTML = `
+                ${eReviewHTML}
+                ${topicsHTML}
+                <h3>Content Statistics</h3>
+                <span class="stat">${result.wordCount} words</span>
+                <span class="stat">${result.charCount} characters</span>
+                <span class="stat">${result.readingTime} min read</span>
+                <span class="stat">Source: <a href="${result.url}" target="_blank" style="color: #000;">View Original</a></span>
+            `;
+
+            // Display content
+            if (document.getElementById('preserveFormatting').checked) {
+                contentDiv.innerHTML = result.cleanHTML;
+
+                // Fix image URLs in the displayed content
+                const images = contentDiv.querySelectorAll('img');
+                images.forEach(img => {
+                    let src = img.getAttribute('src');
+                    if (src) {
+                        // Remove file:/// protocol if present
+                        src = src.replace(/^file:\/\/\/[A-Z]:/, '');
+                        // If it starts with /, prepend the Fidelity base URL
+                        if (src.startsWith('/')) {
+                            img.setAttribute('src', 'https://www.fidelity.com' + src);
+                        }
+                    }
+                });
+            } else {
+                contentDiv.innerHTML = `<pre style="white-space: pre-wrap; font-family: inherit;">${result.cleanText}</pre>`;
+            }
+
+            // Highlight all mentions of "Fidelity"
+            highlightFidelity(contentDiv);
+
+            // Show container
+            hideAll();
+            container.style.display = 'block';
+        }
+
+        function highlightFidelity(element) {
+            // Comprehensive list of Fidelity products to highlight
+            const fidelityProducts = [
+                'Fidelity Go', 'Fidelity Managed FidFolios', 'Fidelity Basket Portfolios',
+                'Fidelity Basket Portfolios for Teens', 'Fidelity Wealth Services',
+                'Fidelity Strategic Disciplines', 'Fidelity Wealth Management',
+                'Fidelity Private Wealth Management', 'Fidelity IRA', 'Fidelity Roth IRA',
+                'Fidelity Traditional IRA', 'Fidelity Rollover IRA', 'Fidelity SEP IRA',
+                'Fidelity SIMPLE IRA', 'Fidelity Inherited IRA', 'Fidelity 401\\(k\\)',
+                'Fidelity 403\\(b\\)', 'Fidelity Brokerage Account', 'Fidelity Cash Management Account',
+                'Fidelity Youth Account', 'Fidelity Custodial Account',
+                'Fidelity Health Savings Account', 'Fidelity HSA', 'Fidelity 529',
+                'Fidelity Trust Account', 'Fidelity Funds', 'Fidelity Flex Funds',
+                'Fidelity Zero Funds', 'Fidelity Freedom Funds', 'Fidelity Freedom Retirement Fund',
+                'Fidelity Index Funds', 'Fidelity Sector Funds', 'Fidelity International Funds',
+                'Fidelity ETFs', 'Fidelity Money Market Funds', 'Fidelity Crypto',
+                'Fidelity Digital Assets', 'Fidelity Digital Asset Services',
+                'Fidelity Digital Dollar', 'Fidelity Account Selector', 'Fidelity Planning Tool',
+                'Fidelity Retirement Calculator', 'Fidelity Investment Calculator',
+                'Fidelity Retirement Planner', 'Fidelity Active Trader Pro',
+                'Fidelity Mobile App', 'Fidelity Planning & Guidance Center',
+                'Fidelity Screeners', 'Fidelity Watchlists', 'Fidelity Charitable',
+                'Fidelity Rewards Visa', 'Fidelity Stock Plan Services',
+                'Fidelity Life Insurance', 'Fidelity Annuities', 'Fidelity'
+            ];
+
+            // Build regex pattern - sort by length (longest first)
+            const sortedProducts = fidelityProducts.sort((a, b) => b.length - a.length);
+            const productPattern = sortedProducts.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+            const regex = new RegExp(`\\b(${productPattern})\\b[®™℠]?`, 'gi');
+
+            // Function to recursively search and highlight text nodes
+            const highlightInNode = (node) => {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    const text = node.textContent;
+
+                    if (regex.test(text)) {
+                        // Reset regex lastIndex
+                        regex.lastIndex = 0;
+
+                        // Create a temporary div to hold the highlighted content
+                        const span = document.createElement('span');
+                        span.innerHTML = text.replace(regex, '<span class="fidelity-highlight">$1</span>');
+
+                        // Replace the text node with the highlighted content
+                        node.parentNode.replaceChild(span, node);
+
+                        // Unwrap the temporary span to keep only its children
+                        while (span.firstChild) {
+                            span.parentNode.insertBefore(span.firstChild, span);
+                        }
+                        span.remove();
+                    }
+                } else if (node.nodeType === Node.ELEMENT_NODE && node.nodeName !== 'SCRIPT' && node.nodeName !== 'STYLE') {
+                    // Recursively process child nodes
+                    // Create a copy of childNodes array because we'll be modifying the DOM
+                    const children = Array.from(node.childNodes);
+                    children.forEach(child => highlightInNode(child));
+                }
+            };
+
+            highlightInNode(element);
+        }
+
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return string.startsWith('http://') || string.startsWith('https://');
+            } catch (_) {
+                return false;
+            }
+        }
+
+        function downloadTextFile(content, filename) {
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadHtmlFile(content, filename) {
+            const blob = new Blob([content], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function showLoading() {
+            hideAll();
+            document.getElementById('loadingMessage').style.display = 'block';
+            globeStartLoop();
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingMessage').style.display = 'none';
+            globeStopLoop();
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => hideSuccess(), 3000);
+        }
+
+        function hideSuccess() {
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        function hideAll() {
+            document.getElementById('welcomeMessage').style.display = 'none';
+            document.getElementById('contentContainer').style.display = 'none';
+            hideLoading();
+        }
+
+        // ── Cleaning options toggle ──
+        document.getElementById('optionsToggle').addEventListener('click', () => {
+            const toggle = document.getElementById('optionsToggle');
+            const body   = document.getElementById('optionsBody');
+            const isOpen = body.classList.toggle('open');
+            toggle.classList.toggle('open', isOpen);
+        });
+
+        // ── Globe animation engine ──
+        const GLOBE_TARGET_RX = [48, 39.4, 30.8, 22.2, 13.6, 5];
+        const GLOBE_DURATION  = 2500; // ms per pulse
+        let _globeAnimId      = null;
+        let _globeLooping     = false;
+        let _globeStopNext    = false;
+
+        function _globeRunCycle(cycleStart, ts) {
+            const ellipses = document.querySelectorAll('#globe-animation svg ellipse');
+            const t    = Math.min((ts - cycleStart) / GLOBE_DURATION, 1);
+            const ease = Math.sin(t * Math.PI); // smooth 0 → 1 → 0
+            GLOBE_TARGET_RX.forEach((target, i) => {
+                ellipses[i].setAttribute('rx', (48 - (48 - target) * ease).toFixed(3));
+            });
+            if (t < 1) {
+                _globeAnimId = requestAnimationFrame(t2 => _globeRunCycle(cycleStart, t2));
+            } else {
+                ellipses.forEach(el => el.setAttribute('rx', '48'));
+                _globeAnimId = null;
+                if (_globeLooping && !_globeStopNext) {
+                    _globeAnimId = requestAnimationFrame(t2 => _globeRunCycle(t2, t2));
+                }
+            }
+        }
+
+        function globePulseOnce() {
+            _globeLooping  = false;
+            _globeStopNext = false;
+            if (_globeAnimId) cancelAnimationFrame(_globeAnimId);
+            _globeAnimId = requestAnimationFrame(ts => _globeRunCycle(ts, ts));
+        }
+
+        function globeStartLoop() {
+            _globeLooping  = true;
+            _globeStopNext = false;
+            if (_globeAnimId) cancelAnimationFrame(_globeAnimId);
+            _globeAnimId = requestAnimationFrame(ts => _globeRunCycle(ts, ts));
+        }
+
+        function globeStopLoop() {
+            _globeStopNext = true;
+            _globeLooping  = false;
+        }
+
+        // One pulse on page load
+        globePulseOnce();
+
+        // Update button state
+        setInterval(() => {
+            const button = document.getElementById('extractButton');
+            button.disabled = isProcessing;
+            if (isProcessing) {
+                button.textContent = 'Extracting...';
+            } else {
+                button.textContent = 'Extract Article Content';
+            }
+        }, 100);
+    </script>
+</body>
+</html>

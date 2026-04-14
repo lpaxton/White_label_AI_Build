@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>aRCHi — Knowledge Base Chat</title>
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        /* ── Page canvas — panels float ON this ─────────────── */
+        body {
+            background: var(--bg);
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .chat-page-body {
+            padding: 20px 24px 24px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* ── Two-column card layout ──────────────────────────── */
+        .chat-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* ── Each panel is a raised neu-card ────────────────── */
+        .chat-panel,
+        .sources-panel {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 8px 8px 18px var(--shadow-dark),
+                        -8px -8px 18px var(--shadow-light);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ── Toolbar (raised header bar inside the card) ─────── */
+        .chat-toolbar {
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            background: var(--surface);
+            border-bottom: 1px solid rgba(176, 191, 207, 0.35);
+        }
+
+        .chat-toolbar-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .chat-toolbar h2 {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text);
+        }
+
+        .chat-toolbar p {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.04em;
+        }
+
+        /* ── DB-Grounded pill badge ──────────────────────────── */
+        .db-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: none;
+            color: var(--accent-red);
+            background: var(--bg);
+            border-radius: 30px;
+            box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                        inset -3px -3px 6px var(--shadow-light);
+            padding: 6px 14px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .db-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: var(--accent-red);
+            border-radius: 50%;
+            flex-shrink: 0;
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.3; }
+        }
+
+        /* ── Messages — inset "tray" ─────────────────────────── */
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            background: var(--bg);
+            margin: 16px 16px 12px;
+            border-radius: var(--radius-sm);
+            box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                        inset -5px -5px 10px var(--shadow-light);
+        }
+
+        .messages-container::-webkit-scrollbar { width: 4px; }
+        .messages-container::-webkit-scrollbar-track { background: transparent; }
+        .messages-container::-webkit-scrollbar-thumb {
+            background: var(--shadow-dark);
+            border-radius: 4px;
+        }
+
+        /* ── Message bubbles ────────────────────────────────── */
+        .message {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            max-width: 85%;
+        }
+
+        .message.user    { align-self: flex-end;  align-items: flex-end; }
+        .message.assistant { align-self: flex-start; align-items: flex-start; }
+
+        .message-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            padding: 0 4px;
+        }
+
+        .message-bubble {
+            padding: 13px 17px;
+            font-size: 14px;
+            line-height: 1.65;
+            border-radius: var(--radius-sm);
+        }
+
+        /* User bubbles — subtly inset (like a pressed state) */
+        .message.user .message-bubble {
+            background: var(--bg);
+            box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                        inset -3px -3px 6px var(--shadow-light);
+            color: var(--text);
+        }
+
+        /* Assistant bubbles — raised (like a lifted card) */
+        .message.assistant .message-bubble {
+            background: var(--surface);
+            box-shadow: 5px 5px 10px var(--shadow-dark),
+                        -5px -5px 10px var(--shadow-light);
+            color: var(--text);
+        }
+
+        .message.assistant .message-bubble p { margin-bottom: 10px; }
+        .message.assistant .message-bubble p:last-child { margin-bottom: 0; }
+
+        /* ── Typing / thinking dots ─────────────────────────── */
+        .thinking {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            padding: 14px 18px;
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            box-shadow: 5px 5px 10px var(--shadow-dark),
+                        -5px -5px 10px var(--shadow-light);
+        }
+        .thinking span {
+            width: 7px;
+            height: 7px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: pulse 1.2s ease-in-out infinite;
+        }
+        .thinking span:nth-child(2) { animation-delay: 0.2s; }
+        .thinking span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes pulse {
+            0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+            40%            { opacity: 1;   transform: scale(1.1); }
+        }
+
+        /* ── Empty / welcome state ──────────────────────────── */
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .empty-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: var(--bg);
+            box-shadow: 6px 6px 12px var(--shadow-dark),
+                        -6px -6px 12px var(--shadow-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 6px;
+        }
+
+        .empty-icon svg {
+            width: 32px;
+            height: 32px;
+            stroke: var(--text-muted);
+            fill: none;
+            stroke-width: 1.5;
+        }
+
+        .empty-state h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: 0.05em;
+        }
+
+        .empty-state p {
+            font-size: 13px;
+            line-height: 1.6;
+            max-width: 300px;
+            color: var(--text-muted);
+        }
+
+        /* ── Input row ───────────────────────────────────────── */
+        .input-bar {
+            padding: 12px 16px 16px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            flex-shrink: 0;
+        }
+
+        .input-bar textarea {
+            flex: 1;
+            background: var(--bg);
+            border: none;
+            color: var(--text);
+            border-radius: var(--radius-sm);
+            box-shadow: inset 4px 4px 8px var(--shadow-dark),
+                        inset -4px -4px 8px var(--shadow-light);
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 12px 16px;
+            resize: none;
+            outline: none;
+            min-height: 48px;
+            max-height: 130px;
+            overflow-y: auto;
+            transition: box-shadow 0.2s;
+        }
+
+        .input-bar textarea::placeholder { color: var(--text-muted); opacity: 0.55; }
+
+        .input-bar textarea:focus {
+            box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                        inset -5px -5px 10px var(--shadow-light);
+        }
+
+        /* Circular clear button */
+        .clear-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: none;
+            color: var(--text-muted);
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 5px 5px 10px var(--shadow-dark),
+                        -5px -5px 10px var(--shadow-light);
+            transition: box-shadow 0.15s;
+            flex-shrink: 0;
+        }
+        .clear-btn:hover {
+            box-shadow: inset 4px 4px 8px var(--shadow-dark),
+                        inset -4px -4px 8px var(--shadow-light);
+        }
+        .clear-btn:active {
+            box-shadow: inset 4px 4px 8px var(--shadow-dark),
+                        inset -4px -4px 8px var(--shadow-light);
+        }
+
+        /* Pill send button */
+        .send-btn {
+            height: 48px;
+            padding: 0 24px;
+            border-radius: 30px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+            box-shadow: 5px 5px 10px var(--shadow-dark),
+                        -5px -5px 10px var(--shadow-light);
+            transition: box-shadow 0.15s, transform 0.1s;
+        }
+        .send-btn:hover:not(:disabled) {
+            box-shadow: inset 3px 3px 8px rgba(0,0,0,0.2),
+                        inset -3px -3px 8px rgba(255,255,255,0.15);
+        }
+        .send-btn:active:not(:disabled) {
+            transform: scale(0.97);
+        }
+        .send-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        /* ── Sources panel internals ────────────────────────── */
+        .sources-header {
+            padding: 18px 20px 14px;
+            flex-shrink: 0;
+            border-bottom: 1px solid rgba(176, 191, 207, 0.35);
+        }
+
+        .sources-header h3 {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .sources-header p {
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .sources-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sources-list::-webkit-scrollbar { width: 4px; }
+        .sources-list::-webkit-scrollbar-track { background: transparent; }
+        .sources-list::-webkit-scrollbar-thumb { background: var(--shadow-dark); border-radius: 4px; }
+
+        /* Source cards — raised */
+        .source-card {
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            box-shadow: 4px 4px 8px var(--shadow-dark),
+                        -4px -4px 8px var(--shadow-light);
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: box-shadow 0.15s;
+            cursor: default;
+        }
+
+        .source-card:hover {
+            box-shadow: 6px 6px 12px var(--shadow-dark),
+                        -6px -6px 12px var(--shadow-light);
+        }
+
+        .source-card-num {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--accent-red);
+        }
+
+        .source-card-url {
+            font-size: 11px;
+            color: var(--text-muted);
+            word-break: break-all;
+            line-height: 1.4;
+        }
+
+        .source-topics { display: flex; flex-wrap: wrap; gap: 4px; }
+
+        .source-topic-tag {
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 3px 9px;
+            box-shadow: 2px 2px 4px var(--shadow-dark),
+                        -2px -2px 4px var(--shadow-light);
+        }
+
+        .sources-empty {
+            padding: 24px 12px;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            text-align: center;
+            opacity: 0.7;
+        }
+
+        /* ── Regulatory notice ──────────────────────────────── */
+        .reg-notice {
+            margin: 0 14px 14px;
+            padding: 12px 14px;
+            border-radius: var(--radius-sm);
+            background: var(--bg);
+            box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                        inset -3px -3px 6px var(--shadow-light);
+            font-size: 10px;
+            line-height: 1.6;
+            color: var(--text-muted);
+            letter-spacing: 0.03em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="site-header">
+        <h1><span style="color: var(--accent-red);">a</span>RCH<span style="color: var(--accent-red);">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
+        <p>Content &amp; Learning Tools</p>
+    </div>
+<button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>
+    <div class="chat-page-body">
+    <div class="chat-layout">
+
+        <!-- ── Left: Chat ───────────────────────────────────── -->
+        <div class="chat-panel">
+            <div class="chat-toolbar">
+                <div class="chat-toolbar-left">
+                    <h2>Knowledge Base Chat</h2>
+                    <p>Answers drawn exclusively from the article database</p>
+                </div>
+                <div class="db-badge">DB-Grounded Only</div>
+            </div>
+
+            <div class="messages-container" id="messagesContainer">
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                    </div>
+                    <h3>Ask a question</h3>
+                    <p>Type a question below. The assistant will answer using only the articles stored in the FCAT database — no outside knowledge.</p>
+                </div>
+            </div>
+
+            <div class="input-bar">
+                <textarea
+                    id="userInput"
+                    placeholder="Ask a question about the articles in the database…"
+                    rows="1"
+                ></textarea>
+                <button class="clear-btn" id="clearBtn" title="Clear conversation">↺</button>
+                <button class="send-btn" id="sendBtn">Send</button>
+            </div>
+        </div>
+
+        <!-- ── Right: Sources ───────────────────────────────── -->
+        <div class="sources-panel">
+            <div class="sources-header">
+                <h3>Source Articles</h3>
+                <p>Articles retrieved from the database for the last response. Every answer is grounded in these documents only.</p>
+            </div>
+            <div class="sources-list" id="sourcesList">
+                <p class="sources-empty">Source articles will appear here after your first message.</p>
+            </div>
+            <div class="reg-notice">
+                This assistant is restricted to the FCAT knowledge base. It cannot access the internet, its training data, or any content outside the database. This is a regulatory requirement.
+            </div>
+        </div>
+
+    </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:5000';
+
+        const messagesContainer = document.getElementById('messagesContainer');
+        const emptyState        = document.getElementById('emptyState');
+        const userInput         = document.getElementById('userInput');
+        const sendBtn           = document.getElementById('sendBtn');
+        const clearBtn          = document.getElementById('clearBtn');
+        const sourcesList       = document.getElementById('sourcesList');
+
+        // Conversation history (user/assistant turns, stored without the injected context)
+        let history = [];
+
+        /* ── Auto-resize textarea ────────────────────────────── */
+        userInput.addEventListener('input', () => {
+            userInput.style.height = 'auto';
+            userInput.style.height = Math.min(userInput.scrollHeight, 140) + 'px';
+        });
+
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        sendBtn.addEventListener('click', sendMessage);
+        clearBtn.addEventListener('click', clearConversation);
+
+        /* ── Append a message bubble ─────────────────────────── */
+        function appendMessage(role, text) {
+            emptyState.style.display = 'none';
+
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('message', role);
+
+            const label = document.createElement('div');
+            label.classList.add('message-label');
+            label.textContent = role === 'user' ? 'You' : 'Assistant';
+
+            const bubble = document.createElement('div');
+            bubble.classList.add('message-bubble');
+
+            if (role === 'assistant') {
+                // Render line breaks and simple paragraph splits
+                bubble.innerHTML = text
+                    .split(/\n\n+/)
+                    .map(para => `<p>${para.replace(/\n/g, '<br>')}</p>`)
+                    .join('');
+            } else {
+                bubble.textContent = text;
+            }
+
+            wrapper.appendChild(label);
+            wrapper.appendChild(bubble);
+            messagesContainer.appendChild(wrapper);
+            scrollToBottom();
+            return wrapper;
+        }
+
+        /* ── Thinking indicator ──────────────────────────────── */
+        function showThinking() {
+            emptyState.style.display = 'none';
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('message', 'assistant');
+            wrapper.id = 'thinkingIndicator';
+
+            const label = document.createElement('div');
+            label.classList.add('message-label');
+            label.textContent = 'Assistant';
+
+            const dots = document.createElement('div');
+            dots.classList.add('thinking');
+            dots.innerHTML = '<span></span><span></span><span></span>';
+
+            wrapper.appendChild(label);
+            wrapper.appendChild(dots);
+            messagesContainer.appendChild(wrapper);
+            scrollToBottom();
+        }
+
+        function removeThinking() {
+            const el = document.getElementById('thinkingIndicator');
+            if (el) el.remove();
+        }
+
+        /* ── Render sources panel ────────────────────────────── */
+        function renderSources(sources) {
+            if (!sources || sources.length === 0) {
+                sourcesList.innerHTML = '<p class="sources-empty">No source articles were matched for this response.</p>';
+                return;
+            }
+            sourcesList.innerHTML = '';
+            sources.forEach((src, i) => {
+                const card = document.createElement('div');
+                card.classList.add('source-card');
+
+                const num = document.createElement('div');
+                num.classList.add('source-card-num');
+                num.textContent = `Article ${i + 1}`;
+
+                const url = document.createElement('div');
+                url.classList.add('source-card-url');
+                const displayUrl = src.source_url || src.id || 'Manual entry';
+                url.textContent = displayUrl.startsWith('manual-entry') ? '(Manually uploaded article)' : displayUrl;
+
+                card.appendChild(num);
+                card.appendChild(url);
+
+                if (src.topics && src.topics.length > 0) {
+                    const topicsEl = document.createElement('div');
+                    topicsEl.classList.add('source-topics');
+                    src.topics.slice(0, 5).forEach(t => {
+                        const tag = document.createElement('span');
+                        tag.classList.add('source-topic-tag');
+                        tag.textContent = t;
+                        topicsEl.appendChild(tag);
+                    });
+                    card.appendChild(topicsEl);
+                }
+
+                sourcesList.appendChild(card);
+            });
+        }
+
+        /* ── Main send function ──────────────────────────────── */
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // Disable input while waiting
+            sendBtn.disabled = true;
+            userInput.disabled = true;
+            userInput.value = '';
+            userInput.style.height = 'auto';
+
+            appendMessage('user', text);
+            showThinking();
+
+            try {
+                const res = await fetch(`${API_BASE}/api/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: text,
+                        history: history,
+                    }),
+                });
+
+                const data = await res.json();
+                removeThinking();
+
+                if (!res.ok || !data.success) {
+                    const errMsg = data.error || 'An error occurred. Is the API server running?';
+                    appendMessage('assistant', `⚠ ${errMsg}`);
+                    renderSources([]);
+                } else {
+                    appendMessage('assistant', data.answer);
+                    renderSources(data.sources);
+
+                    // Store condensed history (without the injected context)
+                    history.push({ role: 'user', content: text });
+                    history.push({ role: 'assistant', content: data.answer });
+
+                    // Keep history bounded
+                    if (history.length > 12) history = history.slice(-12);
+                }
+            } catch (err) {
+                removeThinking();
+                appendMessage('assistant', '⚠ Could not reach the API server. Please make sure api_server.py is running on port 5000.');
+                renderSources([]);
+            } finally {
+                sendBtn.disabled = false;
+                userInput.disabled = false;
+                userInput.focus();
+            }
+        }
+
+        /* ── Clear conversation ──────────────────────────────── */
+        function clearConversation() {
+            history = [];
+            // Remove all message bubbles
+            Array.from(messagesContainer.children).forEach(el => {
+                if (el.id !== 'emptyState') el.remove();
+            });
+            emptyState.style.display = '';
+            sourcesList.innerHTML = '<p class="sources-empty">Source articles will appear here after your first message.</p>';
+        }
+
+        function scrollToBottom() {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        userInput.focus();
+    </script>
+</body>
+
+</html>

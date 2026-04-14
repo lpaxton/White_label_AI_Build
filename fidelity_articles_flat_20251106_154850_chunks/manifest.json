@@ -1,0 +1,29 @@
+{
+  "original_file": "fidelity_articles_flat_20251106_154850.json",
+  "total_articles": 1684,
+  "num_chunks": 10,
+  "chunk_files": [
+    "chunk_01_of_10.json",
+    "chunk_02_of_10.json",
+    "chunk_03_of_10.json",
+    "chunk_04_of_10.json",
+    "chunk_05_of_10.json",
+    "chunk_06_of_10.json",
+    "chunk_07_of_10.json",
+    "chunk_08_of_10.json",
+    "chunk_09_of_10.json",
+    "chunk_10_of_10.json"
+  ],
+  "chunk_paths": [
+    "fidelity_articles_flat_20251106_154850_chunks\\chunk_01_of_10.json",
+    "fidelity_articles_flat_20251106_154850_chunks\\chunk_02_of_10.json",
+    "fidelity_articles_flat_20251106_154850_chunks\\chunk_03_of_10.json",
+    "fidelity_articles_flat_20251106_154850_chunks\\chunk_04_of_10.json",
+    "fidelity_articles_flat_20251106_154850_chunks\\chunk_05_of_10.json",
+    "fidelity_articles_flat_20251106_154850_chunks\\chunk_06_of_10.json",
+    "fidelity_articles_flat_20251106_154850_chunks\\chunk_07_of_10.json",
+    "fidelity_articles_flat_20251106_154850_chunks\\chunk_08_of_10.json",
+    "fidelity_articles_flat_20251106_154850_chunks\\chunk_09_of_10.json",
+    "fidelity_articles_flat_20251106_154850_chunks\\chunk_10_of_10.json"
+  ]
+}
