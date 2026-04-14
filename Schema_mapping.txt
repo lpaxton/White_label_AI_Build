@@ -1,0 +1,9 @@
+<arr name="metadata.topic"> = topics tags
+<arr name="metadata.product"> = product tags
+<str name="metadata.contenttype"> = type of content
+<str name="metadata.ereviewnum"> = eReview number
+<str name="content.estimatetime_t"> = time to read
+<str name="content.headline_t"> = title of content
+<str name="content.primaryimage_t"> = card image or header image
+<str name="content.keytakeaways_t"> = card Teaser text
+<arr name="content.sectiontext_ts"> = full article text

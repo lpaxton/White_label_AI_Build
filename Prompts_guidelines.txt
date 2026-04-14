@@ -1,0 +1,53 @@
+Structure for Persona Prompts
+
+Design persona prompts that avoid bias and maintain accuracy. Use the following best practices for designing persona prompts to ensure they are fair and accurate, structured for those playing role of prompt engineer and content curators:
+
+CORE principles:
+
+1. Define Persona Attributes with nuance – avoid stereotypes
+
+a. Avoid: Active-Duty Military: Prefers simple, non-emotional content. Assumes all military are one way.
+
+b. Prefer: Active-Duty Military – prioritizes ROI-driven case studies, values data visualizations, may prefer concise summaries. Note: Avoid assuming gender, age or cultural preferences unless explicitly provided by client. TIP: Use “may”, “often”, “tends to”. Add disclaimers like: “This persona is based on general trends – individual preferences may vary.”
+
+2. Use Inclusive Language & Avoid Implicit Assumptions
+
+a. Avoid: Tech-Savy Millennial – uses slang, hates formality
+
+b. Prefer: Digital-First-Professional – comfortable with technical terminology, prefers interactive or visual formats. Language should adapt to context, not generational assumptions. Tip: Run prompts through bias detection tools
+
+3. Anchor Persona Traits to Observable or Self-Reported Data
+
+a. Avoid: Senir Executive: “Doesn’t have time for details”
+
+b. Prefer: C-Suite Decision Maker – typically reviews summaries first, seeks strategic implications, and may delegate deep dives. Based on user survey data from 2025. Tip: Use user research, surveys, or behavioral analytics to ground persona traits – not assumptions.
+
+4. Exclude Biased Filters
+
+a. Add guardrails to prompts. “Do not prioritize content based on author’s gender. Ficus on relevance to the persona’s stated goals and the prompts logic.” Tip: Include “anti-bias directives” in every prompt template: “Ensure diversity in perspectives”.
+
+5. Use Multi-Dimensional Scoring – Not just “Relevance”
+
+a. Combine:
+
+i. Accuracy (does it answer the prompt?)
+
+ii. Fairness (does it represent diverse viewpoints?)
+
+iii. Inclusivity (does it avoid exclusionary language or assumptions?)
+
+iv. Tip: Weight scoring dimensions e.g., Fairness=20% of total score
+
+6. Document & Audit Prompt Logic
+
+a. Who created it?
+
+b. What data was used?
+
+c. What bias check was applied?
+
+d. When was it last reviewed?
+
+Success Measures
+
+1. % of prompts with explicit anti-bias directives – target is 100%
