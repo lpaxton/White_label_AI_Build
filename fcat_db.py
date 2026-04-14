@@ -195,7 +195,13 @@ def search_articles(query: str, limit: int = 5) -> list:
         pass  # No text index configured — fall through to regex
 
     # ── Fallback: multi-keyword regex scan ───────────────────────────────────
-    words = [w for w in re.split(r"\W+", query) if len(w) > 3]
+    STOP_WORDS = {'what', 'is', 'are', 'the', 'how', 'does', 'do', 'can', 'a',
+                  'an', 'in', 'of', 'to', 'for', 'and', 'or', 'it', 'its',
+                  'this', 'that', 'with', 'from', 'be', 'was', 'has', 'have'}
+    words = [w for w in re.split(r"\W+", query) if len(w) >= 2 and w.lower() not in STOP_WORDS]
+    if not words:
+        # fallback to all words if stop-word filtering removed everything
+        words = [w for w in re.split(r"\W+", query) if len(w) >= 2]
     if not words:
         words = query.split()
     pattern = "|".join(re.escape(w) for w in words[:10])
