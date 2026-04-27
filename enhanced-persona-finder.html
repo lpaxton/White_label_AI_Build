@@ -776,7 +776,7 @@
         async function testOllamaConnection(ollamaUrl) {
             // Try local server proxy first, then direct connection
             const endpoints = [
-                '/api/tags',  // Local server proxy
+                'http://localhost:5000/api/tags',  // Local server proxy
                 `${ollamaUrl}/api/tags`  // Direct connection
             ];
 

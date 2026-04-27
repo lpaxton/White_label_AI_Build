@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>aRCHi — Article Search</title>
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        body {
+            background: var(--bg);
+            min-height: 100vh;
+        }
+
+        .page-body {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 28px 32px 48px;
+        }
+
+        /* ── Search card ─────────────────────────────────────── */
+        .search-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 8px 8px 18px var(--shadow-dark),
+                        -8px -8px 18px var(--shadow-light);
+            padding: 32px 36px 28px;
+            margin-bottom: 24px;
+        }
+
+        .search-card-header {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .search-icon-circle {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: var(--bg);
+            box-shadow: 5px 5px 10px var(--shadow-dark),
+                        -5px -5px 10px var(--shadow-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .search-card-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .search-card-header p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        /* ── Mode tabs ───────────────────────────────────────── */
+        .mode-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+
+        .mode-tab {
+            padding: 9px 20px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            cursor: pointer;
+            border: none;
+            background: var(--bg);
+            color: var(--text-muted);
+            box-shadow: 4px 4px 8px var(--shadow-dark),
+                        -4px -4px 8px var(--shadow-light);
+            transition: box-shadow 0.18s, color 0.18s;
+        }
+
+        .mode-tab:hover {
+            color: var(--text);
+        }
+
+        .mode-tab.active {
+            box-shadow: inset 3px 3px 7px var(--shadow-dark),
+                        inset -3px -3px 7px var(--shadow-light);
+            color: var(--accent);
+        }
+
+        /* ── Search input row ────────────────────────────────── */
+        .search-input-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .search-input-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .search-input-wrap label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .search-field {
+            width: 100%;
+            padding: 13px 18px;
+            border-radius: var(--radius-sm);
+            border: none;
+            background: var(--bg);
+            box-shadow: inset 4px 4px 8px var(--shadow-dark),
+                        inset -4px -4px 8px var(--shadow-light);
+            font-size: 14px;
+            color: var(--text);
+            font-family: inherit;
+            outline: none;
+            transition: box-shadow 0.18s;
+            box-sizing: border-box;
+        }
+
+        .search-field:focus {
+            box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                        inset -5px -5px 10px var(--shadow-light);
+        }
+
+        .search-field::placeholder {
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+
+        /* Tags input helper text */
+        .input-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* Search button */
+        .search-btn {
+            align-self: flex-end;
+            padding: 13px 32px;
+            border-radius: 30px;
+            border: none;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            cursor: pointer;
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 5px 5px 10px var(--shadow-dark),
+                        -5px -5px 10px var(--shadow-light);
+            transition: box-shadow 0.18s, opacity 0.18s;
+            white-space: nowrap;
+        }
+
+        .search-btn:hover:not(:disabled) {
+            box-shadow: inset 3px 3px 8px rgba(0,0,0,0.2),
+                        inset -3px -3px 8px rgba(255,255,255,0.15);
+        }
+
+        .search-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ── Limit selector ──────────────────────────────────── */
+        .search-options-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .search-options-row label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .limit-select {
+            padding: 7px 14px;
+            border-radius: var(--radius-sm);
+            border: none;
+            background: var(--bg);
+            box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                        inset -3px -3px 6px var(--shadow-light);
+            font-size: 13px;
+            color: var(--text);
+            font-family: inherit;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* ── Results section ─────────────────────────────────── */
+        .results-section {
+            display: none;
+        }
+
+        .results-section.visible {
+            display: block;
+        }
+
+        .results-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .results-header h3 {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .results-count {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent);
+            background: var(--bg);
+            padding: 4px 14px;
+            border-radius: 20px;
+            box-shadow: 3px 3px 6px var(--shadow-dark),
+                        -3px -3px 6px var(--shadow-light);
+        }
+
+        /* ── Result cards ────────────────────────────────────── */
+        .result-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .result-card {
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            box-shadow: 6px 6px 14px var(--shadow-dark),
+                        -6px -6px 14px var(--shadow-light);
+            padding: 20px 24px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 16px;
+            align-items: start;
+            transition: box-shadow 0.2s, transform 0.18s;
+        }
+
+        .result-card:hover {
+            box-shadow: 8px 8px 18px var(--shadow-dark),
+                        -8px -8px 18px var(--shadow-light);
+            transform: translateY(-2px);
+        }
+
+        .result-main { min-width: 0; }
+
+        .result-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+
+        .result-ereview {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--accent);
+            background: var(--bg);
+            padding: 3px 10px;
+            border-radius: 20px;
+            box-shadow: 2px 2px 5px var(--shadow-dark),
+                        -2px -2px 5px var(--shadow-light);
+        }
+
+        .result-status {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        .result-status.published  { background: #d4edda; color: #276b3a; }
+        .result-status.ingested   { background: #d0e8ff; color: #1a5fb4; }
+        .result-status.hitl_pending,
+        .result-status.areview_pending { background: #fff3cd; color: #856404; }
+        .result-status.hitl_approved   { background: #e2d9f3; color: #5a3f8a; }
+        .result-status.retired         { background: #f8d7da; color: #721c24; }
+
+        .result-score {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+        }
+
+        .result-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 6px;
+            word-break: break-word;
+        }
+
+        .result-snippet {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.65;
+            margin-bottom: 10px;
+        }
+
+        .result-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .tag-pill {
+            font-size: 10px;
+            color: var(--text-muted);
+            background: var(--bg);
+            padding: 3px 10px;
+            border-radius: 20px;
+            box-shadow: inset 2px 2px 4px var(--shadow-dark),
+                        inset -2px -2px 4px var(--shadow-light);
+        }
+
+        .result-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+            flex-shrink: 0;
+        }
+
+        .result-date {
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        /* ── Empty / loading / error states ──────────────────── */
+        .state-message {
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            box-shadow: 6px 6px 14px var(--shadow-dark),
+                        -6px -6px 14px var(--shadow-light);
+            padding: 48px 32px;
+            text-align: center;
+        }
+
+        .state-message .state-icon {
+            font-size: 36px;
+            margin-bottom: 14px;
+        }
+
+        .state-message h4 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .state-message p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Spinner inside button */
+        .btn-spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+
+<body>
+    <div class="site-header">
+        <h1><span style="color: var(--accent-red);">a</span>RCH<span style="color: var(--accent-red);">i</span> <span style="font-weight: 100;">[</span><span>Intelligence</span><span style="font-weight: 100;">]</span></h1>
+        <p>Content &amp; Learning Tools</p>
+    </div>
+<button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>
+    <div class="page-body">
+
+        <!-- ── Page header ────────────────────────────────────── -->
+        <div class="header" style="margin-bottom: 24px;">
+            <div>
+                <h2>Article Search</h2>
+                <p>Search the FCAT knowledge base by eReview ID, tags, title, or natural-language meaning.</p>
+            </div>
+            
+        </div>
+
+        <!-- ── Search card ────────────────────────────────────── -->
+        <div class="search-card">
+            <div class="search-card-header">
+                <div class="search-icon-circle">🔍</div>
+                <div>
+                    <h2>Search the FCAT Database</h2>
+                    <p>Choose a search mode, enter your query, and hit Search.</p>
+                </div>
+            </div>
+
+            <!-- Mode tabs -->
+            <div class="mode-tabs" role="tablist" aria-label="Search mode">
+                <button class="mode-tab active" data-mode="semantic"   role="tab" aria-selected="true">Semantic</button>
+                <button class="mode-tab"         data-mode="title"     role="tab" aria-selected="false">Title</button>
+                <button class="mode-tab"         data-mode="tags"      role="tab" aria-selected="false">Tags</button>
+                <button class="mode-tab"         data-mode="ereview"   role="tab" aria-selected="false">eReview #</button>
+            </div>
+
+            <!-- Input row -->
+            <div class="search-input-row">
+                <div class="search-input-wrap">
+
+                    <!-- Semantic / Title / eReview input -->
+                    <label id="query-label" for="query-input">Natural-language query</label>
+                    <input  id="query-input"
+                            class="search-field"
+                            type="text"
+                            placeholder="e.g. how do index funds work?"
+                            autocomplete="off" />
+                    <span id="input-hint" class="input-hint"></span>
+
+                    <!-- Tags input (hidden by default) -->
+                    <label id="tags-label" for="tags-input" style="display:none;">Tags (comma-separated)</label>
+                    <input  id="tags-input"
+                            class="search-field"
+                            type="text"
+                            placeholder="e.g. retirement, beginner, military"
+                            autocomplete="off"
+                            style="display:none;" />
+                    <span id="tags-hint" class="input-hint" style="display:none;">Matches any article that contains at least one of these tags.</span>
+
+                </div>
+                <button id="search-btn" class="search-btn">Search</button>
+            </div>
+
+            <div class="search-options-row">
+                <label for="limit-select">Max results</label>
+                <select id="limit-select" class="limit-select">
+                    <option value="10">10</option>
+                    <option value="20" selected>20</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- ── Results ────────────────────────────────────────── -->
+        <div id="results-section" class="results-section">
+            <div class="results-header">
+                <h3 id="results-label">Results</h3>
+                <span id="results-count" class="results-count">0</span>
+            </div>
+            <div id="result-list" class="result-list"></div>
+        </div>
+
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+
+        // ── State ──────────────────────────────────────────────
+        let activeMode = 'semantic';
+
+        // ── Mode tab switching ─────────────────────────────────
+        const tabs = document.querySelectorAll('.mode-tab');
+        const queryInput  = document.getElementById('query-input');
+        const queryLabel  = document.getElementById('query-label');
+        const inputHint   = document.getElementById('input-hint');
+        const tagsInput   = document.getElementById('tags-input');
+        const tagsLabel   = document.getElementById('tags-label');
+        const tagsHint    = document.getElementById('tags-hint');
+
+        const MODE_CONFIG = {
+            semantic: {
+                label:       'Natural-language query',
+                placeholder: 'e.g. how do index funds work?',
+                hint:        'Uses AI embeddings to find articles closest in meaning to your query.',
+                showTags:    false,
+            },
+            title: {
+                label:       'Title / keyword',
+                placeholder: 'e.g. Roth IRA contribution limits',
+                hint:        'Searches within article text for the words you enter.',
+                showTags:    false,
+            },
+            tags: {
+                label:       null,
+                placeholder: null,
+                hint:        null,
+                showTags:    true,
+            },
+            ereview: {
+                label:       'eReview number',
+                placeholder: 'e.g. ER-2024-0042',
+                hint:        'Partial match — enter any part of the eReview ID.',
+                showTags:    false,
+            },
+        };
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+                tab.classList.add('active');
+                tab.setAttribute('aria-selected','true');
+                activeMode = tab.dataset.mode;
+                applyModeConfig(activeMode);
+            });
+        });
+
+        function applyModeConfig(mode) {
+            const cfg = MODE_CONFIG[mode];
+            if (cfg.showTags) {
+                queryInput.style.display = 'none';
+                queryLabel.style.display = 'none';
+                inputHint.style.display  = 'none';
+                tagsInput.style.display  = '';
+                tagsLabel.style.display  = '';
+                tagsHint.style.display   = '';
+                tagsInput.focus();
+            } else {
+                queryInput.style.display = '';
+                queryLabel.style.display = '';
+                inputHint.style.display  = '';
+                tagsInput.style.display  = 'none';
+                tagsLabel.style.display  = 'none';
+                tagsHint.style.display   = 'none';
+                queryLabel.textContent   = cfg.label;
+                queryInput.placeholder   = cfg.placeholder;
+                inputHint.textContent    = cfg.hint;
+                queryInput.focus();
+            }
+        }
+
+        // ── Search ─────────────────────────────────────────────
+        const searchBtn   = document.getElementById('search-btn');
+        const limitSelect = document.getElementById('limit-select');
+
+        searchBtn.addEventListener('click', runSearch);
+        queryInput.addEventListener('keydown', e => { if (e.key === 'Enter') runSearch(); });
+        tagsInput.addEventListener('keydown',  e => { if (e.key === 'Enter') runSearch(); });
+
+        async function runSearch() {
+            const limit = parseInt(limitSelect.value, 10);
+            const body  = { mode: activeMode, limit };
+
+            if (activeMode === 'tags') {
+                const raw = tagsInput.value.trim();
+                if (!raw) { tagsInput.focus(); return; }
+                body.tags = raw.split(',').map(t => t.trim()).filter(Boolean);
+            } else {
+                const q = queryInput.value.trim();
+                if (!q) { queryInput.focus(); return; }
+                body.query = q;
+            }
+
+            setLoading(true);
+            clearResults();
+
+            try {
+                const res  = await fetch(`${API_BASE}/api/search`, {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:    JSON.stringify(body),
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showError(data.error || 'Search failed.');
+                    return;
+                }
+
+                renderResults(data.results, data.mode, data.count);
+            } catch (err) {
+                showError('Could not reach the API server. Is it running on port 5000?');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // ── Render ─────────────────────────────────────────────
+        function renderResults(results, mode, count) {
+            const section   = document.getElementById('results-section');
+            const list      = document.getElementById('result-list');
+            const countEl   = document.getElementById('results-count');
+            const labelEl   = document.getElementById('results-label');
+
+            const modeLabels = {
+                semantic: 'Semantic Results',
+                title:    'Title / Keyword Results',
+                tags:     'Tag Results',
+                ereview:  'eReview Results',
+            };
+            labelEl.textContent  = modeLabels[mode] || 'Results';
+            countEl.textContent  = `${count} article${count !== 1 ? 's' : ''}`;
+            section.classList.add('visible');
+
+            if (count === 0) {
+                list.innerHTML = `
+                    <div class="state-message">
+                        <div class="state-icon">📭</div>
+                        <h4>No articles found</h4>
+                        <p>Try a different query or search mode.</p>
+                    </div>`;
+                return;
+            }
+
+            list.innerHTML = results.map(doc => buildCard(doc, mode)).join('');
+        }
+
+        function buildCard(doc, mode) {
+            const title   = deriveTitle(doc);
+            const ereview = doc.ereview_id
+                ? `<span class="result-ereview">${esc(doc.ereview_id)}</span>` : '';
+            const STATUS_LABELS = {
+                ingested:         'Ingested',
+                hitl_pending:     'HITL Pending',
+                hitl_approved:    'HITL Approved',
+                areview_pending:  'eReview Pending',
+                published:        'Published',
+                retired:          'Retired',
+            };
+            const status  = doc.pipeline_status
+                ? `<span class="result-status ${esc(doc.pipeline_status)}">${esc(STATUS_LABELS[doc.pipeline_status] || doc.pipeline_status.replace(/_/g,' '))}</span>` : '';
+            const score   = (mode === 'semantic' && doc.score != null)
+                ? `<span class="result-score">score ${doc.score.toFixed(3)}</span>` : '';
+
+            const tax   = doc.taxonomy || {};
+            const allTags = [
+                ...(tax.categories    || []),
+                ...(tax.topics        || []),
+                ...(tax.persona_tags  || []),
+            ];
+            const tagPills = allTags.slice(0, 8)
+                .map(t => `<span class="tag-pill">${esc(t)}</span>`)
+                .join('');
+
+            const dateStr = doc.ingest_date
+                ? new Date(doc.ingest_date).toLocaleDateString('en-US', {year:'numeric', month:'short', day:'numeric'})
+                : '';
+
+            const url = doc.origin_url || doc.source_url || '';
+
+            return `
+            <div class="result-card">
+                <div class="result-main">
+                    <div class="result-meta">
+                        ${ereview}${status}${score}
+                    </div>
+                    <div class="result-title">${esc(title)}</div>
+                    <div class="result-snippet">${esc(doc.snippet || '')}</div>
+                    ${tagPills ? `<div class="result-tags">${tagPills}</div>` : ''}
+                </div>
+                <div class="result-actions">
+                    ${dateStr ? `<span class="result-date">${dateStr}</span>` : ''}
+                    ${url ? `<a href="${esc(url)}" target="_blank" rel="noopener" class="button secondary" style="font-size:10px;padding:6px 14px;text-decoration:none;">View Source ↗</a>` : ''}
+                </div>
+            </div>`;
+        }
+
+        function deriveTitle(doc) {
+            const snippet = doc.snippet || '';
+            // First non-empty sentence or up to 80 chars
+            const firstLine = snippet.split(/[\n\r]/)[0].trim();
+            return firstLine.length > 80 ? firstLine.slice(0, 80) + '…' : (firstLine || doc.source_url || 'Untitled Article');
+        }
+
+        function esc(str) {
+            return String(str ?? '')
+                .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+                .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+        }
+
+        // ── UI helpers ─────────────────────────────────────────
+        function setLoading(on) {
+            searchBtn.disabled = on;
+            searchBtn.innerHTML = on
+                ? `<span class="btn-spinner"></span>Searching…`
+                : 'Search';
+        }
+
+        function clearResults() {
+            document.getElementById('results-section').classList.remove('visible');
+            document.getElementById('result-list').innerHTML = '';
+        }
+
+        function showError(msg) {
+            const section = document.getElementById('results-section');
+            const list    = document.getElementById('result-list');
+            document.getElementById('results-count').textContent = '0';
+            document.getElementById('results-label').textContent = 'Results';
+            list.innerHTML = `
+                <div class="state-message">
+                    <div class="state-icon">⚠️</div>
+                    <h4>Something went wrong</h4>
+                    <p>${esc(msg)}</p>
+                </div>`;
+            section.classList.add('visible');
+        }
+
+        // Init
+        applyModeConfig('semantic');
+        queryInput.focus();
+    </script>
+</body>
+</html>

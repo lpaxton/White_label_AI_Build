@@ -282,6 +282,86 @@ def vector_search_articles(query_vector: list, limit: int = 10) -> list:
     return results
 
 
+def search_by_ereview(ereview_id: str, limit: int = 20) -> list:
+    """
+    Search articles by eReview ID (case-insensitive partial match).
+    Returns a list of document dicts sorted by most recently ingested.
+    """
+    collection = _get_collection()
+    projection = {
+        "source_url": 1, "origin_url": 1, "ereview_id": 1,
+        "pipeline_status": 1, "taxonomy": 1, "ingest_date": 1,
+        "content.plain_text": 1, "_id": 1,
+    }
+    cursor = collection.find(
+        {"ereview_id": {"$regex": re.escape(ereview_id.strip()), "$options": "i"}},
+        projection,
+    ).sort("ingest_date", -1).limit(limit)
+    results = []
+    for doc in cursor:
+        doc["_id"] = str(doc["_id"])
+        results.append(doc)
+    print(f"[fcat_db] search_by_ereview({ereview_id!r}) -> {len(results)} results")
+    return results
+
+
+def search_by_tags(tags: list, limit: int = 20) -> list:
+    """
+    Search articles that contain ANY of the given tags across
+    taxonomy.topics, taxonomy.categories, and taxonomy.persona_tags.
+    Returns documents sorted by most recently ingested.
+    """
+    collection = _get_collection()
+    projection = {
+        "source_url": 1, "origin_url": 1, "ereview_id": 1,
+        "pipeline_status": 1, "taxonomy": 1, "ingest_date": 1,
+        "content.plain_text": 1, "_id": 1,
+    }
+    # Build case-insensitive regex patterns for each tag
+    patterns = [re.compile(re.escape(t.strip()), re.IGNORECASE) for t in tags if t.strip()]
+    if not patterns:
+        return []
+    cursor = collection.find(
+        {"$or": [
+            {"taxonomy.topics":       {"$in": patterns}},
+            {"taxonomy.categories":   {"$in": patterns}},
+            {"taxonomy.persona_tags": {"$in": patterns}},
+        ]},
+        projection,
+    ).sort("ingest_date", -1).limit(limit)
+    results = []
+    for doc in cursor:
+        doc["_id"] = str(doc["_id"])
+        results.append(doc)
+    print(f"[fcat_db] search_by_tags({tags}) -> {len(results)} results")
+    return results
+
+
+def search_by_title(title_query: str, limit: int = 20) -> list:
+    """
+    Search articles whose plain_text begins with (or contains) the given title
+    string. Uses a case-insensitive regex on content.plain_text.
+    Returns documents sorted by most recently ingested.
+    """
+    collection = _get_collection()
+    projection = {
+        "source_url": 1, "origin_url": 1, "ereview_id": 1,
+        "pipeline_status": 1, "taxonomy": 1, "ingest_date": 1,
+        "content.plain_text": 1, "_id": 1,
+    }
+    pattern = re.escape(title_query.strip())
+    cursor = collection.find(
+        {"content.plain_text": {"$regex": pattern, "$options": "i"}},
+        projection,
+    ).sort("ingest_date", -1).limit(limit)
+    results = []
+    for doc in cursor:
+        doc["_id"] = str(doc["_id"])
+        results.append(doc)
+    print(f"[fcat_db] search_by_title({title_query!r}) -> {len(results)} results")
+    return results
+
+
 def backfill_embeddings(batch_size: int = 50) -> dict:
     """
     Generate and store embeddings for articles that are missing them.

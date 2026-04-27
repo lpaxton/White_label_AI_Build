@@ -591,7 +591,7 @@ def save_to_fcat():
         - persona_tags: List of persona tags (optional)
         - categories: List of categories (optional)
         - difficulty_level: "beginner" | "intermediate" | "advanced" (optional)
-        - pipeline_status: Pipeline status (default: "areview_pending")
+        - pipeline_status: Pipeline status (default: "areview_pending" = eReview pending)
     """
     if not FCAT_AVAILABLE:
         return jsonify({
@@ -718,24 +718,39 @@ def chat():
 
         history = data.get('history', [])
 
-        # ── Retrieve relevant articles from the database ───────────────────
-        # Try Atlas Vector Search first (semantic), fall back to keyword search
-        articles = []
-        query_vector = generate_embedding(user_message) if FCAT_AVAILABLE else None
+        # ── Hybrid retrieval: semantic + keyword, merged by _id ───────────
+        articles_map = {}  # keyed by _id to deduplicate
+
+        # 1. Semantic vector search — captures meaning and intent
+        query_vector = generate_embedding(user_message)
         if query_vector:
             try:
-                articles = fcat_db.vector_search_articles(query_vector, limit=10)
-                print(f"[chat] Using vector search -> {len(articles)} candidates")
+                for doc in fcat_db.vector_search_articles(query_vector, limit=20):
+                    articles_map[doc['_id']] = doc
+                print(f"[chat] Semantic search -> {len(articles_map)} articles")
             except Exception as vec_err:
-                print(f"[chat] Vector search unavailable ({vec_err}), falling back to text search")
+                print(f"[chat] Vector search unavailable: {vec_err}")
 
+        # 2. Keyword search — catches exact terms the user typed
+        try:
+            before = len(articles_map)
+            for doc in fcat_db.search_articles(user_message, limit=15):
+                if doc['_id'] not in articles_map:
+                    articles_map[doc['_id']] = doc
+            print(f"[chat] Keyword search added {len(articles_map) - before} new articles")
+        except Exception as kw_err:
+            print(f"[chat] Keyword search failed: {kw_err}")
+
+        # 3. Fallback — if both searches returned nothing, use full DB
+        articles = list(articles_map.values())
         if not articles:
-            articles = fcat_db.search_articles(user_message, limit=10)
+            articles = fcat_db.get_all_articles_for_chat(limit=500)
+            print(f"[chat] Fallback to full DB -> {len(articles)} articles")
 
         if not articles:
             return jsonify({
                 'success': True,
-                'answer': "The knowledge base doesn't contain any articles yet, or none matched your question. Please add articles to the database first.",
+                'answer': "The knowledge base doesn't contain any articles yet. Please add articles to the database first.",
                 'sources': [],
                 'articles_used': 0,
             })
@@ -747,9 +762,9 @@ def chat():
             plain_text = (article.get('content') or {}).get('plain_text', '').strip()
             if not plain_text:
                 continue
-            # Cap individual article length to keep prompt manageable
-            if len(plain_text) > 4000:
-                plain_text = plain_text[:4000] + ' [...]'
+            # Cap individual article to keep total prompt within Claude's context window
+            if len(plain_text) > 8000:
+                plain_text = plain_text[:8000] + ' [...]'
             topics = (article.get('taxonomy') or {}).get('topics', [])
             display_url = article.get('origin_url') or article.get('source_url', '')
             context_parts.append(f'=== ARTICLE {i} ===\n{plain_text}')
@@ -832,6 +847,88 @@ This is a regulatory requirement. Violating these rules is not acceptable under 
     except Exception as e:
         traceback.print_exc()
         return jsonify({'error': f'Chat failed: {str(e)}'}), 500
+
+
+@app.route('/api/search', methods=['POST'])
+def search_articles():
+    """
+    Unified article search endpoint.
+
+    Request body (JSON):
+        - mode: "ereview" | "tags" | "title" | "semantic"
+        - query: str  — search string (used for ereview / title / semantic)
+        - tags:  [str] — list of tags (used for tags mode)
+        - limit: int  — max results (default 20)
+
+    Response:
+        - results: list of article summaries
+        - mode: echoed back
+        - count: number of results
+    """
+    if not FCAT_AVAILABLE:
+        return jsonify({'error': 'FCAT modules not available'}), 503
+
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No JSON data provided'}), 400
+
+        mode  = data.get('mode', 'semantic').strip().lower()
+        query = data.get('query', '').strip()
+        tags  = data.get('tags', [])
+        limit = max(1, min(int(data.get('limit', 20)), 100))
+
+        results = []
+
+        if mode == 'ereview':
+            if not query:
+                return jsonify({'error': 'query is required for ereview mode'}), 400
+            results = fcat_db.search_by_ereview(query, limit=limit)
+
+        elif mode == 'tags':
+            if isinstance(tags, str):
+                tags = [t.strip() for t in tags.split(',') if t.strip()]
+            if not tags:
+                return jsonify({'error': 'tags list is required for tags mode'}), 400
+            results = fcat_db.search_by_tags(tags, limit=limit)
+
+        elif mode == 'title':
+            if not query:
+                return jsonify({'error': 'query is required for title mode'}), 400
+            results = fcat_db.search_by_title(query, limit=limit)
+
+        elif mode == 'semantic':
+            if not query:
+                return jsonify({'error': 'query is required for semantic mode'}), 400
+            vector = generate_embedding(query)
+            if vector is not None:
+                try:
+                    results = fcat_db.vector_search_articles(vector, limit=limit)
+                    print(f"[search] Semantic vector search -> {len(results)} results")
+                except Exception as ve:
+                    print(f"[search] Vector search failed ({ve}), falling back to text search")
+            # Fall back to text/keyword search if vector search returned nothing
+            if not results:
+                print(f"[search] Semantic fallback to text search for: {query!r}")
+                results = fcat_db.search_by_title(query, limit=limit)
+                if not results:
+                    results = fcat_db.search_articles(query, limit=limit)
+
+        else:
+            return jsonify({'error': f'Unknown mode: {mode}. Use ereview, tags, title, or semantic'}), 400
+
+        # Strip full plain_text down to a short snippet for the response
+        for doc in results:
+            plain = (doc.get('content') or {}).get('plain_text', '')
+            doc['snippet'] = plain[:300].strip() + ('…' if len(plain) > 300 else '')
+            if 'content' in doc:
+                del doc['content']
+
+        return jsonify({'results': results, 'mode': mode, 'count': len(results)})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': f'Search failed: {str(e)}'}), 500
 
 
 @app.route('/api/fcat/status', methods=['GET'])

@@ -882,7 +882,7 @@
         async function rewriteContent(htmlContent, apiKey, options) {
             // Try local API server first
             try {
-                const response = await fetch('/api/rewrite', {
+                const response = await fetch('http://localhost:5000/api/rewrite', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

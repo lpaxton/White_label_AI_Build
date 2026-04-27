@@ -552,7 +552,7 @@
         async function extractArticleContent(url, options) {
             // Try to use our server proxy first, then fallback to direct CORS proxy
             const endpoints = [
-                '/api/extract-article', // Our local server
+                'http://localhost:5000/api/extract-article', // Our local server
                 'https://api.allorigins.win/get?url=' + encodeURIComponent(url) // CORS proxy fallback
             ];
 
@@ -560,7 +560,7 @@
                 try {
                     let response, data;
 
-                    if (endpoint.startsWith('/api/')) {
+                    if (endpoint.startsWith('http://localhost:5000/api/')) {
                         // Use our local server — returns raw HTML which we parse client-side
                         response = await fetch(endpoint, {
                             method: 'POST',
