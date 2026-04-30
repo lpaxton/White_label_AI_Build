@@ -1,0 +1,29 @@
+services:
+  api:
+    build: .
+    image: white-label-ai-build:latest
+    container_name: white-label-ai-api
+    ports:
+      - "5000:5000"
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      MONGODB_URI: ${MONGODB_URI:-}
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - ./article_generator_db:/app/article_generator_db
+      - ./uploaded_articles:/app/uploaded_articles
+    restart: unless-stopped
+
+  web:
+    build: .
+    image: white-label-ai-build:latest
+    container_name: white-label-ai-web
+    command: ["python", "serve.py", "8000"]
+    ports:
+      - "8000:8000"
+    depends_on:
+      - api
+    restart: unless-stopped

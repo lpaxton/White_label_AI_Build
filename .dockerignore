@@ -1,0 +1,44 @@
+.git
+.gitignore
+.github
+.claude
+.vscode
+.idea
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+env/
+*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs / temp
+*.log
+*.tmp
+*.temp
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+docker-compose.*.yml
+
+# Large local data caches (rebuilt at runtime)
+uploaded_articles/
+
+# Docs not needed at runtime
+*.md
+!README.md
