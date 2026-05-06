@@ -289,6 +289,10 @@
                 return;
             }
 
+            // CRITICAL: Clear all article-related sessionStorage to prevent stale data contamination
+            // This fixes the bug where extracting multiple articles in succession causes mismatched HTML
+            clearArticleSessionStorage();
+
             isProcessing = true;
             showLoading();
             hideError();
@@ -326,6 +330,21 @@
                 hideLoading();
             }
         });
+
+        function clearArticleSessionStorage() {
+            // Clear all keys used in the article processing pipeline
+            // This prevents stale data from previous articles contaminating new extractions
+            const keysToClean = [
+                'rewriter_content', 'rewriter_source_url', 'rewriter_title', 
+                'rewriter_ereview_id', 'rewriter_topics',
+                'article_ereview_id', 'article_topics', 'article_source_url',
+                'diff_original', 'diff_neutralized', 'diff_title', 
+                'diff_ereview_id', 'diff_topics',
+                'editor_content', 'editor_ereview_id', 'editor_topics'
+            ];
+            keysToClean.forEach(key => sessionStorage.removeItem(key));
+            console.log('[article-extractor] Cleared sessionStorage for new extraction');
+        }
 
         // Save button handler
         document.getElementById('saveButton').addEventListener('click', () => {

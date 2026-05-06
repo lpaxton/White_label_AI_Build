@@ -549,13 +549,37 @@ ${editor.innerHTML}
 
         async function saveToFcat() {
             const btn = document.getElementById('saveFcatBtn');
-            const neutralizedHtml = editor.innerHTML;
-            if (!neutralizedHtml.trim()) {
+            const rawHtml = editor.innerHTML;
+            if (!rawHtml.trim()) {
                 showToast('No content to save', 'error');
                 return;
             }
+
+            // Create three versions:
+            // 1. neutralized_html: Clean production HTML (no markers)
+            // 2. neutralized_html_marked: With data-ai-neutralized markers for comparison view
+            // 3. original_html: Keep original markers for audit trail
+            const neutralizedHtml = stripAIMarkers(rawHtml);
+            const neutralizedHtmlMarked = convertMarkersToNeutralized(rawHtml);
+            
             const sourceUrl = sessionStorage.getItem('article_source_url') || '';
-            const originalHtml = sessionStorage.getItem('diff_original') || '';
+            const rawOriginalHtml = sessionStorage.getItem('diff_original') || '';
+            
+            // Keep markers in original HTML for audit/comparison purposes
+            const originalHtml = rawOriginalHtml;
+
+            // Validate that original HTML exists to prevent data corruption
+            if (!originalHtml || originalHtml.trim().length < 100) {
+                const proceed = confirm(
+                    '⚠️ WARNING: Original HTML is missing or too short.\n\n' +
+                    'This may cause data corruption where the database stores mismatched articles.\n\n' +
+                    'Did you come directly to the editor without going through the extractor → rewriter workflow?\n\n' +
+                    'Click OK to save anyway (NOT RECOMMENDED), or Cancel to go back.'
+                );
+                if (!proceed) {
+                    return;
+                }
+            }
 
             btn.disabled = true;
             btn.textContent = 'Saving…';
@@ -567,6 +591,7 @@ ${editor.innerHTML}
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         neutralized_html: neutralizedHtml,
+                        neutralized_html_marked: neutralizedHtmlMarked,
                         original_html: originalHtml,
                         source_url: sourceUrl || `manual-entry-${Date.now()}`,
                         origin_url: sourceUrl || null,
@@ -633,6 +658,53 @@ ${editor.innerHTML}
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+        }
+
+        function stripAIMarkers(html) {
+            // Remove data-ai-rewrite markers before saving to database
+            // These markers are for workflow visualization only, not final content
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Find all elements with data-ai-rewrite attribute
+            const markers = doc.querySelectorAll('[data-ai-rewrite="true"]');
+            
+            markers.forEach(marker => {
+                // Unwrap the span: move its innerHTML to replace the span itself
+                const parent = marker.parentNode;
+                if (parent) {
+                    // Create a temporary div to hold the inner content
+                    const temp = doc.createElement('div');
+                    temp.innerHTML = marker.innerHTML;
+                    
+                    // Replace the marker with its children
+                    while (temp.firstChild) {
+                        parent.insertBefore(temp.firstChild, marker);
+                    }
+                    parent.removeChild(marker);
+                }
+            });
+            
+            return doc.body.innerHTML;
+        }
+
+        function convertMarkersToNeutralized(html) {
+            // Convert data-ai-rewrite markers to data-ai-neutralized markers
+            // This preserves highlighting in comparison view but distinguishes
+            // neutralized sections (green/blue) from original Fidelity mentions (yellow)
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Find all elements with data-ai-rewrite attribute
+            const markers = doc.querySelectorAll('[data-ai-rewrite="true"]');
+            
+            markers.forEach(marker => {
+                // Change the attribute to indicate this is neutralized content
+                marker.removeAttribute('data-ai-rewrite');
+                marker.setAttribute('data-ai-neutralized', 'true');
+            });
+            
+            return doc.body.innerHTML;
         }
 
         function showToast(message, type = 'success') {

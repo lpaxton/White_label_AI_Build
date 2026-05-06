@@ -327,6 +327,12 @@
 
         // Load content from sessionStorage
         window.addEventListener('DOMContentLoaded', () => {
+            // Clear editor keys to prevent stale data contamination
+            sessionStorage.removeItem('editor_content');
+            sessionStorage.removeItem('editor_ereview_id');
+            sessionStorage.removeItem('editor_topics');
+            console.log('[article-diff] Cleared editor sessionStorage keys');
+
             originalHtml = sessionStorage.getItem('diff_original') || '';
             neutralizedHtml = sessionStorage.getItem('diff_neutralized') || '';
             eReviewId = sessionStorage.getItem('diff_ereview_id') || sessionStorage.getItem('article_ereview_id') || null;
@@ -594,6 +600,11 @@
             sessionStorage.setItem('editor_content', neutralizedHtml);
             sessionStorage.setItem('editor_ereview_id', eReviewId || sessionStorage.getItem('article_ereview_id') || '');
             sessionStorage.setItem('editor_topics', JSON.stringify(topics.length ? topics : JSON.parse(sessionStorage.getItem('article_topics') || '[]')));
+            // IMPORTANT: Preserve diff_original so editor can save the correct original HTML
+            // It should already be set, but make sure it's the current originalHtml
+            if (originalHtml) {
+                sessionStorage.setItem('diff_original', originalHtml);
+            }
             window.location.href = 'article-editor.html';
         }
     </script>

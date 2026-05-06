@@ -34,9 +34,18 @@
             min-height: 0;
         }
 
+        /* ── Right column container ────────────────────────── */
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-height: 0;
+        }
+
         /* ── Each panel is a raised neu-card ────────────────── */
         .chat-panel,
-        .sources-panel {
+        .sources-panel,
+        .tool-panel {
             background: var(--surface);
             border-radius: var(--radius);
             box-shadow: 8px 8px 18px var(--shadow-dark),
@@ -44,6 +53,98 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+        }
+
+        /* ── Tool Panel ────────────────────────────────────── */
+        .tool-panel {
+            display: none; /* Hidden by default */
+            max-height: 850px;
+        }
+
+        .tool-panel.visible {
+            display: flex;
+        }
+
+        .tool-header {
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            border-bottom: 1px solid rgba(176, 191, 207, 0.35);
+        }
+
+        .tool-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tool-icon {
+            font-size: 20px;
+        }
+
+        .tool-header h3 {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--text);
+        }
+
+        .tool-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            border: none;
+            color: var(--accent);
+            background: var(--bg);
+            border-radius: 30px;
+            box-shadow: inset 2px 2px 4px var(--shadow-dark),
+                        inset -2px -2px 4px var(--shadow-light);
+            padding: 4px 10px;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .tool-close-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: var(--bg);
+            border-radius: 50%;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 4px 4px 8px var(--shadow-dark),
+                        -4px -4px 8px var(--shadow-light);
+            transition: box-shadow 0.15s;
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        .tool-close-btn:hover {
+            box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                        inset -3px -3px 6px var(--shadow-light);
+        }
+
+        .tool-iframe-container {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            background: var(--bg);
+            margin: 0;
+        }
+
+        .tool-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
         }
 
         /* ── Toolbar (raised header bar inside the card) ─────── */
@@ -496,17 +597,37 @@
             </div>
         </div>
 
-        <!-- ── Right: Sources ───────────────────────────────── -->
-        <div class="sources-panel">
-            <div class="sources-header">
-                <h3>Source Articles</h3>
-                <p>Articles retrieved from the database for the last response. Every answer is grounded in these documents only.</p>
+        <!-- ── Right: Tool + Sources ─────────────────────────── -->
+        <div class="right-column">
+            <!-- Tool Panel (shown when relevant) -->
+            <div class="tool-panel" id="toolPanel">
+                <div class="tool-header">
+                    <div class="tool-header-left">
+                        <span class="tool-icon" id="toolIcon">📊</span>
+                        <h3 id="toolName">Interactive Tool</h3>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span class="tool-badge">INTERACTIVE</span>
+                        <button class="tool-close-btn" id="toolCloseBtn" title="Hide tool">×</button>
+                    </div>
+                </div>
+                <div class="tool-iframe-container">
+                    <iframe class="tool-iframe" id="toolIframe" src="" title="Interactive Tool"></iframe>
+                </div>
             </div>
-            <div class="sources-list" id="sourcesList">
-                <p class="sources-empty">Source articles will appear here after your first message.</p>
-            </div>
-            <div class="reg-notice">
-                This assistant is restricted to the FCAT knowledge base. It cannot access the internet, its training data, or any content outside the database. This is a regulatory requirement.
+
+            <!-- Sources Panel -->
+            <div class="sources-panel">
+                <div class="sources-header">
+                    <h3>Source Articles</h3>
+                    <p>Articles retrieved from the database for the last response. Every answer is grounded in these documents only.</p>
+                </div>
+                <div class="sources-list" id="sourcesList">
+                    <p class="sources-empty">Source articles will appear here after your first message.</p>
+                </div>
+                <div class="reg-notice">
+                    This assistant is restricted to the FCAT knowledge base. It cannot access the internet, its training data, or any content outside the database. This is a regulatory requirement.
+                </div>
             </div>
         </div>
 
@@ -522,6 +643,13 @@
         const sendBtn           = document.getElementById('sendBtn');
         const clearBtn          = document.getElementById('clearBtn');
         const sourcesList       = document.getElementById('sourcesList');
+        
+        // Tool panel elements
+        const toolPanel         = document.getElementById('toolPanel');
+        const toolIframe        = document.getElementById('toolIframe');
+        const toolIcon          = document.getElementById('toolIcon');
+        const toolName          = document.getElementById('toolName');
+        const toolCloseBtn      = document.getElementById('toolCloseBtn');
 
         // Conversation history (user/assistant turns, stored without the injected context)
         let history = [];
@@ -638,6 +766,26 @@
             });
         }
 
+        /* ── Tool panel management ───────────────────────────── */
+        function showTool(tool) {
+            if (!tool) return;
+            
+            toolIcon.textContent = tool.icon || '📊';
+            toolName.textContent = tool.name || 'Interactive Tool';
+            toolIframe.src = tool.url || '';
+            toolPanel.classList.add('visible');
+            
+            console.log(`[Tool] Displaying: ${tool.name} at ${tool.url}`);
+        }
+
+        function hideTool() {
+            toolPanel.classList.remove('visible');
+            toolIframe.src = '';
+        }
+
+        // Close button handler
+        toolCloseBtn.addEventListener('click', hideTool);
+
         /* ── Main send function ──────────────────────────────── */
         async function sendMessage() {
             const text = userInput.value.trim();
@@ -669,9 +817,17 @@
                     const errMsg = data.error || 'An error occurred. Is the API server running?';
                     appendMessage('assistant', `⚠ ${errMsg}`);
                     renderSources([]);
+                    hideTool();
                 } else {
                     appendMessage('assistant', data.answer);
                     renderSources(data.sources);
+                    
+                    // Show tool if detected
+                    if (data.tool) {
+                        showTool(data.tool);
+                    } else {
+                        hideTool();
+                    }
 
                     // Store condensed history (without the injected context)
                     history.push({ role: 'user', content: text });
@@ -684,6 +840,7 @@
                 removeThinking();
                 appendMessage('assistant', '⚠ Could not reach the API server. Please make sure api_server.py is running on port 5000.');
                 renderSources([]);
+                hideTool();
             } finally {
                 sendBtn.disabled = false;
                 userInput.disabled = false;
@@ -700,6 +857,7 @@
             });
             emptyState.style.display = '';
             sourcesList.innerHTML = '<p class="sources-empty">Source articles will appear here after your first message.</p>';
+            hideTool(); // Hide any displayed tool
         }
 
         function scrollToBottom() {

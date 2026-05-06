@@ -401,6 +401,125 @@
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Comparison Modal ─────────────────────────────────── */
+        .comparison-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .comparison-modal.active { display: flex; }
+
+        .comparison-modal-content {
+            background: var(--bg);
+            border-radius: var(--radius);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            width: 95%;
+            max-width: 1600px;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .comparison-modal-header {
+            background: var(--surface);
+            padding: 20px 30px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .comparison-modal-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0;
+        }
+
+        .comparison-modal-header .close-btn {
+            background: var(--bg);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            color: var(--text-muted);
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            transition: all 0.2s;
+        }
+
+        .comparison-modal-header .close-btn:hover {
+            color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        .comparison-body {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .comparison-panel {
+            background: var(--surface);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .comparison-panel-header {
+            padding: 12px 20px;
+            background: var(--bg);
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .comparison-panel-header h4 {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .comparison-panel-content {
+            flex: 1;
+            
+            padding: 20px;
+        }
+
+        .comparison-panel-content iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+        }
+
+        .comparison-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
     </style>
 </head>
 
@@ -485,6 +604,34 @@
             <div id="result-list" class="result-list"></div>
         </div>
 
+    </div>
+
+    <!-- ── Comparison Modal ──────────────────────────────── -->
+    <div id="comparison-modal" class="comparison-modal">
+        <div class="comparison-modal-content">
+            <div class="comparison-modal-header">
+                <h3 id="comparison-title">Article Comparison</h3>
+                <button class="close-btn" onclick="closeComparison()" aria-label="Close">×</button>
+            </div>
+            <div class="comparison-body">
+                <div class="comparison-panel">
+                    <div class="comparison-panel-header">
+                        <h4>Original HTML (Source)</h4>
+                    </div>
+                    <div id="comparison-original" class="comparison-panel-content">
+                        <div class="comparison-loading">Loading...</div>
+                    </div>
+                </div>
+                <div class="comparison-panel">
+                    <div class="comparison-panel-header">
+                        <h4>Neutralized HTML (Database)</h4>
+                    </div>
+                    <div id="comparison-neutralized" class="comparison-panel-content">
+                        <div class="comparison-loading">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -641,6 +788,8 @@
 
         function buildCard(doc, mode) {
             const title   = deriveTitle(doc);
+            const mongoId = doc._id
+                ? `<span class="result-ereview" style="font-size:9px;opacity:0.6;">DB: ${esc(String(doc._id).slice(-8))}</span>` : '';
             const ereview = doc.ereview_id
                 ? `<span class="result-ereview">${esc(doc.ereview_id)}</span>` : '';
             const STATUS_LABELS = {
@@ -676,7 +825,7 @@
             <div class="result-card">
                 <div class="result-main">
                     <div class="result-meta">
-                        ${ereview}${status}${score}
+                        ${mongoId}${ereview}${status}${score}
                     </div>
                     <div class="result-title">${esc(title)}</div>
                     <div class="result-snippet">${esc(doc.snippet || '')}</div>
@@ -684,6 +833,7 @@
                 </div>
                 <div class="result-actions">
                     ${dateStr ? `<span class="result-date">${dateStr}</span>` : ''}
+                    <button class="comparison-btn button primary" data-article-id="${esc(doc._id)}" data-article-title="${esc(title)}" style="font-size:10px;padding:6px 14px;margin-bottom:8px;">View Comparison</button>
                     ${url ? `<a href="${esc(url)}" target="_blank" rel="noopener" class="button secondary" style="font-size:10px;padding:6px 14px;text-decoration:none;">View Source ↗</a>` : ''}
                 </div>
             </div>`;
@@ -695,6 +845,341 @@
             const firstLine = snippet.split(/[\n\r]/)[0].trim();
             return firstLine.length > 80 ? firstLine.slice(0, 80) + '…' : (firstLine || doc.source_url || 'Untitled Article');
         }
+
+        // ── Comparison Modal Functions ────────────────────────
+        async function viewComparison(articleId, title) {
+            const modal = document.getElementById('comparison-modal');
+            const titleEl = document.getElementById('comparison-title');
+            const originalPanel = document.getElementById('comparison-original');
+            const neutralizedPanel = document.getElementById('comparison-neutralized');
+
+            titleEl.textContent = title || 'Article Comparison';
+            originalPanel.innerHTML = '<div class="comparison-loading">Loading original HTML...</div>';
+            neutralizedPanel.innerHTML = '<div class="comparison-loading">Loading neutralized HTML...</div>';
+            modal.classList.add('active');
+
+            try {
+                const res = await fetch(`${API_BASE}/api/article/${articleId}`);
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || 'Failed to load article');
+                }
+
+                const article = data.article;
+                const originalHTML = article.content?.original_html || '<p>No original HTML available</p>';
+                // Use marked version for comparison view, fall back to clean version
+                const neutralizedHTML = article.content?.neutralized_html_marked 
+                    || article.content?.neutralized_html 
+                    || '<p>No neutralized HTML available</p>';
+
+                // Extract titles from HTML for verification
+                const extractTitle = (html) => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    return doc.querySelector('title')?.textContent?.trim() 
+                        || doc.querySelector('h1')?.textContent?.trim() 
+                        || 'No title found';
+                };
+
+                const originalTitle = extractTitle(originalHTML);
+                const neutralizedTitle = extractTitle(neutralizedHTML);
+                
+                // Log to console for debugging
+                console.log('Article Comparison Debug:', {
+                    mongoId: article._id,
+                    ereviewId: article.ereview_id,
+                    originalTitle: originalTitle,
+                    neutralizedTitle: neutralizedTitle,
+                    titlesMatch: originalTitle === neutralizedTitle,
+                    originalHTMLLength: originalHTML.length,
+                    neutralizedHTMLLength: neutralizedHTML.length,
+                    hasMarkedVersion: !!article.content?.neutralized_html_marked
+                });
+
+                // Update modal title with article info and verification
+                const ereviewId = article.ereview_id || 'No eReview ID';
+                const mongoId = article._id || articleId;
+                const matchIndicator = originalTitle === neutralizedTitle 
+                    ? '<span style="color:#4ade80;">✓ Titles Match</span>' 
+                    : `<span style="color:#f87171;">⚠ Title Mismatch</span><br><small style="font-size:9px;">Original: "${esc(originalTitle.slice(0,50))}"<br>Neutralized: "${esc(neutralizedTitle.slice(0,50))}"</small>`;
+                
+                titleEl.innerHTML = `${esc(title)}<br><small style="font-size:11px;font-weight:400;opacity:0.7;">eReview: ${esc(ereviewId)} | MongoDB ID: ${esc(mongoId)}</small><br><small style="font-size:10px;">${matchIndicator}</small>`;
+
+                // Sanitize HTML to remove problematic inline scripts and event handlers
+                const sanitizedOriginal = sanitizeHTML(originalHTML);
+                const sanitizedNeutralized = sanitizeHTML(neutralizedHTML);
+
+                // Mark Fidelity brand mentions in the original HTML (left panel)
+                // markFidelitySentences checks if markers already exist to avoid double-wrapping
+                const markedOriginal = markFidelitySentences(sanitizedOriginal);
+                
+                // Add highlighting CSS for neutralized sections (right panel)
+                const markedNeutralized = addNeutralizedHighlighting(sanitizedNeutralized);
+
+                // Render both panels
+                originalPanel.innerHTML = `<iframe srcdoc="${esc(markedOriginal).replace(/"/g, '&quot;')}"></iframe>`;
+                neutralizedPanel.innerHTML = `<iframe srcdoc="${esc(markedNeutralized).replace(/"/g, '&quot;')}"></iframe>`;
+
+                // Setup synchronized scrolling after iframes load
+                setTimeout(() => setupSyncScroll(), 500);
+
+            } catch (err) {
+                originalPanel.innerHTML = `<div class="comparison-loading" style="color:var(--accent);">Error: ${esc(err.message)}</div>`;
+                neutralizedPanel.innerHTML = `<div class="comparison-loading" style="color:var(--accent);">Error loading article</div>`;
+            }
+        }
+
+        function closeComparison() {
+            const modal = document.getElementById('comparison-modal');
+            modal.classList.remove('active');
+        }
+
+        function sanitizeHTML(html) {
+            // Parse HTML and remove problematic inline scripts and event handlers
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Remove all script tags
+            doc.querySelectorAll('script').forEach(el => el.remove());
+            
+            // Remove all inline event handlers (onclick, onload, onerror, etc.)
+            const eventAttributes = ['onclick', 'onload', 'onerror', 'onmouseover', 'onmouseout', 
+                                     'onmousedown', 'onmouseup', 'onfocus', 'onblur', 'onchange',
+                                     'onsubmit', 'onkeydown', 'onkeyup', 'onkeypress'];
+            
+            doc.querySelectorAll('*').forEach(el => {
+                eventAttributes.forEach(attr => {
+                    if (el.hasAttribute(attr)) {
+                        el.removeAttribute(attr);
+                    }
+                });
+            });
+            
+            // Add max-width to all images
+            doc.querySelectorAll('img').forEach(img => {
+                img.style.maxWidth = '100%';
+                img.style.height = 'auto';
+            });
+            
+            // Return sanitized HTML
+            return doc.documentElement.outerHTML;
+        }
+
+        function markFidelitySentences(html) {
+            // Parse HTML and mark sentences containing Fidelity brand mentions
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Check if marking already exists
+            const hasMarkers = doc.querySelector('[data-ai-rewrite="true"]');
+            
+            // If no markers exist, apply marking
+            if (!hasMarkers) {
+                markSentencesWithFidelity(doc.body);
+            }
+            
+            // Always add highlighting CSS (in case it was stripped during sanitization)
+            const style = doc.createElement('style');
+            style.textContent = `
+                [data-ai-rewrite="true"] {
+                    background-color: rgba(255, 235, 59, 0.3);
+                    border-left: 3px solid #ffc107;
+                    padding-left: 8px;
+                    display: block;
+                    position: relative;
+                    border-radius: 4px;
+                    margin: 4px 0;
+                }
+            `;
+            doc.head.appendChild(style);
+            
+            return doc.documentElement.outerHTML;
+        }
+
+        function markSentencesWithFidelity(element) {
+            // Comprehensive list of Fidelity products to detect and mark
+            const fidelityProducts = [
+                'Fidelity',
+                'Fidelity Go', 'Fidelity Managed FidFolios', 'Fidelity Basket Portfolios',
+                'Fidelity Basket Portfolios for Teens', 'Fidelity Wealth Services',
+                'Fidelity Strategic Disciplines', 'Fidelity Wealth Management',
+                'Fidelity Private Wealth Management', 'Personalized Portfolios',
+                'Portfolio Advisory Services',
+                'Fidelity IRA', 'Fidelity Roth IRA', 'Fidelity Traditional IRA',
+                'Fidelity Rollover IRA', 'Fidelity SEP IRA', 'Fidelity SIMPLE IRA',
+                'Fidelity Inherited IRA', 'Fidelity 401\\(k\\)', 'Fidelity 403\\(b\\)',
+                'Fidelity Brokerage Account', 'Fidelity Cash Management Account',
+                'Fidelity Youth Account', 'Fidelity Custodial Account',
+                'Fidelity Health Savings Account', 'Fidelity HSA', 'Fidelity 529',
+                'Fidelity Trust Account',
+                'Fidelity Funds', 'Fidelity Flex Funds', 'Fidelity Zero Funds',
+                'Fidelity Freedom Funds', 'Fidelity Freedom Retirement Fund',
+                'Fidelity Index Funds', 'Fidelity Sector Funds',
+                'Fidelity International Funds', 'Fidelity ETFs',
+                'Fidelity Money Market Funds',
+                'Fidelity Crypto', 'Fidelity Digital Assets',
+                'Fidelity Digital Asset Services', 'Fidelity Digital Dollar',
+                'Fidelity Account Selector', 'Fidelity Planning Tool',
+                'Fidelity Retirement Calculator', 'Fidelity Investment Calculator',
+                'Fidelity Retirement Planner', 'Fidelity Active Trader Pro',
+                'Fidelity Mobile App', 'Fidelity Planning & Guidance Center',
+                'Fidelity Screeners', 'Fidelity Watchlists',
+                'Fidelity Charitable', 'Fidelity Rewards Visa',
+                'Fidelity Stock Plan Services', 'Fidelity Life Insurance',
+                'Fidelity Annuities'
+            ];
+
+            const sortedProducts = fidelityProducts.sort((a, b) => b.length - a.length);
+            const productPattern = sortedProducts.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+            const productRegex = new RegExp(`\\b(?:${productPattern})\\b[®™℠]?`, 'i');
+            const sentenceRegex = /[^.!?]+[.!?]+|[^.!?]+$/g;
+            const blockSelector = 'p, li, td, th, h1, h2, h3, h4, h5, h6, blockquote, figcaption';
+            const blockElements = Array.from(element.querySelectorAll(blockSelector));
+
+            const blockTagNames = new Set(['P', 'LI', 'TD', 'TH', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'FIGCAPTION']);
+            if (blockTagNames.has(element.nodeName)) {
+                blockElements.unshift(element);
+            }
+
+            blockElements.forEach(blockEl => {
+                const fullText = blockEl.innerText || blockEl.textContent || '';
+
+                if (!productRegex.test(fullText)) {
+                    return;
+                }
+
+                const sentences = fullText.match(sentenceRegex) || [fullText];
+                if (!sentences.some(s => productRegex.test(s))) {
+                    return;
+                }
+
+                const marker = document.createElement('span');
+                marker.setAttribute('data-ai-rewrite', 'true');
+                marker.innerHTML = blockEl.innerHTML;
+                blockEl.innerHTML = '';
+                blockEl.appendChild(marker);
+
+                normalizeInlineSpacing(blockEl);
+            });
+        }
+
+        function normalizeInlineSpacing(container) {
+            const inlineTags = ['STRONG', 'EM', 'B', 'I', 'A', 'SPAN'];
+            container.querySelectorAll(inlineTags.join(',')).forEach(el => {
+                if (el.hasAttribute('data-ai-rewrite')) return;
+
+                const next = el.nextSibling;
+                if (next && next.nodeType === Node.TEXT_NODE) {
+                    if (next.textContent && !/^[\s.,;:!?)]/.test(next.textContent)) {
+                        next.textContent = ' ' + next.textContent;
+                    }
+                } else if (next && inlineTags.includes(next.nodeName)) {
+                    el.parentNode.insertBefore(document.createTextNode(' '), next);
+                }
+
+                const prev = el.previousSibling;
+                if (prev && prev.nodeType === Node.TEXT_NODE) {
+                    if (prev.textContent && !/[\s(]$/.test(prev.textContent)) {
+                        prev.textContent = prev.textContent + ' ';
+                    }
+                }
+            });
+        }
+
+        function addNeutralizedHighlighting(html) {
+            // Add CSS to highlight neutralized sections (data-ai-neutralized markers)
+            // These show what was changed from the original on the right panel
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Add highlighting CSS for neutralized content
+            const style = doc.createElement('style');
+            style.textContent = `
+                [data-ai-neutralized="true"] {
+                    background-color: rgba(34, 197, 94, 0.15);
+                    border-left: 3px solid #22c55e;
+                    padding-left: 8px;
+                    display: block;
+                    position: relative;
+                    border-radius: 4px;
+                    margin: 4px 0;
+                }
+            `;
+            doc.head.appendChild(style);
+            
+            return doc.documentElement.outerHTML;
+        }
+
+        let isSyncing = false;
+
+        function setupSyncScroll() {
+            const originalPanel = document.getElementById('comparison-original');
+            const neutralizedPanel = document.getElementById('comparison-neutralized');
+
+            // Get the iframes
+            const originalIframe = originalPanel.querySelector('iframe');
+            const neutralizedIframe = neutralizedPanel.querySelector('iframe');
+
+            if (!originalIframe || !neutralizedIframe) return;
+
+            // Wait for iframes to fully load
+            Promise.all([
+                new Promise(resolve => originalIframe.onload = resolve),
+                new Promise(resolve => neutralizedIframe.onload = resolve)
+            ]).then(() => {
+                try {
+                    const originalDoc = originalIframe.contentDocument || originalIframe.contentWindow.document;
+                    const neutralizedDoc = neutralizedIframe.contentDocument || neutralizedIframe.contentWindow.document;
+
+                    // Add scroll listeners to iframe content
+                    originalDoc.addEventListener('scroll', () => {
+                        if (isSyncing) return;
+                        isSyncing = true;
+                        syncIframeScroll(originalDoc, neutralizedDoc);
+                        setTimeout(() => isSyncing = false, 10);
+                    });
+
+                    neutralizedDoc.addEventListener('scroll', () => {
+                        if (isSyncing) return;
+                        isSyncing = true;
+                        syncIframeScroll(neutralizedDoc, originalDoc);
+                        setTimeout(() => isSyncing = false, 10);
+                    });
+                } catch (e) {
+                    console.error('Could not setup scroll sync:', e);
+                }
+            });
+        }
+
+        function syncIframeScroll(sourceDoc, targetDoc) {
+            const sourceElement = sourceDoc.documentElement || sourceDoc.body;
+            const targetElement = targetDoc.documentElement || targetDoc.body;
+            
+            const scrollPercentage = sourceElement.scrollTop / (sourceElement.scrollHeight - sourceElement.clientHeight);
+            const targetScroll = scrollPercentage * (targetElement.scrollHeight - targetElement.clientHeight);
+            targetElement.scrollTop = targetScroll;
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeComparison();
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('comparison-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'comparison-modal') closeComparison();
+        });
+
+        // Event delegation for comparison buttons
+        document.getElementById('result-list').addEventListener('click', (e) => {
+            const btn = e.target.closest('.comparison-btn');
+            if (btn) {
+                const articleId = btn.dataset.articleId;
+                const articleTitle = btn.dataset.articleTitle;
+                viewComparison(articleId, articleTitle);
+            }
+        });
 
         function esc(str) {
             return String(str ?? '')

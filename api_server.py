@@ -67,6 +67,66 @@ app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max total upload s
 generator = None
 temp_articles_dir = None
 
+# ============================================================================
+# TOOL INTEGRATION - Load and detect interactive tools
+# ============================================================================
+
+def load_available_tools():
+    """
+    Scan the tools/ directory and load tool configurations.
+    Returns a list of tool metadata dictionaries.
+    """
+    tools = []
+    tools_dir = Path('tools')
+    
+    if not tools_dir.exists():
+        return tools
+    
+    for tool_path in tools_dir.iterdir():
+        if not tool_path.is_dir():
+            continue
+        
+        config_file = tool_path / 'config.json'
+        if not config_file.exists():
+            continue
+        
+        try:
+            with open(config_file, 'r', encoding='utf-8') as f:
+                tool_config = json.load(f)
+                tool_config['folder'] = tool_path.name
+                tools.append(tool_config)
+        except Exception as e:
+            print(f"Warning: Could not load tool config from {config_file}: {e}")
+    
+    return tools
+
+def detect_relevant_tool(message: str, tools: list) -> Optional[dict]:
+    """
+    Detect if a user message matches any tool keywords.
+    Returns the most relevant tool or None.
+    """
+    if not tools:
+        return None
+    
+    message_lower = message.lower()
+    
+    for tool in tools:
+        keywords = tool.get('keywords', [])
+        for keyword in keywords:
+            if keyword.lower() in message_lower:
+                return tool
+    
+    return None
+
+# Load available tools at startup
+AVAILABLE_TOOLS = load_available_tools()
+if AVAILABLE_TOOLS:
+    print(f"Loaded {len(AVAILABLE_TOOLS)} interactive tool(s):")
+    for tool in AVAILABLE_TOOLS:
+        print(f"  - {tool['name']} ({tool['id']})")
+
+# ============================================================================
+
 def allowed_file(filename):
     """Check if file extension is allowed"""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -606,6 +666,7 @@ def save_to_fcat():
 
         # Required fields
         neutralized_html = data.get('neutralized_html', '').strip()
+        neutralized_html_marked = data.get('neutralized_html_marked', '').strip()
         original_html = data.get('original_html', '').strip()
         source_url = data.get('source_url', '').strip()
         source = data.get('source', '').strip()
@@ -646,6 +707,7 @@ def save_to_fcat():
             "content": {
                 "original_html": original_html,
                 "neutralized_html": neutralized_html,
+                "neutralized_html_marked": neutralized_html_marked,
                 "plain_text": plain_text,
             },
             "pipeline_status": data.get('pipeline_status', 'areview_pending'),
@@ -837,11 +899,17 @@ This is a regulatory requirement. Violating these rules is not acceptable under 
         answer = response.content[0].text
         print(f"[chat] Answered using {len(context_parts)} article(s)")
 
+        # ── Detect relevant interactive tool ────────────────────────────────
+        relevant_tool = detect_relevant_tool(user_message, AVAILABLE_TOOLS)
+        if relevant_tool:
+            print(f"[chat] Detected relevant tool: {relevant_tool['name']}")
+
         return jsonify({
             'success': True,
             'answer': answer,
             'sources': sources,
             'articles_used': len(context_parts),
+            'tool': relevant_tool,  # Include tool info if detected
         })
 
     except Exception as e:
@@ -929,6 +997,33 @@ def search_articles():
     except Exception as e:
         traceback.print_exc()
         return jsonify({'error': f'Search failed: {str(e)}'}), 500
+
+
+@app.route('/api/article/<article_id>', methods=['GET'])
+def get_article(article_id):
+    """
+    Get a single article by its ID, including full HTML content.
+    
+    Response includes:
+        - original_html: Raw HTML before processing
+        - neutralized_html: Processed/neutralized HTML
+        - All metadata (taxonomy, status, dates, etc.)
+    """
+    if not FCAT_AVAILABLE:
+        return jsonify({'error': 'FCAT modules not available'}), 503
+
+    try:
+        article = fcat_db.get_article_by_id(article_id)
+        if not article:
+            return jsonify({'error': f'Article not found with ID: {article_id}'}), 404
+        
+        return jsonify({
+            'success': True,
+            'article': article
+        })
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': f'Failed to retrieve article: {str(e)}'}), 500
 
 
 @app.route('/api/fcat/status', methods=['GET'])

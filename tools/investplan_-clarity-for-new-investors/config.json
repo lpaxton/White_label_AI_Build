@@ -1,0 +1,32 @@
+{
+  "id": "investplan",
+  "name": "InvestPlan: Investment Planning Tool",
+  "description": "Interactive tool to help new investors define goals, estimate timelines, and build a consistent action plan",
+  "keywords": [
+    "investment planning",
+    "investing goals",
+    "new investor",
+    "beginner investor",
+    "portfolio planning",
+    "investment strategy",
+    "start investing",
+    "how to invest",
+    "investment plan",
+    "investing for beginners",
+    "investment roadmap",
+    "investment timeline",
+    "investment goals"
+  ],
+  "topics": [
+    "Investment Planning",
+    "Portfolio Management",
+    "Beginner Investing",
+    "Goal Setting",
+    "Investment Strategy"
+  ],
+  "url": "http://localhost:3031",
+  "embedMode": "iframe",
+  "width": "100%",
+  "height": "800px",
+  "icon": "📊"
+}

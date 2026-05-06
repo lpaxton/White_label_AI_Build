@@ -4,7 +4,9 @@
       "Bash(git fetch origin claude/add-diff-tool-dZWGn)",
       "Bash(git checkout claude/add-diff-tool-dZWGn)",
       "Bash(python serve.py)",
-      "Bash(git push)"
+      "Bash(git push)",
+      "Bash(.venv/Scripts/python --version)",
+      "Bash(.venv/Scripts/pip --version)"
     ]
   }
 }

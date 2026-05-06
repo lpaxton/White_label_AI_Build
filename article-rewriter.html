@@ -519,11 +519,11 @@
                             <h4>AI Provider</h4>
                             <div class="radio-group" style="margin-top: 10px;">
                                 <div class="radio-item">
-                                    <input type="radio" id="providerClaude" name="aiProvider" value="claude" checked>
+                                    <input type="radio" id="providerClaude" name="aiProvider" value="claude" >
                                     <label for="providerClaude">Claude</label>
                                 </div>
                                 <div class="radio-item">
-                                    <input type="radio" id="providerOllama" name="aiProvider" value="ollama">
+                                    <input type="radio" id="providerOllama" name="aiProvider" value="ollama" checked>
                                     <label for="providerOllama">Ollama (Local)</label>
                                 </div>
                             </div>
@@ -815,6 +815,10 @@
         // Main rewrite function
         document.getElementById('rewriteButton').addEventListener('click', async () => {
             if (isProcessing) return;
+
+            // Clear downstream sessionStorage keys to prevent stale data contamination
+            // Keep rewriter_* keys intact as they may have been set by the extractor
+            clearDownstreamSessionStorage();
 
             const htmlContent = document.getElementById('htmlInput').value.trim();
             const apiKey = document.getElementById('apiKey').value.trim();
@@ -1496,12 +1500,27 @@ Return ONLY the rewritten text, nothing else.`
             errorDiv.style.display = 'block';
         }
 
+        function clearDownstreamSessionStorage() {
+            // Clear keys used in downstream steps (diff and editor)
+            // to prevent stale data from previous articles contaminating the new rewrite
+            const keysToClean = [
+                'diff_original', 'diff_neutralized', 'diff_title', 
+                'diff_ereview_id', 'diff_topics',
+                'editor_content', 'editor_ereview_id', 'editor_topics'
+            ];
+            keysToClean.forEach(key => sessionStorage.removeItem(key));
+            console.log('[article-rewriter] Cleared downstream sessionStorage');
+        }
+
         function skipToEditor() {
             // Write the current article HTML into editor_content so the
             // Word Editor shows this article, not a stale previous one.
             const html = document.getElementById('htmlInput').value.trim();
             if (html) {
                 sessionStorage.setItem('editor_content', html);
+                // IMPORTANT: Also set diff_original so the editor can save the correct original HTML
+                // Use originalContent (saved before rewriting) if available, otherwise use current HTML
+                sessionStorage.setItem('diff_original', originalContent || html);
             }
             // Carry eReview + topics forward
             const erId = eReviewId || sessionStorage.getItem('article_ereview_id') || '';
